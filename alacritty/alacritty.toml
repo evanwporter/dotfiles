@@ -1,0 +1,34 @@
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 12.0
+
+[font.normal]
+family = "CaskaydiaCove Nerd Font Mono"
+style = "Regular"
+
+[font.bold]
+family = "CaskaydiaCove Nerd Font Mono"
+style = "Bold"
+
+[font.italic]
+family = "CaskaydiaCove Nerd Font Mono"
+style = "Italic"
+
+[font.bold_italic]
+family = "CaskaydiaCove Nerd Font Mono"
+style = "Bold Italic"
+
+[terminal.shell]
+program = "wsl.exe"
+args = ["-d", "Ubuntu", "--cd", "~"]
+
+[window]
+startup_mode = "Maximized"
+
+[general]
+import = ["./catppuccin-frappe.toml"]
+
+[keyboard]
+bindings = [{ key = "Slash", mods = "Control", chars = "\u001f" }]
