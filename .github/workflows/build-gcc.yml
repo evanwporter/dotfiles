@@ -1,0 +1,130 @@
+name: Build GCC and Release
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags:
+      - "gcc-*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-gcc:
+    runs-on: ubuntu-24.04
+
+    env:
+      GCC_VERSION: "16.1.0"
+      GCC_PREFIX: "${{ github.workspace }}/.toolchains/gcc-16.1"
+      ASSET_NAME: "gcc-16.1.0-ubuntu-24.04-x86_64.tar.zst"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            flex \
+            bison \
+            libgmp-dev \
+            libmpfr-dev \
+            libmpc-dev \
+            texinfo \
+            wget \
+            xz-utils \
+            zstd
+
+      - name: Cache built GCC
+        id: cache-gcc
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GCC_PREFIX }}
+          key: gcc-${{ runner.os }}-${{ runner.arch }}-${{ env.GCC_VERSION }}
+
+      - name: Download GCC
+        if: steps.cache-gcc.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/src"
+          cd "$GITHUB_WORKSPACE/src"
+
+
+          wget "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz"
+          tar -xf "gcc-${GCC_VERSION}.tar.xz"
+
+          cd "gcc-${GCC_VERSION}"
+          ./contrib/download_prerequisites
+
+      - name: Configure GCC
+        if: steps.cache-gcc.outputs.cache-hit != 'true'
+        run: |
+
+          mkdir -p "$GITHUB_WORKSPACE/src/gcc-build"
+          cd "$GITHUB_WORKSPACE/src/gcc-build"
+
+          "../gcc-${GCC_VERSION}/configure" \
+            --prefix="$GCC_PREFIX" \
+            --enable-languages=c,c++ \
+
+            --disable-multilib
+
+      - name: Build GCC
+        if: steps.cache-gcc.outputs.cache-hit != 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE/src/gcc-build"
+          make -j"$(nproc)"
+
+      - name: Install GCC
+        if: steps.cache-gcc.outputs.cache-hit != 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE/src/gcc-build"
+
+          make install
+
+      - name: Add GCC to PATH
+        run: |
+
+          echo "$GCC_PREFIX/bin" >> "$GITHUB_PATH"
+          echo "CC=$GCC_PREFIX/bin/gcc" >> "$GITHUB_ENV"
+          echo "CXX=$GCC_PREFIX/bin/g++" >> "$GITHUB_ENV"
+
+      - name: Verify GCC
+        run: |
+          which gcc
+          which g++
+          gcc --version
+          g++ --version
+
+      - name: Package GCC
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+
+          tar \
+            --zstd \
+            -cf "$GITHUB_WORKSPACE/dist/$ASSET_NAME" \
+            -C "$GITHUB_WORKSPACE/.toolchains" \
+            "gcc-16.1"
+
+          ls -lh "$GITHUB_WORKSPACE/dist/$ASSET_NAME"
+
+      - name: Upload GitHub Release asset
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/${{ env.ASSET_NAME }}
+          name: GCC ${{ env.GCC_VERSION }} for Ubuntu 24.04 x86_64
+          body: |
+            Prebuilt GCC ${{ env.GCC_VERSION }} for Ubuntu 24.04 x86_64.
+
+            Install example:
+
+            ```bash
+            mkdir -p ~/.local/toolchains
+            tar --zstd -xf ${{ env.ASSET_NAME }} -C ~/.local/toolchains
+            export PATH="$HOME/.local/toolchains/gcc-16.1/bin:$PATH"
+            gcc --version
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
