@@ -71,7 +71,6 @@ jobs:
 
           "../gcc-${GCC_VERSION}/configure" \
             --prefix="$GCC_PREFIX" \
-
             --target=x86_64-linux-gnu \
             --host=x86_64-linux-gnu \
             --build=x86_64-linux-gnu \
