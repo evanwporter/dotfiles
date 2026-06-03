@@ -36,7 +36,11 @@ jobs:
             texinfo \
             wget \
             xz-utils \
-            zstd
+            zstd \
+            gawk \
+            gcc-multilib \
+            g++-multilib \
+            libc6-dev-i386
 
       - name: Cache built GCC
         id: cache-gcc
@@ -60,16 +64,21 @@ jobs:
 
       - name: Configure GCC
         if: steps.cache-gcc.outputs.cache-hit != 'true'
-        run: |
 
+        run: |
           mkdir -p "$GITHUB_WORKSPACE/src/gcc-build"
           cd "$GITHUB_WORKSPACE/src/gcc-build"
 
           "../gcc-${GCC_VERSION}/configure" \
             --prefix="$GCC_PREFIX" \
-            --enable-languages=c,c++ \
 
-            --disable-multilib
+            --target=x86_64-linux-gnu \
+            --host=x86_64-linux-gnu \
+            --build=x86_64-linux-gnu \
+            --enable-languages=c,c++ \
+            --disable-multilib \
+            --with-multilib-list=m64 \
+            --disable-bootstrap
 
       - name: Build GCC
         if: steps.cache-gcc.outputs.cache-hit != 'true'
