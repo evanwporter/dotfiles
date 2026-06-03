@@ -55,7 +55,6 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/src"
           cd "$GITHUB_WORKSPACE/src"
 
-
           wget "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz"
           tar -xf "gcc-${GCC_VERSION}.tar.xz"
 

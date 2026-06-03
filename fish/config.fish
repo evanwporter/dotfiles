@@ -6,7 +6,7 @@ if status is-interactive
     alias la "eza -A --icons"
     alias l "eza -CF --icons"
 
-    # starship init fish | source
+    alias cat "bat --paging=never"
 end
 
 # -----------------------------
