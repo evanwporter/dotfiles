@@ -1,0 +1,8 @@
+fish_variables
+local.fish
+completions/
+conf.d/
+functions/
+themes/
+
+

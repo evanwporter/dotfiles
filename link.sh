@@ -35,6 +35,7 @@ link_file "$DOTFILES_DIR/nvim/" "$HOME/.config/nvim"
 link_file "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
 link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/tmux" "$HOME/.config/tmux"
+link_file "$DOTFILES_DIR/fish" "$HOME/.config/fish"
 
 echo
 echo "Done."
