@@ -21,7 +21,10 @@ return {
 
       cmake_executor = {
         name = "quickfix",
-        opts = {},
+        opts = {
+          show = "always",
+          -- auto_close_when_success = false,
+        },
       },
 
       cmake_runner = {

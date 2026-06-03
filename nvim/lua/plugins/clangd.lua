@@ -7,12 +7,13 @@ return {
           cmd = {
             "clangd-22",
             "--clang-tidy",
-            "--compile-commands-dir=build/debug",
+            -- "--compile-commands-dir=./",
             "--completion-style=detailed",
-            "--header-insertion=iwyu"
+            "--header-insertion=iwyu",
           },
         },
       },
     },
   },
 }
+
