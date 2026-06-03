@@ -15,6 +15,7 @@ end
 
 # vcpkg
 set -gx VCPKG_ROOT "$HOME/vcpkg"
+fish_add_path ~/vcpkg
 
 # Linux Homebrew
 if test -x /home/linuxbrew/.linuxbrew/bin/brew
