@@ -29,6 +29,13 @@ else if test -d "$HOME/.cargo/bin"
     fish_add_path "$HOME/.cargo/bin"
 end
 
+# GCC 16.1
+set -gx GCC_16_1_HOME /opt/gcc-16.1
+fish_add_path -g -p $GCC_16_1_HOME/bin
+set -gx LD_LIBRARY_PATH $GCC_16_1_HOME/lib64 $LD_LIBRARY_PATH
+set -gx CC $GCC_16_1_HOME/bin/gcc
+set -gx CXX $GCC_16_1_HOME/bin/g++
+
 # -----------------------------
 # Fish Prompt
 # -----------------------------
