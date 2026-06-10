@@ -29,6 +29,42 @@ config.window_padding = {
 	bottom = 0,
 }
 
+config.font = wezterm.font_with_fallback({
+	{ family = "JetBrainsMono NFM", weight = "Regular", style = "Normal" },
+	"Symbols Nerd Font Mono",
+	"Noto Color Emoji",
+})
+
+config.font_rules = {
+	{
+		intensity = "Bold",
+		italic = false,
+		font = wezterm.font_with_fallback({
+			{ family = "JetBrainsMono NFM", weight = "Bold", style = "Normal" },
+			"Symbols Nerd Font Mono",
+			"Noto Color Emoji",
+		}),
+	},
+	{
+		intensity = "Normal",
+		italic = true,
+		font = wezterm.font_with_fallback({
+			{ family = "JetBrainsMono NFM", weight = "Regular", style = "Italic" },
+			"Symbols Nerd Font Mono",
+			"Noto Color Emoji",
+		}),
+	},
+	{
+		intensity = "Bold",
+		italic = true,
+		font = wezterm.font_with_fallback({
+			{ family = "JetBrainsMono NFM", weight = "Bold", style = "Italic" },
+			"Symbols Nerd Font Mono",
+			"Noto Color Emoji",
+		}),
+	},
+}
+
 config.window_close_confirmation = "NeverPrompt"
 
 return config

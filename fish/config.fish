@@ -46,6 +46,8 @@ if string match -q '*microsoft*' (uname -r | string lower)
     set -gx PATH (string match -v '/mnt/c/*' $PATH)
 end
 
+fish_add_path ~/.local/bin
+
 set -g theme_color_scheme catpuccin-frappe
 set -g theme_display_git yes
 set -g theme_display_git_default_branch yes

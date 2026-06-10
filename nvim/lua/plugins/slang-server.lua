@@ -4,6 +4,7 @@ return {
     opts = {
       servers = {
         slang_server = {
+          name = "slang-server",
           mason = false,
           cmd = { "/home/evanw/slang-server/build/clang-debug/bin/slang-server" },
           filetypes = { "systemverilog", "verilog", "slang" },
@@ -14,6 +15,7 @@ return {
   },
   {
     "hudson-trading/slang-server.nvim",
+    name = "slang-server.nvim",
     dependencies = {
       "MunifTanjim/nui.nvim",
     },
