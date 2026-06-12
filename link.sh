@@ -37,6 +37,7 @@ link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/tmux" "$HOME/.config/tmux"
 link_file "$DOTFILES_DIR/fish" "$HOME/.config/fish"
 link_file "$DOTFILES_DIR/lazygit" "$HOME/.config/lazygit"
+link_file "/etc/nixos" "$HOME/.config/nixos"
 
 echo
 echo "Done."

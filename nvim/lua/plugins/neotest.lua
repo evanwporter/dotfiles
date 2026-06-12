@@ -1,8 +1,6 @@
 return {
   {
-    dir = vim.fn.expand("~/neotest-ctest"),
-    name = "neotest-ctest",
-    dev = true,
+    "evanwporter/neotest-ctest",
   },
 
   {

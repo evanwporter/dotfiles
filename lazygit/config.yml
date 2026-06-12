@@ -1,2 +1,7 @@
 gui:
   skipDiscardChangeWarning: true
+
+git:
+  pagers:
+    - pager: delta --paging=never
+
