@@ -13,3 +13,16 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     vim.opt_local.spell = false
   end,
 })
+
+local function set_neotest_highlights()
+  vim.api.nvim_set_hl(0, "NeotestFile", { fg = "#2aa198" }) -- cyan
+  vim.api.nvim_set_hl(0, "NeotestDir", { fg = "#268bd2" }) -- blue
+  vim.api.nvim_set_hl(0, "NeotestNamespace", { fg = "#6c71c4" }) -- violet
+  vim.api.nvim_set_hl(0, "NeotestTest", { fg = "#859900" }) -- green
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = set_neotest_highlights,
+})
+
+set_neotest_highlights()

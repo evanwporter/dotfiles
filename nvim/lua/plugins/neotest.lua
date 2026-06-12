@@ -1,5 +1,9 @@
 return {
-  { "orjangj/neotest-ctest" },
+  {
+    dir = vim.fn.expand("~/neotest-ctest"),
+    name = "neotest-ctest",
+    dev = true,
+  },
 
   {
     "nvim-neotest/neotest",
@@ -12,10 +16,10 @@ return {
             local name = vim.fs.basename(file)
 
             return name:match("_test%.cpp$")
-                or name:match("_tests%.cpp$")
-                or name:match("^test_.*%.cpp$")
-                or name:match("tests%.cpp$")
-                or name:match("Tests%.cpp$")
+              or name:match("_tests%.cpp$")
+              or name:match("^test_.*%.cpp$")
+              or name:match("tests%.cpp$")
+              or name:match("Tests%.cpp$")
           end,
         },
       },
