@@ -3,13 +3,15 @@ local config = wezterm.config_builder()
 
 config.default_prog = {
 	"wsl.exe",
+	"-d",
+	"NixOS",
 	"--cd",
 	"~",
-	"--exec",
-	"/home/linuxbrew/.linuxbrew/bin/fish",
+	"-e",
+	"/run/current-system/sw/bin/fish",
 	"-l",
 	"-c",
-	"tmux new-session -A -s default",
+	"/run/current-system/sw/bin/tmux new-session -A -s default",
 }
 
 config.enable_tab_bar = false

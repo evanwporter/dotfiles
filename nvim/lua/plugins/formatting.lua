@@ -15,6 +15,18 @@ return {
         json = { "prettier" },
         jsonc = { "prettier" },
         json5 = { "prettier" },
+
+        nix = { "alejandra" },
+      },
+
+      formatters = {
+        alejandra = {
+          command = "alejandra",
+          args = {
+            "--experimental-config",
+            vim.fn.expand("~/.config/alejandra/alejandra.toml"),
+          },
+        },
       },
     },
   },
