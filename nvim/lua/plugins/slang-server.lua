@@ -6,7 +6,7 @@ return {
         slang_server = {
           name = "slang-server",
           mason = false,
-          cmd = { "/home/evanw/slang-server/build/clang-debug/bin/slang-server" },
+          cmd = { "/home/evanw/slang-server/build/debug/bin/slang-server" },
           filetypes = { "systemverilog", "verilog", "slang" },
           single_file_support = true,
         },

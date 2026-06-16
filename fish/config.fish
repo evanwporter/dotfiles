@@ -14,27 +14,9 @@ end
 # -----------------------------
 
 # vcpkg
-set -gx VCPKG_ROOT "$HOME/vcpkg"
-fish_add_path ~/vcpkg
-
-# Linux Homebrew
-if test -x /home/linuxbrew/.linuxbrew/bin/brew
-    eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv fish)
+if type -q vcpkg
+    set -gx VCPKG_ROOT (dirname (dirname (which vcpkg)))
 end
-
-# Rust / Cargo
-if test -f "$HOME/.cargo/env.fish"
-    source "$HOME/.cargo/env.fish"
-else if test -d "$HOME/.cargo/bin"
-    fish_add_path "$HOME/.cargo/bin"
-end
-
-# GCC 16.1
-set -gx GCC_16_1_HOME /opt/gcc-16.1
-fish_add_path -g -p $GCC_16_1_HOME/bin
-set -gx LD_LIBRARY_PATH $GCC_16_1_HOME/lib64 $LD_LIBRARY_PATH
-set -gx CC $GCC_16_1_HOME/bin/gcc
-set -gx CXX $GCC_16_1_HOME/bin/g++
 
 # -----------------------------
 # Fish Prompt
@@ -45,8 +27,6 @@ set -gx CXX $GCC_16_1_HOME/bin/g++
 if string match -q '*microsoft*' (uname -r | string lower)
     set -gx PATH (string match -v '/mnt/c/*' $PATH)
 end
-
-fish_add_path ~/.local/bin
 
 set -g theme_color_scheme catpuccin-frappe
 set -g theme_display_git yes

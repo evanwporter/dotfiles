@@ -39,6 +39,7 @@ link_file "$DOTFILES_DIR/fish" "$HOME/.config/fish"
 link_file "$DOTFILES_DIR/lazygit" "$HOME/.config/lazygit"
 link_file "/etc/nixos" "$HOME/.config/nixos"
 link_file "$DOTFILES_DIR/alejandra" "$HOME/.config/alejandra"
+link_file "$DOTFILES_DIR/delta" "$HOME/delta"
 
 echo
 echo "Done."

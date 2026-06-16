@@ -1,5 +1,5 @@
 {
-	description = "Evan's NixOS WSL config";
+	description = "Evan";
 
 	inputs = {
 		nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

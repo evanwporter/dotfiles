@@ -10,27 +10,27 @@
 	...
 }: {
 	wsl.enable = true;
-	wsl.defaultUser = "nixos";
+	wsl.defaultUser = "evanw";
 
 	programs.nix-ld.enable = true;
 
 	programs.fish.enable = true;
 
-	users.users.nixos = {
+	users.users.evanw = {
 		isNormalUser = true;
 		extraGroups = ["wheel"];
 		shell = pkgs.fish;
 	};
 
 	environment.systemPackages = with pkgs; [
-		# editors / git
+		# editors
 		git
 		neovim
 		lazygit
 		gh
 		delta
 
-		# search / terminal tools
+		# terminal tools
 		ripgrep
 		fd
 		fzf
@@ -44,9 +44,9 @@
 		bat
 		eza
 
-		# C / C++ build tools
-		gcc
-		clang
+		# build tools
+		gcc16
+		clang_22
 		cmake
 		gnumake
 		ninja
@@ -54,19 +54,33 @@
 		gdb
 		lldb
 		valgrind
+		vcpkg
+
+		# node/npm
+		nodejs
+		corepack
+		typescript
 
 		# useful libs/tools
 		openssl
 		openssh
 		zlib
 
-		# systemverilog/hdl
+		# hdl tools
 		verilator
 
-		# language servers / formatters
-		clang-tools
-		cmake-language-server
-		alejandra
+		# language services
+		llvmPackages_22.clang-tools
+
+		# python
+		python313
+		python313Packages.pip
+
+		# rust / cargo
+		rustc
+		cargo
+		clippy
+		rustfmt
 	];
 
 	# This value determines the NixOS release from which the default
