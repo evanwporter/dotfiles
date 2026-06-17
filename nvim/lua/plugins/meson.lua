@@ -10,6 +10,7 @@ return {
         "cmakelang",
         "cmakelint",
         "codelldb",
+        "fish-lsp",
         "js-debug-adapter",
         "json-lsp",
         "lua-language-server",
