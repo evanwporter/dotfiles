@@ -3,12 +3,7 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 # NixOS-WSL specific options are documented on the NixOS-WSL repository:
 # https://github.com/nix-community/NixOS-WSL
-{
-	config,
-	lib,
-	pkgs,
-	...
-}: {
+{pkgs, ...}: {
 	wsl.enable = true;
 	wsl.defaultUser = "evanw";
 
@@ -22,6 +17,12 @@
 		shell = pkgs.fish;
 	};
 
+	home-manager = {
+		useGlobalPkgs = true;
+		useUserPackages = true;
+		users.evanw = import ./home/home.nix;
+	};
+
 	environment.systemPackages = with pkgs; [
 		# editors
 		git
@@ -29,6 +30,7 @@
 		lazygit
 		gh
 		delta
+		glow
 
 		# terminal tools
 		ripgrep
@@ -43,6 +45,10 @@
 		tmux
 		bat
 		eza
+		dust
+		yazi
+		zoxide
+		file
 
 		# build tools
 		gcc16

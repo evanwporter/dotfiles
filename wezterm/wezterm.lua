@@ -11,7 +11,10 @@ config.default_prog = {
 	"/run/current-system/sw/bin/fish",
 	"-l",
 	"-c",
-	"/run/current-system/sw/bin/tmux new-session -A -s default",
+	"/run/current-system/sw/bin/tmux",
+	"new-session",
+	"-A",
+	"-s default",
 }
 
 config.enable_tab_bar = false

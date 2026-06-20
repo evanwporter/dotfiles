@@ -13,6 +13,9 @@ return {
     end,
   },
 
+  { "catppuccin/nvim", enabled = false },
+  { "folke/tokyonight.nvim", enabled = false },
+
   -- {
   --   "maxmx03/solarized.nvim",
   --   lazy = false,
