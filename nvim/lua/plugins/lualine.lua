@@ -28,6 +28,12 @@ return {
           "oil",
           "Trouble",
           "lazy",
+          "dap-repl",
+          "dapui_scopes",
+          "dapui_breakpoints",
+          "dapui_stacks",
+          "dapui_watches",
+          "dapui_console",
         }, ft)
       end
 
@@ -59,6 +65,12 @@ return {
           "snacks_picker_preview",
           "snacks_dashboard",
           "snacks_terminal",
+          "dap-repl",
+          "dapui_scopes",
+          "dapui_breakpoints",
+          "dapui_stacks",
+          "dapui_watches",
+          "dapui_console",
         },
       })
     end,
