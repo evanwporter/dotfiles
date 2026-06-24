@@ -1,4 +1,4 @@
-PREFIX  := $(HOME)/local
+PREFIX  := $(HOME)/.local
 BIN_DIR := $(PREFIX)/bin
 TMP_DIR := $(HOME)/tmp
 
