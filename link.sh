@@ -32,18 +32,18 @@ link_file() {
 }
 
 link_file "$DOTFILES_DIR/nvim/" "$HOME/.config/nvim"
-link_file "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
-link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
+# link_file "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
+# link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
 link_file "$DOTFILES_DIR/tmux" "$HOME/.config/tmux"
 link_file "$DOTFILES_DIR/fish" "$HOME/.config/fish"
 link_file "$DOTFILES_DIR/lazygit" "$HOME/.config/lazygit"
-link_file "/etc/nixos" "$HOME/.config/nixos"
+# link_file "/etc/nixos" "$HOME/.config/nixos"
 link_file "$DOTFILES_DIR/alejandra" "$HOME/.config/alejandra"
 link_file "$DOTFILES_DIR/delta" "$HOME/.config/delta"
 link_file "$DOTFILES_DIR/bat" "$HOME/.config/bat"
 link_file "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
-link_file "$DOTFILES_DIR/nvimpager" "$HOME/.config/nvimpager"
-link_file "$DOTFILES_DIR/glow" "$HOME/.config/glow"
+# link_file "$DOTFILES_DIR/nvimpager" "$HOME/.config/nvimpager"
+# link_file "$DOTFILES_DIR/glow" "$HOME/.config/glow"
 
 echo
 echo "Done."
