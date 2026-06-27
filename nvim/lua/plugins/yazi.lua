@@ -10,10 +10,10 @@ return {
   keys = {
     --in this section, choose your own keymappings!
     {
-      "<leader>-",
+      "<leader>y",
       mode = { "n", "v" },
       "<cmd>Yazi<cr>",
-      desc = "Yazi (Current File)",
+      desc = "Yazi",
     },
     -- {
     --   -- Open in the current working directory

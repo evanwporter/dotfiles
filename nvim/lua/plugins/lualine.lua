@@ -1,12 +1,10 @@
 return {
   {
-    "akinsho/bufferline.nvim",
-    enabled = false,
-  },
-
-  {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
+      opts.options = opts.options or {}
+      opts.options.disabled_filetypes = opts.options.disabled_filetypes or {}
+
       vim.o.showtabline = 0
       opts.tabline = {}
 
@@ -52,7 +50,7 @@ return {
       opts.winbar = buffer_winbar
       opts.inactive_winbar = buffer_winbar
 
-      opts.options.disabled_filetypes = vim.tbl_deep_extend("force", opts.options.disabled_filetypes or {}, {
+      opts.options.disabled_filetypes = vim.tbl_deep_extend("force", opts.options.disabled_filetypes, {
         winbar = {
           "neo-tree",
           "NvimTree",
@@ -76,3 +74,4 @@ return {
     end,
   },
 }
+

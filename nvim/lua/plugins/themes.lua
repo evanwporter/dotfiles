@@ -6,14 +6,12 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      vim.o.termguicolors = true
       vim.o.background = "dark"
       vim.g.gruvbox_material_background = "medium"
       vim.g.gruvbox_material_better_performance = 1
     end,
   },
 
-  { "catppuccin/nvim", enabled = false },
   { "folke/tokyonight.nvim", enabled = false },
 
   {
@@ -22,7 +20,6 @@ return {
     priority = 1000,
     opts = {},
     config = function(_, opts)
-      vim.o.termguicolors = true
       vim.o.background = "light"
 
       require("solarized").setup(opts)
@@ -48,12 +45,5 @@ return {
     lazy = false,
     priority = 1000,
     enabled = false,
-  },
-
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "gruvbox-material",
-    },
   },
 }
