@@ -5,6 +5,11 @@ local defaults = {
 
   left = { "mark", "sign" },
   number = true,
+
+  -- Insert / replace mode: absolute numbers
+  -- Normal / visual mode: relative numbers, current line absolute
+  smart_number = true,
+
   right = { "fold", "git" },
 
   folds = {
@@ -28,6 +33,9 @@ local cache = {}
 local icon_cache = {}
 
 local did_setup = false
+
+-- Keep the libuv timer referenced so it does not get garbage-collected.
+M._timer = nil
 
 local function _ffi()
   if not C then
@@ -226,6 +234,14 @@ function M._get()
   local nu = config.number and vim.wo[win].number
   local rnu = config.number and vim.wo[win].relativenumber
 
+  if config.smart_number and config.number then
+    local mode = vim.api.nvim_get_mode().mode
+    local is_insert = mode:match("^[iR]") ~= nil
+
+    nu = true
+    rnu = not is_insert
+  end
+
   local show_signs = vim.v.virtnum == 0 and vim.wo[win].signcolumn ~= "no"
   local show_folds = vim.v.virtnum == 0 and vim.wo[win].foldcolumn ~= "0"
 
@@ -327,7 +343,14 @@ function M.get()
     return ""
   end
 
-  local key = ("%d:%d:%d:%d:%d"):format(win, buf, vim.v.lnum, vim.v.virtnum ~= 0 and 1 or 0, vim.v.relnum)
+  local key = ("%d:%d:%d:%d:%d:%s"):format(
+    win,
+    buf,
+    vim.v.lnum,
+    vim.v.virtnum ~= 0 and 1 or 0,
+    vim.v.relnum,
+    vim.api.nvim_get_mode().mode
+  )
 
   if cache[key] then
     return cache[key]
@@ -379,9 +402,22 @@ function M.setup(opts)
 
   vim.o.statuscolumn = "%!v:lua.require'config.statuscolumn'.get()"
 
-  local timer = assert((vim.uv or vim.loop).new_timer())
+  if config.smart_number then
+    vim.api.nvim_create_autocmd({ "ModeChanged", "InsertEnter", "InsertLeave" }, {
+      group = vim.api.nvim_create_augroup("StatusColumnSmartNumber", { clear = true }),
+      callback = function()
+        cache = {}
 
-  timer:start(
+        vim.schedule(function()
+          vim.cmd("redraw!")
+        end)
+      end,
+    })
+  end
+
+  M._timer = assert((vim.uv or vim.loop).new_timer())
+
+  M._timer:start(
     config.refresh,
     config.refresh,
     vim.schedule_wrap(function()
@@ -396,6 +432,8 @@ M.setup({
 
   left = { "mark", "sign" },
   number = true,
+  smart_number = true,
+
   right = { "fold", "git" },
 
   folds = {
