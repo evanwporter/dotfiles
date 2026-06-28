@@ -7,4 +7,4 @@ vim.opt.smartindent = true
 vim.opt.number = true
 vim.opt.relativenumber = true
 
-vim.opt.numberwidth = 4
+vim.opt.signcolumn = "yes"

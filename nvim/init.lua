@@ -7,3 +7,4 @@ require("core.theme")
 
 require("config.dashboard")
 require("config.keymaps")
+require("config.statuscolumn")
