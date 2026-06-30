@@ -1,7 +1,7 @@
 return {
   {
-    "nvim-tree/nvim-tree.lua",
-    lazy = false,
+    "evanwporter/nvim-tree.lua",
+    -- lazy = false,
     -- enabled = false,
 
     dependencies = {
@@ -172,7 +172,7 @@ return {
 
       sources = {
         "filesystem",
-        "buffers",
+        -- "buffers",
         -- "git_status",
       },
 
