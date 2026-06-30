@@ -7,6 +7,7 @@ return {
 
       vim.o.showtabline = 0
       opts.tabline = {}
+      opts.options.globalstatus = true
 
       local function is_normal_file_buffer()
         local ft = vim.bo.filetype
@@ -74,4 +75,3 @@ return {
     end,
   },
 }
-

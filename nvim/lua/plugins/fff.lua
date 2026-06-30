@@ -1,10 +1,31 @@
 return {
   {
-    "dmtrKovalenko/fff.nvim",
-    build = function()
-      require("fff.download").download_or_build_binary()
-    end,
-    -- lazy = false,
+    "vinitkumar/fff.nvim",
+    build = "cargo build --release",
+
+    keys = {
+      {
+        "<leader><leader>",
+        function()
+          require("fff").find_files()
+        end,
+        desc = "Find files",
+      },
+      {
+        "<leader>fb",
+        function()
+          require("fff").buffers()
+        end,
+        desc = "Find buffers",
+      },
+      {
+        "<leader>fg",
+        function()
+          require("fff").live_grep()
+        end,
+        desc = "Live grep",
+      },
+    },
 
     init = function()
       local function set_fff_highlights()
@@ -38,47 +59,8 @@ return {
       },
     },
 
-    keys = {
-      {
-        "<leader><leader>",
-        function()
-          require("fff").find_files()
-        end,
-        desc = "Find Files",
-      },
-      {
-        "<leader>ff",
-        function()
-          require("fff").find_files()
-        end,
-        desc = "Find Files",
-      },
-      {
-        "<leader>fg",
-        function()
-          require("fff").live_grep()
-        end,
-        desc = "Live Grep",
-      },
-      {
-        "<leader>fz",
-        function()
-          require("fff").live_grep({
-            grep = {
-              modes = { "fuzzy", "plain" },
-            },
-          })
-        end,
-        desc = "Live Fuzzy Grep",
-      },
-      {
-        "<leader>fw",
-        function()
-          require("fff").live_grep_under_cursor()
-        end,
-        mode = { "n", "x" },
-        desc = "Search Word / Selection",
-      },
-    },
+    config = function(_, opts)
+      require("fff").setup(opts)
+    end,
   },
 }
