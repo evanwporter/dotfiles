@@ -136,5 +136,6 @@ return {
     event = { "InsertEnter", "CmdlineEnter" },
     branch = "v0.6",
     opts = {},
+    enabled = false,
   },
 }

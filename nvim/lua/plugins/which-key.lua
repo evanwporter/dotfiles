@@ -20,6 +20,7 @@ return {
           { "<leader>e", group = "Explorer", icon = "󰙅" },
           { "<leader>f", group = "Find", icon = "󰈞" },
           { "<leader>t", group = "Test", icon = "󰙨" },
+          { "<leader>y", group = "Yazi", icon = "󰇥" },
         },
       },
     },

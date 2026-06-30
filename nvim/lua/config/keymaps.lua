@@ -7,7 +7,19 @@ vim.keymap.set("n", "<leader>q", "<cmd>qa<cr>", {
 })
 
 vim.keymap.set("n", "<leader>bd", function()
-  vim.cmd("bdelete")
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local listed = vim.tbl_filter(function(buf)
+    return vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted and buf ~= bufnr
+  end, vim.api.nvim_list_bufs())
+
+  if #listed > 0 then
+    vim.cmd("buffer " .. listed[#listed])
+  else
+    vim.cmd("enew")
+  end
+
+  vim.cmd("bdelete " .. bufnr)
 end, {
   desc = "Delete Buffer",
 })
