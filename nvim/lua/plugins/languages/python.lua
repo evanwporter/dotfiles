@@ -1,0 +1,29 @@
+-- lua/plugins/basedpyright.lua
+return {
+  -- {
+  --   "neovim/nvim-lspconfig",
+  --   opts = {
+  --     servers = {
+  --       basedpyright = {
+  --         name = "basedpyright",
+  --         mason = false,
+  --         cmd = {
+  --           "/nvme1/home/eporter/.local/miniconda3/bin/python",
+  --           "-m",
+  --           "basedpyright",
+  --           "--stdio",
+  --         },
+  --         filetypes = { "python" },
+  --
+  --         -- You can leave this empty for a super minimal setup
+  --         -- or add settings if you want:
+  --         -- settings = {
+  --         --   basedpyright = {
+  --         --     typeCheckingMode = "strict",
+  --         --   },
+  --         -- },
+  --       },
+  --     },
+  --   },
+  -- },
+}
