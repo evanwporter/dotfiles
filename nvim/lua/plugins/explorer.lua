@@ -5,16 +5,7 @@ return {
     -- enabled = false,
 
     dependencies = {
-      {
-        "nvim-mini/mini.icons",
-        opts = {},
-        init = function()
-          package.preload["nvim-web-devicons"] = function()
-            require("mini.icons").mock_nvim_web_devicons()
-            return package.loaded["nvim-web-devicons"]
-          end
-        end,
-      },
+      "nvim-mini/mini.icons",
     },
 
     keys = {
@@ -49,13 +40,13 @@ return {
 
           glyphs = {
             git = {
-              unstaged = "●",
-              staged = "✓",
-              unmerged = "",
-              renamed = "➜",
-              untracked = "★",
-              deleted = "",
-              ignored = "◌",
+              unstaged = "M",
+              staged = "S",
+              unmerged = "U",
+              renamed = "R",
+              untracked = "U",
+              deleted = "D",
+              ignored = "I",
             },
           },
 
@@ -65,6 +56,19 @@ return {
             folder_arrow = true,
             git = true,
           },
+        },
+      },
+
+      diagnostics = {
+        enable = true,
+        show_on_dirs = true,
+        show_on_open_dirs = true,
+
+        icons = {
+          error = "",
+          warning = "",
+          info = "",
+          hint = "",
         },
       },
 
@@ -81,11 +85,6 @@ return {
       git = {
         enable = true,
         ignore = false,
-      },
-
-      diagnostics = {
-        enable = true,
-        show_on_dirs = true,
       },
 
       update_focused_file = {
