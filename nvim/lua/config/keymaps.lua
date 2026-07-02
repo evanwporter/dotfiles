@@ -2,7 +2,7 @@ vim.keymap.set("n", "<localleader>a", function()
   vim.cmd("normal! ggVG")
 end, { desc = "Select All" })
 
-vim.keymap.set("n", "<leader>q", "<cmd>qa<cr>", {
+vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", {
   desc = "Quit All",
 })
 
