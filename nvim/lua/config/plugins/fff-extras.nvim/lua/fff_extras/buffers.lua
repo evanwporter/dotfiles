@@ -629,7 +629,14 @@ function M.update_preview()
   end
 
   local item = items[M.state.cursor]
-  if not item or item.path == "" then
+  if not item or not item.path or item.path == "" then
+    M.clear_preview()
+    M.state.last_preview_file = nil
+    return
+  end
+
+  -- Check if the file actually exists
+  if vim.fn.filereadable(item.path) ~= 1 then
     M.clear_preview()
     M.state.last_preview_file = nil
     return
@@ -650,7 +657,13 @@ function M.update_preview()
   })
 
   preview.set_preview_window(M.state.preview_win)
-  preview.preview(item.path, M.state.preview_buf, { line = item.line })
+
+  -- Safely call preview, catching any errors
+  local ok, err = pcall(preview.preview, item.path, M.state.preview_buf, { line = item.line })
+  if not ok then
+    M.clear_preview()
+    M.state.last_preview_file = nil
+  end
 end
 
 function M.clear_preview()
@@ -875,6 +888,12 @@ function M.open(opts)
   M.state.items = M.get_buffer_items()
   M.state.filtered_items = M.state.items
 
+  if #M.state.items == 0 then
+    vim.notify("No buffers available", vim.log.levels.WARN)
+    M.state.active = false
+    return
+  end
+
   if not M.create_ui() then
     vim.notify("Failed to create buffer picker UI", vim.log.levels.ERROR)
     M.state.active = false
@@ -907,6 +926,12 @@ end
 
 function M.buffers(opts)
   return M.open(vim.tbl_deep_extend("force", M.opts or {}, opts or {}))
+end
+
+-- Auto-initialize tracking on first require
+if not M._tracking_started then
+  M.setup_tracking()
+  M._tracking_started = true
 end
 
 return M

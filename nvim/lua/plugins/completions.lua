@@ -1,7 +1,7 @@
 return {
   {
     "zbirenbaum/copilot.lua",
-    -- enabled = false,
+    enabled = false,
     cmd = "Copilot",
     event = "InsertEnter",
     opts = {
@@ -22,7 +22,7 @@ return {
     "saghen/blink.cmp",
     dependencies = {
       "rafamadriz/friendly-snippets",
-      "fang2hou/blink-copilot",
+      -- "fang2hou/blink-copilot",
     },
     branch = "v1",
     opts = {
@@ -36,17 +36,17 @@ return {
           "path",
           "snippets",
           "buffer",
-          "copilot",
+          -- "copilot",
         },
 
-        providers = {
-          copilot = {
-            name = "copilot",
-            module = "blink-copilot",
-            score_offset = 100,
-            async = true,
-          },
-        },
+        -- providers = {
+        --   copilot = {
+        --     name = "copilot",
+        --     module = "blink-copilot",
+        --     score_offset = 100,
+        --     async = true,
+        --   },
+        -- },
       },
 
       completion = {
@@ -60,36 +60,6 @@ return {
 
       keymap = {
         preset = "super-tab",
-
-        -- ["<Tab>"] = {
-        --   function(cmp)
-        --     if cmp.is_visible() then
-        --       return cmp.accept()
-        --     end
-        --   end,
-        --   "snippet_forward",
-        --   "fallback",
-        -- },
-
-        -- ["<S-Tab>"] = {
-        --   "snippet_backward",
-        --   function(cmp)
-        --     if cmp.is_visible() then
-        --       return cmp.select_prev()
-        --     end
-        --   end,
-        --   "fallback",
-        -- },
-        --
-        --
-        -- ["<Down>"] = { "select_next", "fallback" },
-        -- ["<Up>"] = { "select_prev", "fallback" },
-        --
-        -- ["<C-n>"] = { "select_next", "fallback" },
-        -- ["<C-p>"] = { "select_prev", "fallback" },
-        -- ["<C-e>"] = { "hide", "fallback" },
-        --
-        -- ["<CR>"] = { "fallback" },
       },
 
       cmdline = {
