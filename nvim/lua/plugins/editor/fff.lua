@@ -7,7 +7,7 @@ return {
     keys = {
       -- Buffers picker
       {
-        "<leader>fb",
+        "<leader>bb",
         function()
           require("fff_extras").buffers()
         end,
@@ -105,13 +105,6 @@ return {
         desc = "Find files",
       },
       {
-        "<leader>fb",
-        function()
-          require("fff").buffers()
-        end,
-        desc = "Find buffers",
-      },
-      {
         "<leader>fg",
         function()
           require("fff").live_grep()
@@ -162,127 +155,6 @@ return {
 
     config = function(_, opts)
       require("fff").setup(opts)
-    end,
-  },
-
-  -- {
-  --   dir = vim.fn.expand("~/dotfiles/nvim/plugins/fff-buffers.nvim"),
-  --   name = "fff-buffers.nvim",
-  --   dependencies = {
-  --     "dmtrKovalenko/fff.nvim",
-  --   },
-  --   opts = {},
-  --   keys = {
-  --     {
-  --       "<leader>fb",
-  --       function()
-  --         require("fff_buffers").buffers()
-  --       end,
-  --       desc = "Find buffers",
-  --     },
-  --   },
-  -- },
-  --
-  {
-    "nvim-telescope/telescope-frecency.nvim",
-    version = "^1.0.0",
-    enabled = false,
-    config = function()
-      require("telescope").load_extension("frecency")
-    end,
-  },
-
-  {
-    "nvim-telescope/telescope.nvim",
-    enabled = false,
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope-frecency.nvim",
-    },
-    keys = {
-      -- Files by frecency
-      {
-        "<leader><leader>",
-        function()
-          require("telescope").extensions.frecency.frecency()
-        end,
-        desc = "Find files",
-      },
-
-      -- Buffers (MRU)
-      {
-        "<leader>fb",
-        function()
-          require("telescope.builtin").buffers({
-            sort_mru = true,
-            ignore_current_buffer = true,
-          })
-        end,
-        desc = "Buffers",
-      },
-
-      -- Live grep
-      {
-        "<leader>fg",
-        function()
-          require("telescope.builtin").live_grep()
-        end,
-        desc = "Live grep",
-      },
-
-      -- Grep word / selection under cursor
-      {
-        "<leader>fw",
-        function()
-          local builtin = require("telescope.builtin")
-          local mode = vim.api.nvim_get_mode().mode
-          if mode == "v" or mode == "V" or mode == "\22" then
-            -- visual selection
-            local _, ls, cs = unpack(vim.fn.getpos("'<"))
-            local _, le, ce = unpack(vim.fn.getpos("'>"))
-            local lines = vim.api.nvim_buf_get_lines(0, ls - 1, le, false)
-            if #lines == 0 then
-              builtin.live_grep()
-              return
-            end
-            lines[#lines] = string.sub(lines[#lines], 1, ce)
-            lines[1] = string.sub(lines[1], cs)
-            local text = table.concat(lines, "\n")
-            builtin.live_grep({ default_text = text })
-          else
-            -- normal mode: use <cword>
-            builtin.live_grep({ default_text = vim.fn.expand("<cword>") })
-          end
-        end,
-        mode = { "n", "x" },
-        desc = "Search current word / selection",
-      },
-    },
-
-    opts = {
-      defaults = {
-        prompt_prefix = " ",
-        selection_caret = " ",
-        sorting_strategy = "descending",
-        layout_config = {
-          prompt_position = "bottom",
-        },
-      },
-      extensions = {
-        frecency = {
-          show_scores = false,
-          show_unindexed = false,
-          ignore_patterns = { "*.git/*", "*/tmp/*" },
-          default_workspace = "CWD",
-          auto_validate = true,
-        },
-      },
-    },
-
-    config = function(_, opts)
-      local telescope = require("telescope")
-      telescope.setup(opts)
-      telescope.load_extension("frecency")
     end,
   },
 }

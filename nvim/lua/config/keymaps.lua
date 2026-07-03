@@ -3,7 +3,7 @@ vim.keymap.set("n", "<localleader>a", function()
 end, { desc = "Select All" })
 
 vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", {
-  desc = "Quit All",
+  desc = "Quit",
 })
 
 vim.keymap.set("n", "<leader>bd", function()
@@ -24,12 +24,26 @@ end, {
   desc = "Delete Buffer",
 })
 
+vim.api.nvim_create_user_command("BdeleteAll", function()
+  vim.cmd("%bd")
+end, {
+  desc = "Delete all buffers",
+})
+
+vim.keymap.set("n", "<leader>bn", "<cmd>bnext<cr>", {
+  desc = "Next Buffer",
+})
+
+vim.keymap.set("n", "<leader>bp", "<cmd>bprevious<cr>", {
+  desc = "Previous Buffer",
+})
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(event)
     local map = function(keys, func, desc)
       vim.keymap.set("n", keys, func, {
         buffer = event.buf,
-        desc = "LSP: " .. desc,
+        desc = desc,
       })
     end
 
@@ -39,11 +53,22 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("gi", vim.lsp.buf.implementation, "Go to Implementation")
     map("K", vim.lsp.buf.hover, "Hover Documentation")
 
-    map("<leader>cn", vim.lsp.buf.rename, "Rename")
+    map("<leader>cr", vim.lsp.buf.rename, "Rename")
     map("<leader>ca", vim.lsp.buf.code_action, "Code Action")
-
     map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+
     map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
     map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
   end,
 })
+
+for i = 1, 9 do
+  vim.keymap.set("n", "<leader>" .. i, function()
+    require("harpoon"):list():select(i)
+  end, { desc = "which_key_ignore" })
+end
+
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window" })
+vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window" })
+vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window" })
+vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
