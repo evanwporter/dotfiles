@@ -1,24 +1,22 @@
+-- FFF Extras - Clean API for fff.nvim extensions
 local M = {}
 
-local buffers = require("fff_extras.buffers")
-
-M.opts = {}
-
-function M.setup(opts)
-  M.opts = opts or {}
-
-  if buffers.setup then
-    buffers.setup(M.opts.buffers or M.opts)
-  end
-end
-
+--- Open buffer picker
+--- @param opts? table Optional configuration
 function M.buffers(opts)
-  opts = vim.tbl_deep_extend("force", M.opts or {}, opts or {})
-  return buffers.buffers(opts)
+  return require("fff_extras.buffers").buffers(opts)
 end
 
-function M.open_buffers(opts)
-  return M.buffers(opts)
+--- Open git files picker
+--- @param opts? table Optional configuration
+function M.git_files(opts)
+  return require("fff_extras.git_files").git_files(opts)
+end
+
+--- Open old files picker
+--- @param opts? table Optional configuration
+function M.oldfiles(opts)
+  return require("fff_extras.oldfiles").oldfiles(opts)
 end
 
 return M

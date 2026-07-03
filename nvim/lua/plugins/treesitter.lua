@@ -5,18 +5,18 @@ return {
     build = ":TSUpdate",
 
     opts = {
-      ensure_installed = {
-        "c",
-        "cpp",
-        "cmake",
-        "json",
-        "lua",
-        "markdown",
-        "python",
-        "rust",
-        "toml",
-        "typescript",
-      },
+      -- ensure_installed = {
+      --   "c",
+      --   "cpp",
+      --   "cmake",
+      --   "json",
+      --   "lua",
+      --   "markdown",
+      --   "python",
+      --   "rust",
+      --   "toml",
+      --   "typescript",
+      -- },
     },
   },
 }
