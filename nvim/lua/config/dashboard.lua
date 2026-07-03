@@ -88,20 +88,13 @@ local function render_dashboard(buf, win)
   vim.api.nvim_buf_add_highlight(buf, dashboard_ns, "DashboardFooter", vertical_padding + #lines - 1, 0, -1)
 end
 
-local function setup_dashboard_buffer(buf, win)
+local function setup_dashboard_buffer(buf)
   vim.bo[buf].buftype = "nofile"
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].buflisted = false
   vim.bo[buf].swapfile = false
   vim.bo[buf].modifiable = true
   vim.bo[buf].filetype = "dashboard"
-
-  -- vim.wo[win].number = false
-  -- vim.wo[win].relativenumber = false
-  -- vim.wo[win].signcolumn = "no"
-  -- vim.wo[win].foldcolumn = "0"
-  -- vim.wo[win].cursorline = false
-  -- vim.wo[win].list = false
 end
 
 local function open_dashboard()
@@ -113,7 +106,7 @@ local function open_dashboard()
     return
   end
 
-  setup_dashboard_buffer(buf, win)
+  setup_dashboard_buffer(buf)
   render_dashboard(buf, win)
 end
 
