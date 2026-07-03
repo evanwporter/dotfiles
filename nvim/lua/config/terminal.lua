@@ -16,7 +16,6 @@ local function cleanup_no_name_buffers()
 end
 
 local function close_terminal()
-  -- Close the fullscreen terminal tab, but keep the terminal buffer alive
   if term.tab and vim.api.nvim_tabpage_is_valid(term.tab) then
     vim.api.nvim_set_current_tabpage(term.tab)
     vim.cmd("tabclose")
@@ -44,7 +43,6 @@ local function toggle_terminal()
   vim.cmd("tabnew")
   term.tab = vim.api.nvim_get_current_tabpage()
 
-  -- Reopen saved terminal buffer if it exists
   if term.buf and vim.api.nvim_buf_is_valid(term.buf) then
     vim.api.nvim_set_current_buf(term.buf)
   else
@@ -58,10 +56,6 @@ local function toggle_terminal()
 
   vim.cmd("startinsert")
 end
-
-vim.keymap.set({ "n", "t" }, "<C-/>", toggle_terminal, {
-  desc = "Toggle fullscreen terminal",
-})
 
 vim.keymap.set({ "n", "t" }, "<C-_>", toggle_terminal, {
   desc = "Toggle fullscreen terminal",

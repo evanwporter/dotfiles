@@ -47,7 +47,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
   end,
 })
-
-vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], {
-  desc = "Exit terminal mode",
-})
