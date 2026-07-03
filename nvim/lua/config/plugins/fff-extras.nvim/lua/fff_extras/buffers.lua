@@ -304,7 +304,7 @@ function M.create_ui()
 
   if M.is_preview_enabled() then
     if preview.setup then
-      preview.setup(config)
+      preview.setup(config.preview or {})
     end
 
     preview.set_preview_window(M.state.preview_win)

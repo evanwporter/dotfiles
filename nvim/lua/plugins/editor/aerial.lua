@@ -15,7 +15,7 @@ return {
       "nvim-mini/mini.icons",
     },
     keys = {
-      { "<leader>cs", "<cmd>AerialToggle<cr>", desc = "Aerial (Symbols)" },
+      { "<leader>cs", "<cmd>AerialToggle<cr>", desc = "Outline" },
     },
   },
 }

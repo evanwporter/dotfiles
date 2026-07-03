@@ -13,7 +13,7 @@ return {
       spec = {
         {
           mode = { "n", "x" },
-          { "<leader>q", group = "Quit All", icon = "󰗼" },
+          { "<leader>q", group = "Quit", icon = "󰗼" },
           { "<leader>b", group = "Buffer", icon = "󰈔" },
           { "<leader>c", group = "Code", icon = "󰅩" },
           { "<leader>d", group = "Debug", icon = "󰃤" },
@@ -21,6 +21,8 @@ return {
           { "<leader>f", group = "Find", icon = "󰈞" },
           { "<leader>t", group = "Test", icon = "󰙨" },
           { "<leader>y", group = "Yazi", icon = "󰇥" },
+          { "<leader>x", group = "Trouble", icon = "" },
+          { "<leader>g", group = "LazyGit", icon = "" },
         },
       },
     },

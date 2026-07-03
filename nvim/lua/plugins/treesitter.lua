@@ -3,7 +3,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
     build = ":TSUpdate",
-    -- enabled = false,
+    enabled = false,
 
     opts = {
       -- ensure_installed = {
@@ -22,7 +22,7 @@ return {
   },
   {
     "romus204/tree-sitter-manager.nvim",
-    enabled = false,
+    -- enabled = false,
     lazy = false,
     dependencies = {}, -- tree-sitter CLI must be installed system-wide
     config = function()

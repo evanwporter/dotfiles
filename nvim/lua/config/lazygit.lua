@@ -25,5 +25,5 @@ vim.keymap.set("n", "<leader>g", function()
     end,
   })
 end, {
-  desc = "Git",
+  desc = "LazyGit",
 })
