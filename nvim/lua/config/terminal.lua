@@ -9,7 +9,6 @@ local function cleanup_no_name_buffers()
     local buftype = vim.bo[buf].buftype
     local modified = vim.bo[buf].modified
 
-    -- Delete empty [No Name] buffers, but do not delete active terminals or modified buffers
     if name == "" and buftype == "" and not modified then
       pcall(vim.api.nvim_buf_delete, buf, { force = true })
     end
@@ -17,22 +16,26 @@ local function cleanup_no_name_buffers()
 end
 
 local function close_terminal()
+  -- Close the fullscreen terminal tab, but keep the terminal buffer alive
   if term.tab and vim.api.nvim_tabpage_is_valid(term.tab) then
     vim.api.nvim_set_current_tabpage(term.tab)
     vim.cmd("tabclose")
   end
 
-  if term.buf and vim.api.nvim_buf_is_valid(term.buf) then
-    pcall(vim.api.nvim_buf_delete, term.buf, { force = true })
-  end
-
-  term.buf = nil
   term.tab = nil
 
   vim.schedule(cleanup_no_name_buffers)
 end
 
+local function create_terminal()
+  vim.cmd("terminal")
+  term.buf = vim.api.nvim_get_current_buf()
+
+  vim.bo[term.buf].buflisted = false
+end
+
 local function toggle_terminal()
+  -- If terminal tab is open, hide it
   if term.tab and vim.api.nvim_tabpage_is_valid(term.tab) then
     close_terminal()
     return
@@ -41,8 +44,12 @@ local function toggle_terminal()
   vim.cmd("tabnew")
   term.tab = vim.api.nvim_get_current_tabpage()
 
-  vim.cmd("terminal")
-  term.buf = vim.api.nvim_get_current_buf()
+  -- Reopen saved terminal buffer if it exists
+  if term.buf and vim.api.nvim_buf_is_valid(term.buf) then
+    vim.api.nvim_set_current_buf(term.buf)
+  else
+    create_terminal()
+  end
 
   vim.wo.number = false
   vim.wo.relativenumber = false

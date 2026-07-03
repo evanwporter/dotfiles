@@ -25,9 +25,5 @@ vim.keymap.set("n", "<leader>g", function()
     end,
   })
 end, {
-  desc = "Open lazygit in fullscreen terminal",
-})
-
-vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], {
-  desc = "Exit terminal mode",
+  desc = "Git",
 })
