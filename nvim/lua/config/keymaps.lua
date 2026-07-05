@@ -94,6 +94,3 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
 
 vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
-
-vim.keymap.set("n", "b[", "[b", { desc = "Previous buffer" })
-vim.keymap.set("n", "b]", "]b", { desc = "Next buffer" })

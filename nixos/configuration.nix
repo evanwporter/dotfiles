@@ -26,7 +26,7 @@
 	environment.systemPackages = with pkgs; [
 		# editors
 		git
-		neovim
+		# neovim
 		lazygit
 		gh
 		delta

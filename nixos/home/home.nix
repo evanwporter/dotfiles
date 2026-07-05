@@ -6,6 +6,6 @@
 	};
 
 	imports = [
-		./yazi.nix
+		./neovim.nix
 	];
 }
