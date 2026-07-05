@@ -1,40 +1,34 @@
 return {
   {
     "MagicDuck/grug-far.nvim",
-    -- Note (lazy loading): grug-far.lua defers all it's requires so it's lazy by default
-    -- additional lazy config to defer loading is not really needed...
     config = function()
-      -- optional setup call to override plugin options
-      -- alternatively you can set options with vim.g.grug_far = { ... }
       require("grug-far").setup({
-        window = {
-          position = "right", -- "right", "left", "top", "bottom", or "center"
-          width = 0.4, -- fraction of total width (if side window)
+        openTargetWindow = {
+          preferredLocation = "right",
+          exclude = {
+            "dashboard",
+          },
         },
       })
     end,
-
     keys = {
       {
-        "<leader>fr",
+        "<leader>sr",
         function()
-          require("grug-far").open()
+          local grug = require("grug-far")
+          local ext = vim.bo.buftype == "" and vim.fn.expand("%:e")
+          grug.open({
+            transient = true,
+            prefills = {
+              filesFilter = ext and ext ~= "" and "*." .. ext or nil,
+            },
+          })
         end,
-        desc = "Find and Replace",
+        mode = { "n", "x" },
+        desc = "Search and Replace",
       },
-      -- {
-      --   "<leader>sw",
-      --   function()
-      --     require("grug-far").open({
-      --       prefills = {
-      --         search = vim.fn.expand("<cword>"),
-      --       },
-      --     })
-      --   end,
-      --   desc = "Search current word",
-      -- },
       {
-        "<leader>fR",
+        "<leader>sR",
         function()
           require("grug-far").open({
             prefills = {

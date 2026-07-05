@@ -49,8 +49,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     map("gd", vim.lsp.buf.definition, "Go to Definition")
     map("gD", vim.lsp.buf.declaration, "Go to Declaration")
-    map("gr", vim.lsp.buf.references, "Go to References")
+    map("gr", function()
+      require("fzf-lua").lsp_references()
+    end, "Go to References")
     map("gi", vim.lsp.buf.implementation, "Go to Implementation")
+
     map("K", vim.lsp.buf.hover, "Hover Documentation")
 
     map("<leader>cr", vim.lsp.buf.rename, "Rename")
@@ -59,6 +62,22 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
     map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
+
+    map("<leader>ss", function()
+      require("fzf-lua").lsp_document_symbols()
+    end, "Search Document Symbols")
+
+    map("<leader>sS", function()
+      require("fzf-lua").lsp_live_workspace_symbols()
+    end, "Search Workspace Symbols")
+
+    map("<leader>cx", function()
+      vim.cmd("Trouble diagnostics toggle")
+    end, "Diagnostics")
+
+    map("<leader>cX", function()
+      vim.cmd("Trouble diagnostics toggle filter.buf=0")
+    end, "Buffer Diagnostics")
   end,
 })
 
@@ -72,3 +91,9 @@ vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
+
+vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
+vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
+
+vim.keymap.set("n", "b[", "[b", { desc = "Previous buffer" })
+vim.keymap.set("n", "b]", "]b", { desc = "Next buffer" })
