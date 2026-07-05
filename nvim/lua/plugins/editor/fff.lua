@@ -1,31 +1,5 @@
 return {
   {
-    dir = vim.fn.expand("~/dotfiles/nvim/lua/config/plugins/fff-extras.nvim/"),
-    dependencies = {
-      "dmtrKovalenko/fff",
-    },
-    keys = {
-      -- Buffers picker
-      {
-        "<leader>bb",
-        function()
-          require("fff_extras").buffers()
-        end,
-        desc = "Find Buffers",
-      },
-
-      -- Git picker (files in git repo)
-      {
-        "<leader>fi",
-        function()
-          require("fff_extras").git_files()
-        end,
-        desc = "Find Git files",
-      },
-    },
-  },
-
-  {
     "dmtrKovalenko/fff",
 
     build = function(plugin)
@@ -103,21 +77,6 @@ return {
           require("fff").find_files()
         end,
         desc = "Find files",
-      },
-      {
-        "<leader>fg",
-        function()
-          require("fff").live_grep()
-        end,
-        desc = "Live grep",
-      },
-      {
-        "<leader>fw",
-        function()
-          require("fff").live_grep_under_cursor()
-        end,
-        mode = { "n", "x" },
-        desc = "Find word under cursor",
       },
     },
 
