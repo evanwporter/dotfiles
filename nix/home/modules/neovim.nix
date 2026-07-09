@@ -8,7 +8,7 @@
 			vscode-extensions.vadimcn.vscode-lldb
 
 			tree-sitter
-
+			yaml-language-server
 			lua-language-server
 			stylua
 			nil
@@ -21,14 +21,5 @@
 			cmake-format
 			verible
 		];
-
-		extraLuaConfig = ''
-			vim.g.codelldb_path = "${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb"
-		'';
-	};
-
-	xdg.configFile."nvim" = {
-		source = ../../nvim;
-		recursive = true;
 	};
 }
