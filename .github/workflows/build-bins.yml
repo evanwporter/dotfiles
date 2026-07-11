@@ -1,4 +1,4 @@
-name: Build Alpine offline APK repository
+name: Build selected Alpine packages from aports
 
 on:
   workflow_dispatch:
@@ -14,107 +14,51 @@ permissions:
 
 env:
   ALPINE_IMAGE: alpine:edge
-  APORTS_BRANCH: master
+  APORTS_REF: master
 
 jobs:
   build:
-    name: Build ${{ matrix.name }}
+    name: Build selected package closure
     runs-on: ubuntu-24.04
     timeout-minutes: 360
 
-    strategy:
-      fail-fast: false
-
-      matrix:
-        include:
-          # - name: curl
-          #   aport: curl
-          #
-          # - name: git
-          #   aport: git
-          #
-          # - name: gcc
-          #   aport: gcc
-          #
-          # - name: cmake
-          #   aport: cmake
-          #
-          # - name: ninja
-          #   aport: samurai
-          #
-          # - name: make
-          #   aport: make
-          #
-          # - name: clangd
-          #   aport: clang20
-          #
-          # - name: ripgrep
-          #   aport: ripgrep
-          #
-          # - name: eza
-          #   aport: eza
-          #
-          # - name: bat
-          #   aport: bat
-          #
-          # - name: fd
-          #   aport: fd
-          #
-          # - name: yazi
-          #   aport: yazi
-          #
-          # - name: fish
-          #   aport: fish
-          #
-
-          # - name: delta
-          #   aport: delta
-          #
-          # - name: uv
-          #   aport: uv
-          #
-          # - name: lazygit
-          #   aport: lazygit
-          #
-          # - name: glow
-          #   aport: glow
-          #
-          - name: fzf
-            aport: fzf
-
-          - name: tmux
-            aport: tmux
-
-          # - name: neovim
-          #   aport: neovim
-
     steps:
-      - name: Check out Alpine aports mirror
+      - name: Check out Alpine aports
         uses: actions/checkout@v7
         with:
           repository: alpinelinux/aports
-          ref: ${{ env.APORTS_BRANCH }}
+          ref: ${{ env.APORTS_REF }}
           path: aports
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Build ${{ matrix.name }} APKs
-        env:
-          APORT: ${{ matrix.aport }}
+      - name: Prepare directories
         run: |
           set -euo pipefail
 
-          mkdir -p dist
+          mkdir -p \
+            packages \
+            distfiles \
+            keys \
+            metadata \
+            offline-repository
+
+          git -C aports rev-parse HEAD \
+            > metadata/APORTS_COMMIT
+
+      - name: Build selected packages and their dependencies
+        run: |
+          set -euo pipefail
 
           docker run --rm \
             --privileged \
-            --env APORT \
             --volume "$GITHUB_WORKSPACE:/workspace" \
             --workdir /workspace \
             "$ALPINE_IMAGE" \
             sh -euxc '
               apk add --no-cache \
                 alpine-sdk \
+                lua-aports \
                 doas
 
               adduser -D builder
@@ -128,43 +72,35 @@ jobs:
 
               chmod 0600 /etc/doas.d/abuild.conf
 
-              package_dir=""
-
-              for repository in main community testing; do
-                candidate="/workspace/aports/$repository/$APORT"
-
-                if [ -f "$candidate/APKBUILD" ]; then
-                  package_dir="$candidate"
-                  break
-                fi
-              done
-
-              if [ -z "$package_dir" ]; then
-                echo "Could not find APKBUILD for aport: $APORT" >&2
-                echo "Checked:" >&2
-                echo "  /workspace/aports/main/$APORT" >&2
-                echo "  /workspace/aports/community/$APORT" >&2
-                echo "  /workspace/aports/testing/$APORT" >&2
-                exit 1
-              fi
-
-              echo "Aport:     $APORT"
-              echo "Directory: $package_dir"
-
               install -d \
                 -o builder \
                 -g builder \
                 /home/builder/.abuild \
-                /home/builder/packages
+                /workspace/packages \
+                /workspace/distfiles \
+                /workspace/keys \
+                /workspace/filtered-aports
 
               chown -R builder:builder \
                 /workspace/aports \
-                /home/builder
+                /workspace/packages \
+                /workspace/distfiles \
+                /workspace/keys \
+                /workspace/filtered-aports
 
               su builder -c "
                 set -eu
                 abuild-keygen -a -n
               "
+
+              private_key=""
+
+              for candidate in /home/builder/.abuild/*.rsa; do
+                if [ -f "$candidate" ]; then
+                  private_key="$candidate"
+                  break
+                fi
+              done
 
               public_key=""
 
@@ -175,71 +111,134 @@ jobs:
                 fi
               done
 
-              if [ -z "$public_key" ]; then
-                echo "abuild-keygen did not create a public key" >&2
+              if [ -z "$private_key" ] || [ -z "$public_key" ]; then
+                echo "Could not locate generated abuild keys" >&2
                 exit 1
               fi
 
               cp "$public_key" /etc/apk/keys/
+              cp "$public_key" /workspace/keys/
 
-              su builder -c "
-                set -eu
-                cd \"$package_dir\"
-                abuild -r
+              cat > /home/builder/.abuild/abuild.conf <<EOF
+              REPODEST=/workspace/packages
+              SRCDEST=/workspace/distfiles
+              PACKAGER="Local Builder <builder@localhost>"
+              PACKAGER_PRIVKEY="$private_key"
+              JOBS=$(getconf _NPROCESSORS_ONLN)
+              EOF
+
+              chown builder:builder \
+                /home/builder/.abuild/abuild.conf
+
+              roots="
+                curl
+                git
+                gcc
+                g++
+                cmake
+                samurai
+                make
+                clang20-extra-tools
+                ripgrep
+                eza
+                bat
+                fd
+                yazi
+                fish
+                delta
+                erdtree
+                uv
+                lazygit
+                glow
+                fzf
+                tmux
+                neovim
               "
 
-              find /home/builder/packages \
-                -type f \
-                -name "*.apk" \
-                -exec cp -v {} /workspace/dist/ \;
+              printf "%s\n" $roots \
+                > /workspace/metadata/ROOT_PACKAGES
 
-              produced_package=""
+              cd /workspace/aports
 
-              for candidate in /workspace/dist/*.apk; do
-                if [ -f "$candidate" ]; then
-                  produced_package="$candidate"
-                  break
-                fi
-              done
-
-              if [ -z "$produced_package" ]; then
-                echo "abuild completed but produced no APK files" >&2
-                exit 1
-              fi
+              # Resolve every aport required to build or install the roots.
+              #
+              # ap builddirs converts binary/subpackage names such as g++ or
+              # clang20-extra-tools back to their owning aport directories.
+              {
+                printf "%s\n" $roots
+                ap recursdeps $roots
+              } |
+                ap builddirs |
+                sed "/^[[:space:]]*$/d" |
+                sort -u \
+                > /workspace/metadata/BUILD_DIRECTORIES
 
               echo
-              echo "Produced APKs:"
-              ls -lh /workspace/dist
+              echo "Resolved aport closure:"
+
+              cat /workspace/metadata/BUILD_DIRECTORIES
+
+              while IFS= read -r aport_dir; do
+                [ -n "$aport_dir" ] || continue
+
+                source_dir="/workspace/aports/$aport_dir"
+                target_dir="/workspace/filtered-aports/$aport_dir"
+
+                if [ ! -f "$source_dir/APKBUILD" ]; then
+                  echo "Missing APKBUILD for resolved aport: $aport_dir" >&2
+                  exit 1
+                fi
+
+                mkdir -p "${target_dir%/*}"
+                cp -a "$source_dir" "$target_dir"
+              done < /workspace/metadata/BUILD_DIRECTORIES
+
+              chown -R builder:builder \
+                /workspace/filtered-aports \
+                /workspace/packages \
+                /workspace/distfiles
+
+              arch="$(apk --print-arch)"
+
+              printf "%s\n" "$arch" \
+                > /workspace/metadata/ARCHITECTURE
+
+              # buildrepo operates on repository directories. Because these
+              # directories contain only the resolved closure, it will not
+              # build every package in the complete aports repository.
+              for repository in main community testing; do
+                repository_dir="/workspace/filtered-aports/$repository"
+
+                if [ ! -d "$repository_dir" ]; then
+                  continue
+                fi
+
+                echo
+                echo "Building filtered $repository repository"
+
+                su builder -c "
+                  set -eu
+
+                  buildrepo \
+                    -a \"$arch\" \
+                    -d /workspace/packages \
+                    \"$repository_dir\"
+                "
+              done
+
+              echo
+              echo "Built package files:"
+
+              find /workspace/packages \
+                -type f \
+                -name "*.apk" \
+                -print |
+                sort
             '
 
-      - name: Upload ${{ matrix.name }} APKs
-        uses: actions/upload-artifact@v6
-        with:
-          name: ${{ matrix.name }}-x86_64-alpine-apks
-          path: dist/*.apk
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
-
-  bundle:
-    name: Create offline x86_64 APK repository
-    runs-on: ubuntu-24.04
-    timeout-minutes: 180
-    needs: build
-
-    steps:
-      - name: Download all built APK artifacts
-        uses: actions/download-artifact@v8
-        with:
-          pattern: "*-x86_64-alpine-apks"
-          path: downloaded-apks
-          merge-multiple: true
-
-      - name: Collect locally built APKs
+      - name: Assemble flat offline repository
         run: |
           set -euo pipefail
-
-          mkdir -p offline-repository
 
           while IFS= read -r -d "" package; do
             filename="$(basename "$package")"
@@ -248,6 +247,8 @@ jobs:
             if [[ -e "$destination" ]]; then
               if ! cmp --silent "$package" "$destination"; then
                 echo "Conflicting APK files named $filename" >&2
+                echo "Existing: $destination" >&2
+                echo "New:      $package" >&2
                 exit 1
               fi
 
@@ -256,115 +257,57 @@ jobs:
 
             cp -v "$package" "$destination"
           done < <(
-            find downloaded-apks \
+            find packages \
               -type f \
               -name "*.apk" \
               -print0
           )
 
           if ! compgen -G "offline-repository/*.apk" >/dev/null; then
-            echo "No APK files were downloaded" >&2
+            echo "No APK packages were produced" >&2
             exit 1
           fi
 
-          echo
-          echo "Locally built APKs:"
-          ls -lh offline-repository
+          cp -v keys/*.rsa.pub offline-repository/
+          cp -v metadata/* offline-repository/
 
-      - name: Resolve complete runtime dependency closure
+          cp metadata/ROOT_PACKAGES \
+            offline-repository/world.txt
+
+          echo
+          echo "APK count:"
+
+          find offline-repository \
+            -maxdepth 1 \
+            -type f \
+            -name "*.apk" |
+            wc -l
+
+          du -sh offline-repository
+
+      - name: Generate and sign repository index
         run: |
           set -euo pipefail
 
           docker run --rm \
-            --volume "$GITHUB_WORKSPACE:/workspace" \
-            --workdir /workspace \
+            --volume "$GITHUB_WORKSPACE/offline-repository:/repository" \
+            --volume "$GITHUB_WORKSPACE/keys:/keys:ro" \
             "$ALPINE_IMAGE" \
             sh -euxc '
-              repository=/workspace/offline-repository
-              resolved=/tmp/resolved
-
-              mkdir -p "$resolved"
-
-              # The matrix jobs use temporary signing keys. The bundle job
-              # does not possess all those public keys, so permit untrusted
-              # input packages while generating the local repository index.
-              apk index \
-                --allow-untrusted \
-                --description "Locally built Alpine Edge packages" \
-                --output "$repository/APKINDEX.tar.gz" \
-                "$repository"/*.apk
-
-              printf "%s\n" \
-                "$repository" \
-                "https://dl-cdn.alpinelinux.org/alpine/edge/main" \
-                "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
-                "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
-                > /tmp/repositories
-
-              # These are installable package names.
-              #
-              # samurai provides the ninja command.
-              # clang20-extra-tools provides clangd.
-              set -- \
-                curl \
-                git \
-                gcc \
-                g++ \
-                cmake \
-                samurai \
-                make \
-                clang20-extra-tools \
-                ripgrep \
-                eza \
-                bat \
-                fd \
-                yazi \
-                fish \
-                delta \
-                erdtree \
-                uv \
-                lazygit \
-                glow \
-                fzf \
-                tmux \
-                neovim
-
-              printf "%s\n" "$@" > "$repository/world.txt"
-
-              apk fetch \
-                --allow-untrusted \
-                --recursive \
-                --repositories-file /tmp/repositories \
-                --output "$resolved" \
-                "$@"
-
-              for package in "$resolved"/*.apk; do
-                [ -f "$package" ] || continue
-
-                filename="${package##*/}"
-                destination="$repository/$filename"
-
-                if [ ! -e "$destination" ]; then
-                  cp -v "$package" "$destination"
-                fi
-              done
-
-              rm -f "$repository/APKINDEX.tar.gz"
+              apk add --no-cache abuild
 
               apk index \
-                --allow-untrusted \
                 --description \
-                  "Offline Alpine Edge x86_64 CLI repository" \
-                --output "$repository/APKINDEX.tar.gz" \
-                "$repository"/*.apk
+                  "Source-built Alpine Edge x86_64 CLI repository" \
+                --output /repository/APKINDEX.tar.gz \
+                /repository/*.apk
 
-              echo
-              echo "Complete offline repository:"
-              du -sh "$repository"
-              ls -lh "$repository"
+              # The workflow currently exports only the public key, so the
+              # flattened index cannot be signed here. Individual APKs remain
+              # signed by abuild.
             '
 
-      - name: Verify repository with networking disabled
+      - name: Verify repository without networking
         run: |
           set -euo pipefail
 
@@ -374,7 +317,25 @@ jobs:
               "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
             "$ALPINE_IMAGE" \
             sh -euxc '
-              printf "%s\n" /offline > /etc/apk/repositories
+              public_key=""
+
+              for candidate in /offline/*.rsa.pub; do
+                if [ -f "$candidate" ]; then
+                  public_key="$candidate"
+                  break
+                fi
+              done
+
+              if [ -z "$public_key" ]; then
+                echo "No repository public key found" >&2
+                exit 1
+              fi
+
+              cp "$public_key" /etc/apk/keys/
+
+              printf "%s\n" \
+                /offline \
+                > /etc/apk/repositories
 
               apk add \
                 --no-network \
@@ -429,33 +390,41 @@ jobs:
               nvim --version
             '
 
-      - name: Create offline repository archive
+      - name: Create repository archive
         run: |
           set -euo pipefail
 
           tar \
             --create \
             --zstd \
-            --file alpine-edge-x86_64-offline-apks.tar.zst \
+            --file alpine-edge-x86_64-source-built-apks.tar.zst \
             offline-repository
 
           sha256sum \
-            alpine-edge-x86_64-offline-apks.tar.zst \
-            > alpine-edge-x86_64-offline-apks.tar.zst.sha256
+            alpine-edge-x86_64-source-built-apks.tar.zst \
+            > alpine-edge-x86_64-source-built-apks.tar.zst.sha256
 
-          echo
           ls -lh \
-            alpine-edge-x86_64-offline-apks.tar.zst \
-            alpine-edge-x86_64-offline-apks.tar.zst.sha256
+            alpine-edge-x86_64-source-built-apks.tar.zst \
+            alpine-edge-x86_64-source-built-apks.tar.zst.sha256
 
-      - name: Upload complete offline APK repository
+      - name: Upload offline APK repository
         uses: actions/upload-artifact@v6
         with:
-          name: alpine-edge-x86_64-offline-apk-repository
+          name: alpine-edge-x86_64-source-built-apk-repository
           path: |
             offline-repository/
-            alpine-edge-x86_64-offline-apks.tar.zst
-            alpine-edge-x86_64-offline-apks.tar.zst.sha256
+            alpine-edge-x86_64-source-built-apks.tar.zst
+            alpine-edge-x86_64-source-built-apks.tar.zst.sha256
           if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+
+      - name: Upload source distfile cache
+        uses: actions/upload-artifact@v6
+        with:
+          name: alpine-edge-source-distfiles
+          path: distfiles/
+          if-no-files-found: warn
           compression-level: 0
           retention-days: 90
