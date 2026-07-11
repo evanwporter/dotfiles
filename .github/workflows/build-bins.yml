@@ -1,0 +1,114 @@
+name: Build binaries
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+jobs:
+  build-rust:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ripgrep
+            repository: BurntSushi/ripgrep
+            binary: rg
+
+          - name: eza
+            repository: eza-community/eza
+            binary: eza
+
+          - name: bat
+            repository: sharkdp/bat
+            binary: bat
+
+          - name: fd
+            repository: sharkdp/fd
+            binary: fd
+
+          - name: yazi
+            repository: sxyazi/yazi
+            binary: yazi
+
+          - name: fish
+            repository: fish-shell/fish-shell
+            binary: fish
+
+    steps:
+      - name: Check out ${{ matrix.name }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repository }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build ${{ matrix.name }}
+        run: cargo build --release --locked
+
+      - name: Verify ${{ matrix.binary }}
+        run: |
+          test -x "target/release/${{ matrix.binary }}"
+          "target/release/${{ matrix.binary }}" --version
+
+      - name: Stage binary
+        run: |
+          mkdir -p dist
+          cp "target/release/${{ matrix.binary }}" \
+             "dist/${{ matrix.binary }}"
+
+      - name: Upload ${{ matrix.binary }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary }}
+          path: dist/${{ matrix.binary }}
+          if-no-files-found: error
+          compression-level: 0
+
+  build-lazygit:
+    name: Build lazygit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out lazygit
+        uses: actions/checkout@v4
+        with:
+          repository: jesseduffield/lazygit
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build lazygit
+        run: |
+          mkdir -p dist
+          go build \
+            -trimpath \
+            -ldflags="-s -w" \
+            -o dist/lazygit \
+            .
+
+      - name: Verify lazygit
+        run: |
+          test -x dist/lazygit
+          ./dist/lazygit --version
+
+      - name: Upload lazygit
+        uses: actions/upload-artifact@v4
+        with:
+          name: lazygit
+          path: dist/lazygit
+          if-no-files-found: error
+          compression-level: 0
