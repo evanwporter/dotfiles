@@ -1,4 +1,4 @@
-name: Build Alpine packages
+name: Build Alpine offline APK repository
 
 on:
   workflow_dispatch:
@@ -20,12 +20,34 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 360
 
     strategy:
       fail-fast: false
 
       matrix:
         include:
+          - name: curl
+            aport: curl
+
+          - name: git
+            aport: git
+
+          - name: gcc
+            aport: gcc
+
+          - name: cmake
+            aport: cmake
+
+          - name: ninja
+            aport: samurai
+
+          - name: make
+            aport: make
+
+          - name: clangd
+            aport: clang20
+
           - name: ripgrep
             aport: ripgrep
 
@@ -47,8 +69,8 @@ jobs:
           - name: delta
             aport: delta
 
-          # - name: erdtree
-          #   aport: erdtree
+          - name: erdtree
+            aport: erdtree
 
           - name: uv
             aport: uv
@@ -68,40 +90,17 @@ jobs:
           - name: neovim
             aport: neovim
 
-          - name: glow
-            aport: glow
-
-          - name: curl
-            aport: curl
-
-          - name: git
-            aport: git
-
-          - name: gcc
-            aport: gcc
-
-          - name: cmake
-            aport: cmake
-
-          - name: ninja
-            aport: samurai
-
-          - name: make
-            aport: make
-
-          - name: clang
-            aport: clang20
-
     steps:
       - name: Check out Alpine aports mirror
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: alpinelinux/aports
           ref: ${{ env.APORTS_BRANCH }}
           path: aports
           fetch-depth: 1
+          persist-credentials: false
 
-      - name: Build ${{ matrix.name }}
+      - name: Build ${{ matrix.name }} APKs
         env:
           APORT: ${{ matrix.aport }}
         run: |
@@ -211,15 +210,245 @@ jobs:
               fi
 
               echo
-              echo "Produced packages:"
+              echo "Produced APKs:"
               ls -lh /workspace/dist
             '
 
-      - name: Upload ${{ matrix.name }}
-        uses: actions/upload-artifact@v4
+      - name: Upload ${{ matrix.name }} APKs
+        uses: actions/upload-artifact@v6
         with:
-          name: ${{ matrix.name }}-alpine
+          name: ${{ matrix.name }}-x86_64-alpine-apks
           path: dist/*.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+
+  bundle:
+    name: Create offline x86_64 APK repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    needs: build
+
+    steps:
+      - name: Download all built APK artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*-x86_64-alpine-apks"
+          path: downloaded-apks
+
+      - name: Collect locally built APKs
+        run: |
+          set -euo pipefail
+
+          mkdir -p offline-repository
+
+          while IFS= read -r -d "" package; do
+            filename="$(basename "$package")"
+            destination="offline-repository/$filename"
+
+            if [[ -e "$destination" ]]; then
+              if ! cmp --silent "$package" "$destination"; then
+                echo "Conflicting APK files named $filename" >&2
+                exit 1
+              fi
+
+              continue
+            fi
+
+            cp -v "$package" "$destination"
+          done < <(
+            find downloaded-apks \
+              -type f \
+              -name "*.apk" \
+              -print0
+          )
+
+          if ! compgen -G "offline-repository/*.apk" >/dev/null; then
+            echo "No APK files were downloaded" >&2
+            exit 1
+          fi
+
+          echo "Locally built packages:"
+          ls -lh offline-repository
+
+      - name: Resolve complete runtime dependency closure
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            "$ALPINE_IMAGE" \
+            sh -euxc '
+              repository=/workspace/offline-repository
+              resolved=/tmp/resolved
+
+              mkdir -p "$resolved"
+
+              apk index \
+                --description "Locally built Alpine Edge packages" \
+                --output "$repository/APKINDEX.tar.gz" \
+                "$repository"/*.apk
+
+              cat > /tmp/repositories <<EOF
+              $repository
+              https://dl-cdn.alpinelinux.org/alpine/edge/main
+              https://dl-cdn.alpinelinux.org/alpine/edge/community
+              https://dl-cdn.alpinelinux.org/alpine/edge/testing
+              EOF
+
+              # These are package names, not necessarily aport names.
+              #
+              # samurai provides the ninja executable.
+              # clang20-extra-tools contains clangd.
+              set -- \
+                curl \
+                git \
+                gcc \
+                g++ \
+                cmake \
+                samurai \
+                make \
+                clang20-extra-tools \
+                ripgrep \
+                eza \
+                bat \
+                fd \
+                yazi \
+                fish \
+                delta \
+                erdtree \
+                uv \
+                lazygit \
+                glow \
+                fzf \
+                tmux \
+                neovim
+
+              printf "%s\n" "$@" > "$repository/world.txt"
+
+              apk fetch \
+                --allow-untrusted \
+                --recursive \
+                --repositories-file /tmp/repositories \
+                --output "$resolved" \
+                "$@"
+
+              for package in "$resolved"/*.apk; do
+                [ -f "$package" ] || continue
+
+                filename="${package##*/}"
+                destination="$repository/$filename"
+
+                if [ -e "$destination" ]; then
+                  continue
+                fi
+
+                cp -v "$package" "$destination"
+              done
+
+              rm -f "$repository/APKINDEX.tar.gz"
+
+              apk index \
+                --description \
+                  "Offline Alpine Edge x86_64 CLI repository" \
+                --output "$repository/APKINDEX.tar.gz" \
+                "$repository"/*.apk
+
+              echo
+              echo "Complete offline repository:"
+              du -sh "$repository"
+              ls -lh "$repository"
+            '
+
+      - name: Verify repository with networking disabled
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --network none \
+            --volume \
+              "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
+            "$ALPINE_IMAGE" \
+            sh -euxc '
+              printf "%s\n" /offline > /etc/apk/repositories
+
+              apk add \
+                --no-network \
+                --allow-untrusted \
+                curl \
+                git \
+                gcc \
+                g++ \
+                cmake \
+                samurai \
+                make \
+                clang20-extra-tools \
+                ripgrep \
+                eza \
+                bat \
+                fd \
+                yazi \
+                fish \
+                delta \
+                erdtree \
+                uv \
+                lazygit \
+                glow \
+                fzf \
+                tmux \
+                neovim
+
+              curl --version
+              git --version
+              gcc --version
+              g++ --version
+              cmake --version
+              ninja --version
+              make --version
+              clangd --version
+              rg --version
+              eza --version
+              bat --version
+              fd --version
+              yazi --version
+              fish --version
+              delta --version
+              erd --version
+              uv --version
+              lazygit --version
+              glow --version
+              fzf --version
+              tmux -V
+              nvim --version
+            '
+
+      - name: Create offline repository archive
+        run: |
+          set -euo pipefail
+
+          tar \
+            --create \
+            --zstd \
+            --file alpine-edge-x86_64-offline-apks.tar.zst \
+            offline-repository
+
+          sha256sum \
+            alpine-edge-x86_64-offline-apks.tar.zst \
+            > alpine-edge-x86_64-offline-apks.tar.zst.sha256
+
+          ls -lh \
+            alpine-edge-x86_64-offline-apks.tar.zst \
+            alpine-edge-x86_64-offline-apks.tar.zst.sha256
+
+      - name: Upload complete offline APK repository
+        uses: actions/upload-artifact@v6
+        with:
+          name: alpine-edge-x86_64-offline-apk-repository
+          path: |
+            offline-repository/
+            alpine-edge-x86_64-offline-apks.tar.zst
+            alpine-edge-x86_64-offline-apks.tar.zst.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
