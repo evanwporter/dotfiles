@@ -47,18 +47,29 @@ jobs:
             https://gitlab.alpinelinux.org/alpine/aports.git \
             aports
 
-      - name: Build ${{ matrix.package }}
+      - name: Build ${{ matrix.name }}
         env:
-          PACKAGE: ${{ matrix.package }}
+          APORT: ${{ matrix.aport }}
         run: |
           set -euo pipefail
 
           docker run --rm \
             --privileged \
-            --env PACKAGE \
+            --env APORT \
             --volume "$GITHUB_WORKSPACE:/workspace" \
             --workdir /workspace \
-            "$ALPINE_IMAGE" \
+            alpine:edge \- name: Build ${{ matrix.name }}
+        env:
+          APORT: ${{ matrix.aport }}
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --privileged \
+            --env APORT \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            alpine:edge \
             sh -euxc '
               apk add --no-cache \
                 alpine-sdk \
@@ -68,31 +79,76 @@ jobs:
               adduser -D builder
               addgroup builder abuild
 
-              echo "permit nopass builder" > /etc/doas.d/builder.conf
+              install -d -m 0755 /etc/doas.d
+              echo "permit nopass builder" \
+                > /etc/doas.d/builder.conf
 
               mkdir -p /home/builder/.abuild
               chown -R builder:builder \
                 /home/builder \
                 /workspace/aports
 
+              package_dir="$(
+                find \
+                  /workspace/aports/main \
+                  /workspace/aports/community \
+                  /workspace/aports/testing \
+                  -mindepth 1 \
+                  -maxdepth 1 \
+                  -type d \
+                  -name "$APORT" \
+                  -print \
+                  -quit
+              )"
+
+              if [ -z "$package_dir" ]; then
+                echo "Could 
+            sh -euxc '
+              apk add --no-cache \
+                alpine-sdk \
+                doas \
+                findutils
+
+              adduser -D builder
+              addgroup builder abuild
+
+              install -d -m 0755 /etc/doas.d
+              echo "permit nopass builder" \
+                > /etc/doas.d/builder.conf
+
+              mkdir -p /home/builder/.abuild
+              chown -R builder:builder \
+                /home/builder \
+                /workspace/aports
+
+              package_dir="$(
+                find \
+                  /workspace/aports/main \
+                  /workspace/aports/community \
+                  /workspace/aports/testing \
+                  -mindepth 1 \
+                  -maxdepth 1 \
+                  -type d \
+                  -name "$APORT" \
+                  -print \
+                  -quit
+              )"
+
+              if [ -z "$package_dir" ]; then
+                echo "Could not find aport: $APORT" >&2
+                exit 1
+              fi
+
+              test -f "$package_dir/APKBUILD"
+
+              echo "Building aport from $package_dir"
+
               su builder -c "
+                set -eu
+
                 abuild-keygen -a -n
 
-                cd /workspace/aports
-
-                package_dir=\$(
-                  find main community testing \
-                    -mindepth 2 \
-                    -maxdepth 2 \
-                    -type d \
-                    -name \"$PACKAGE\" \
-                    -print \
-                    -quit
-                )
-
-                test -n \"\$package_dir\"
-
-                cd \"\$package_dir\"
+                cd \"$package_dir\"
                 abuild -r
               "
 
@@ -101,9 +157,15 @@ jobs:
               find /home/builder/packages \
                 -type f \
                 -name "*.apk" \
-                -exec cp {} /workspace/dist/ \;
+                -exec cp -v {} /workspace/dist/ \;
 
-              test -n "$(find /workspace/dist -name "*.apk" -print -quit)"
+              test -n "$(
+                find /workspace/dist \
+                  -type f \
+                  -name "*.apk" \
+                  -print \
+                  -quit
+              )"
             '
 
       - name: Upload ${{ matrix.package }}
