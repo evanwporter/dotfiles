@@ -294,12 +294,12 @@ jobs:
                 --output "$repository/APKINDEX.tar.gz" \
                 "$repository"/*.apk
 
-              cat > /tmp/repositories <<EOF
-              $repository
-              https://dl-cdn.alpinelinux.org/alpine/edge/main
-              https://dl-cdn.alpinelinux.org/alpine/edge/community
-              https://dl-cdn.alpinelinux.org/alpine/edge/testing
-              EOF
+              printf "%s\n" \
+                "$repository" \
+                "https://dl-cdn.alpinelinux.org/alpine/edge/main" \
+                "https://dl-cdn.alpinelinux.org/alpine/edge/community" \
+                "https://dl-cdn.alpinelinux.org/alpine/edge/testing" \
+                > /tmp/repositories
 
               # These are installable package names.
               #
