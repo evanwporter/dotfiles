@@ -40,11 +40,12 @@ jobs:
           - neovim
 
     steps:
-      - name: Check out aports
-        uses: actions/checkout@v4
-        with:
-          repository: alpine/aports
-          path: aports
+      - name: Clone Alpine aports
+        run: |
+          git clone \
+            --depth=1 \
+            https://gitlab.alpinelinux.org/alpine/aports.git \
+            aports
 
       - name: Build ${{ matrix.package }}
         env:
