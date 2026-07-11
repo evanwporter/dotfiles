@@ -327,7 +327,7 @@ function M._get()
 
   local ret = table.concat(components, "")
 
-  return "%@v:lua.require'config.statuscolumn'.click_fold@" .. ret .. "%T"
+  return "%@v:lua.require'core.statuscolumn'.click_fold@" .. ret .. "%T"
 end
 
 function M.get()
@@ -400,7 +400,7 @@ function M.setup(opts)
     default = true,
   })
 
-  vim.o.statuscolumn = "%!v:lua.require'config.statuscolumn'.get()"
+  vim.o.statuscolumn = "%!v:lua.require'core.statuscolumn'.get()"
 
   if config.smart_number then
     vim.api.nvim_create_autocmd({ "ModeChanged", "InsertEnter", "InsertLeave" }, {
