@@ -16,29 +16,9 @@ env:
   ALPINE_IMAGE: alpine:edge
   APORTS_REF: master
 
-  # Space-separated binary package names to include in the offline repository.
-  #
-  # Their dependency aports are resolved and built as well.
+  # Binary package names to build from source.
+  # Dependency aports returned by lua-aports are built first.
   ROOT_PACKAGES: >-
-    curl
-    git
-    gcc
-    g++
-    cmake
-    samurai
-    make
-    clang20-extra-tools
-    ripgrep
-    eza
-    bat
-    fd
-    yazi
-    fish
-    delta
-    erdtree
-    uv
-    lazygit
-    glow
     fzf
     tmux
     neovim
@@ -73,12 +53,17 @@ jobs:
           git -C aports rev-parse HEAD \
             > metadata/APORTS_COMMIT
 
-          printf '%s\n' "$ROOT_PACKAGES" \
-            | tr ' ' '\n' \
-            | sed '/^$/d' \
+          printf '%s\n' $ROOT_PACKAGES \
             > metadata/world.txt
 
-      - name: Resolve and build selected package closure
+          echo "Aports commit:"
+          cat metadata/APORTS_COMMIT
+
+          echo
+          echo "Requested packages:"
+          cat metadata/world.txt
+
+      - name: Resolve and build package closure
         env:
           ROOT_PACKAGES: ${{ env.ROOT_PACKAGES }}
         run: |
@@ -91,6 +76,11 @@ jobs:
             --workdir /workspace \
             "$ALPINE_IMAGE" \
             sh -euxc '
+              #
+              # These packages are disposable build infrastructure.
+              # They are not copied into the final repository unless they
+              # are also built from an APKBUILD below.
+              #
               apk add --no-cache \
                 alpine-sdk \
                 lua-aports \
@@ -158,13 +148,20 @@ jobs:
               cp "$public_key" /etc/apk/keys/
               cp "$public_key" /workspace/keys/
 
-              cat > /home/builder/.abuild/abuild.conf <<EOF
-              REPODEST=/workspace/packages
-              SRCDEST=/workspace/distfiles
-              PACKAGER="Local Builder <builder@localhost>"
-              PACKAGER_PRIVKEY="$private_key"
-              JOBS=$(getconf _NPROCESSORS_ONLN)
-              EOF
+              jobs="$(getconf _NPROCESSORS_ONLN)"
+
+              #
+              # Do not use an indented heredoc here. In YAML, the terminator
+              # can remain indented after parsing and BusyBox sh will consume
+              # the rest of the script as heredoc input.
+              #
+              printf "%s\n" \
+                "REPODEST=/workspace/packages" \
+                "SRCDEST=/workspace/distfiles" \
+                "PACKAGER=\"Local Builder <builder@localhost>\"" \
+                "PACKAGER_PRIVKEY=\"$private_key\"" \
+                "JOBS=$jobs" \
+                > /home/builder/.abuild/abuild.conf
 
               chown builder:builder \
                 /home/builder/.abuild/abuild.conf
@@ -177,25 +174,48 @@ jobs:
               cat /etc/alpine-release \
                 > /workspace/metadata/ALPINE_RELEASE
 
+              echo
+              echo "Architecture: $arch"
+              echo "Build jobs:   $jobs"
+
               #
-              # Build an aports package-name map.
+              # Keep locally built packages ahead of the bootstrap
+              # repositories. This lets later builds use dependencies that
+              # were built earlier in this job.
               #
-              # `ap builddirs` converts binary package names, including
-              # subpackages, into their owning aport directories.
-              #
+              bootstrap_repositories="$(
+                cat /etc/apk/repositories
+              )"
+
+              install -d \
+                -o builder \
+                -g builder \
+                "/workspace/packages/main/$arch" \
+                "/workspace/packages/community/$arch" \
+                "/workspace/packages/testing/$arch"
+
+              printf "%s\n" \
+                "/workspace/packages/main/$arch" \
+                "/workspace/packages/community/$arch" \
+                "/workspace/packages/testing/$arch" \
+                "$bootstrap_repositories" \
+                > /etc/apk/repositories
+
               cd /workspace/aports
 
+              #
+              # Confirm each requested binary package maps to an aport.
+              #
               : > /workspace/metadata/root-aports.txt
 
               for root_package in $ROOT_PACKAGES; do
                 root_dir="$(
-                  printf "%s\n" "$root_package" |
-                    ap builddirs |
+                  ap builddirs "$root_package" |
                     head -n 1
                 )"
 
                 if [ -z "$root_dir" ]; then
-                  echo "Could not locate aport for: $root_package" >&2
+                  echo "Could not find aport for package: $root_package" >&2
                   exit 1
                 fi
 
@@ -203,8 +223,13 @@ jobs:
                   >> /workspace/metadata/root-aports.txt
               done
 
-              sort -u \
-                -o /workspace/metadata/root-aports.txt \
+              awk \
+                "NF && !seen[\$0]++" \
+                /workspace/metadata/root-aports.txt \
+                > /workspace/metadata/root-aports.unique.txt
+
+              mv \
+                /workspace/metadata/root-aports.unique.txt \
                 /workspace/metadata/root-aports.txt
 
               echo
@@ -212,45 +237,43 @@ jobs:
               cat /workspace/metadata/root-aports.txt
 
               #
-              # Resolve dependency package names recursively and convert all
-              # resulting package names to their owning aport directories.
+              # Resolve recursive dependencies and convert their binary
+              # package names to owning aport directories.
               #
-              # Build/test dependencies may be installed as binaries by
-              # `abuild -r`, but any dependency aport returned here is also
-              # compiled and included in the local repository.
+              # Do not sort this list: the resolver output order is retained
+              # so dependencies can be built before packages that use them.
               #
-              {
-                printf "%s\n" $ROOT_PACKAGES
-
-                ap recursdeps $ROOT_PACKAGES
-              } |
-                sed "/^$/d" |
-                sort -u \
+              ap recursdeps $ROOT_PACKAGES \
                 > /workspace/metadata/dependency-packages.txt
 
-              ap builddirs \
-                < /workspace/metadata/dependency-packages.txt |
-                sed "/^$/d" |
-                sort -u \
+              : > /workspace/metadata/dependency-aports.txt
+
+              if [ -s /workspace/metadata/dependency-packages.txt ]; then
+                xargs ap builddirs \
+                  < /workspace/metadata/dependency-packages.txt \
+                  > /workspace/metadata/dependency-aports.txt
+              fi
+
+              #
+              # Dependencies first, requested roots last.
+              # Remove duplicates while preserving the first occurrence.
+              #
+              cat \
+                /workspace/metadata/dependency-aports.txt \
+                /workspace/metadata/root-aports.txt |
+                awk "NF && !seen[\$0]++" \
                 > /workspace/metadata/aport-closure.txt
 
-              #
-              # Ensure the requested roots are included even if a particular
-              # lua-aports version omits input nodes from recursdeps output.
-              #
-              cat /workspace/metadata/root-aports.txt \
-                >> /workspace/metadata/aport-closure.txt
-
-              sort -u \
-                -o /workspace/metadata/aport-closure.txt \
-                /workspace/metadata/aport-closure.txt
+              echo
+              echo "Resolved dependency packages:"
+              cat /workspace/metadata/dependency-packages.txt
 
               echo
-              echo "Resolved aport closure:"
+              echo "Aports to build:"
               cat /workspace/metadata/aport-closure.txt
 
               echo
-              echo "Number of aports to build:"
+              echo "Number of aports:"
               wc -l < /workspace/metadata/aport-closure.txt
 
               chown -R builder:builder \
@@ -259,19 +282,24 @@ jobs:
                 /workspace/metadata
 
               #
-              # Each aport is built from its checked-out APKBUILD.
+              # Build every resolved aport from its checked-out APKBUILD.
               #
-              # `-r` permits the builder to install missing compilation and
-              # test dependencies from its configured package repositories.
-              # Those bootstrap APKs stay inside this disposable container.
+              # Build-only tools may be installed from the bootstrap
+              # repositories by abuild -r. Only APKs produced in
+              # /workspace/packages are retained.
               #
               while IFS= read -r aport_dir; do
                 [ -n "$aport_dir" ] || continue
 
                 case "$aport_dir" in
+                  /workspace/aports/*)
+                    package_dir="$aport_dir"
+                    ;;
+
                   /*)
                     package_dir="$aport_dir"
                     ;;
+
                   *)
                     package_dir="/workspace/aports/$aport_dir"
                     ;;
@@ -302,7 +330,7 @@ jobs:
                 wc -l
 
               echo
-              echo "Built repository size:"
+              echo "Built package repository size:"
               du -sh /workspace/packages
             '
 
@@ -342,7 +370,7 @@ jobs:
           cp -v metadata/* offline-repository/
 
           echo
-          echo "Offline package count:"
+          echo "Offline APK count:"
           find offline-repository \
             -maxdepth 1 \
             -type f \
@@ -363,10 +391,15 @@ jobs:
             "$ALPINE_IMAGE" \
             sh -euxc '
               apk index \
+                --allow-untrusted \
                 --description \
-                  "Locally built Alpine package closure" \
+                  "Locally source-built Alpine package closure" \
                 --output /repository/APKINDEX.tar.gz \
                 /repository/*.apk
+
+              echo
+              echo "Repository index:"
+              ls -lh /repository/APKINDEX.tar.gz
             '
 
       - name: Verify repository without networking
@@ -398,7 +431,8 @@ jobs:
 
               cp "$public_key" /etc/apk/keys/
 
-              printf "%s\n" /offline \
+              printf "%s\n" \
+                /offline \
                 > /etc/apk/repositories
 
               apk add \
@@ -407,22 +441,23 @@ jobs:
                 $ROOT_PACKAGES
 
               echo
-              echo "Installed roots:"
+              echo "Installed root packages:"
+
               for package in $ROOT_PACKAGES; do
                 apk info -e "$package"
               done
 
               echo
-              echo "Neovim:"
-              nvim --version
+              echo "fzf:"
+              fzf --version
 
               echo
               echo "tmux:"
               tmux -V
 
               echo
-              echo "fzf:"
-              fzf --version
+              echo "Neovim:"
+              nvim --version
             '
 
       - name: Create repository archive
@@ -439,6 +474,7 @@ jobs:
             alpine-edge-x86_64-offline-apks.tar.zst \
             > alpine-edge-x86_64-offline-apks.tar.zst.sha256
 
+          echo
           ls -lh \
             alpine-edge-x86_64-offline-apks.tar.zst \
             alpine-edge-x86_64-offline-apks.tar.zst.sha256
