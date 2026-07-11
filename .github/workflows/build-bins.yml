@@ -47,8 +47,8 @@ jobs:
           - name: delta
             aport: delta
 
-          - name: erdtree
-            aport: erdtree
+          # - name: erdtree
+          #   aport: erdtree
 
           - name: uv
             aport: uv
@@ -76,6 +76,21 @@ jobs:
 
           - name: git
             aport: git
+
+          - name: gcc
+            aport: gcc
+
+          - name: cmake
+            aport: cmake
+
+          - name: ninja
+            aport: samurai
+
+          - name: make
+            aport: make
+
+          - name: clang
+            aport: clang20
 
     steps:
       - name: Clone Alpine aports
