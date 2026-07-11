@@ -20,6 +20,8 @@
 		glow
 		erdtree
 
+		codex
+
 		# git tools
 		lazygit
 		gh
