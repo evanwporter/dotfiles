@@ -89,7 +89,7 @@ jobs:
 
     steps:
       - name: Check out Alpine aports mirror
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: alpinelinux/aports
           ref: ${{ env.APORTS_BRANCH }}
@@ -223,7 +223,7 @@ jobs:
   bundle:
     name: Create offline x86_64 APK repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 180
     needs: build
 
     steps:
@@ -232,6 +232,7 @@ jobs:
         with:
           pattern: "*-x86_64-alpine-apks"
           path: downloaded-apks
+          merge-multiple: true
 
       - name: Collect locally built APKs
         run: |
@@ -265,7 +266,8 @@ jobs:
             exit 1
           fi
 
-          echo "Locally built packages:"
+          echo
+          echo "Locally built APKs:"
           ls -lh offline-repository
 
       - name: Resolve complete runtime dependency closure
@@ -282,7 +284,11 @@ jobs:
 
               mkdir -p "$resolved"
 
+              # The matrix jobs use temporary signing keys. The bundle job
+              # does not possess all those public keys, so permit untrusted
+              # input packages while generating the local repository index.
               apk index \
+                --allow-untrusted \
                 --description "Locally built Alpine Edge packages" \
                 --output "$repository/APKINDEX.tar.gz" \
                 "$repository"/*.apk
@@ -294,10 +300,10 @@ jobs:
               https://dl-cdn.alpinelinux.org/alpine/edge/testing
               EOF
 
-              # These are package names, not necessarily aport names.
+              # These are installable package names.
               #
-              # samurai provides the ninja executable.
-              # clang20-extra-tools contains clangd.
+              # samurai provides the ninja command.
+              # clang20-extra-tools provides clangd.
               set -- \
                 curl \
                 git \
@@ -337,16 +343,15 @@ jobs:
                 filename="${package##*/}"
                 destination="$repository/$filename"
 
-                if [ -e "$destination" ]; then
-                  continue
+                if [ ! -e "$destination" ]; then
+                  cp -v "$package" "$destination"
                 fi
-
-                cp -v "$package" "$destination"
               done
 
               rm -f "$repository/APKINDEX.tar.gz"
 
               apk index \
+                --allow-untrusted \
                 --description \
                   "Offline Alpine Edge x86_64 CLI repository" \
                 --output "$repository/APKINDEX.tar.gz" \
@@ -396,6 +401,9 @@ jobs:
                 tmux \
                 neovim
 
+              echo
+              echo "Verifying installed commands"
+
               curl --version
               git --version
               gcc --version
@@ -434,6 +442,7 @@ jobs:
             alpine-edge-x86_64-offline-apks.tar.zst \
             > alpine-edge-x86_64-offline-apks.tar.zst.sha256
 
+          echo
           ls -lh \
             alpine-edge-x86_64-offline-apks.tar.zst \
             alpine-edge-x86_64-offline-apks.tar.zst.sha256
