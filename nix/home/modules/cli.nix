@@ -19,6 +19,7 @@
 		file
 		glow
 		erdtree
+		codex
 
 		# git tools
 		lazygit
