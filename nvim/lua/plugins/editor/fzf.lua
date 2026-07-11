@@ -8,7 +8,7 @@ return {
           require("fzf-lua").buffers({
             -- winopts = {
             --   preview = {
-            --     layout = "vertical", -- or "horizontal"
+            --     layout = "vertical", - or "horizontal"
             --   },
             -- },
           })
@@ -22,6 +22,11 @@ return {
       --   end,
       --   desc = "LSP references",
       -- },
+      {
+        "<leader>ss",
+        "<cmd>FzfLua resume",
+        desc = "Resume Fzf search",
+      },
       {
         "<leader>sg",
         function()
@@ -37,8 +42,10 @@ return {
         desc = "Search Word Under Cursor",
       },
       { "gr", desc = "Go to References" },
-      { "<leader>ss", desc = "Search Document Symbols" },
-      { "<leader>sS", desc = "Search Workspace Symbols" },
+      { "<leader>sd", desc = "Search Document Symbols" },
+      { "<leader>sD", desc = "Search Workspace Symbols" },
+      { "<leader>cx", desc = "Diagnostics Document" },
+      { "<leader>cX", desc = "Diagnostics Workspace" },
     },
     opts = {
       fzf_opts = {
