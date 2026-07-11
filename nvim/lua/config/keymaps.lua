@@ -31,21 +31,21 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
     map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
 
-    map("<leader>ss", function()
+    map("<leader>sd", function()
       require("fzf-lua").lsp_document_symbols()
     end, "Search Document Symbols")
 
-    map("<leader>sS", function()
+    map("<leader>sD", function()
       require("fzf-lua").lsp_live_workspace_symbols()
     end, "Search Workspace Symbols")
 
     map("<leader>cx", function()
-      vim.cmd("Trouble diagnostics toggle")
-    end, "Diagnostics")
+      require("fzf-lua").diagnostics_document()
+    end, "Diagnostics Document")
 
     map("<leader>cX", function()
-      vim.cmd("Trouble diagnostics toggle filter.buf=0")
-    end, "Buffer Diagnostics")
+      require("fzf-lua").diagnostics_workspace()
+    end, "Buffer Workspace")
   end,
 })
 
