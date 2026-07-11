@@ -1,4 +1,4 @@
-name: Build binaries
+name: Build CLI binaries
 
 on:
   workflow_dispatch:
@@ -7,6 +7,9 @@ on:
       - main
     tags:
       - "v*"
+
+permissions:
+  contents: read
 
 jobs:
   build-rust:
@@ -41,17 +44,37 @@ jobs:
             repository: fish-shell/fish-shell
             binary: fish
 
+          - name: delta
+            repository: dandavison/delta
+            binary: delta
+
+          - name: erdtree
+            repository: solidiquis/erdtree
+            binary: erd
+
     steps:
       - name: Check out ${{ matrix.name }}
         uses: actions/checkout@v4
         with:
           repository: ${{ matrix.repository }}
 
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            build-essential \
+            cmake \
+            gettext \
+            libpcre2-dev \
+            pkg-config
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Restore Rust cache
         uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
 
       - name: Build ${{ matrix.name }}
         run: cargo build --release --locked
@@ -61,11 +84,12 @@ jobs:
           test -x "target/release/${{ matrix.binary }}"
           "target/release/${{ matrix.binary }}" --version
 
-      - name: Stage binary
+      - name: Stage ${{ matrix.binary }}
         run: |
           mkdir -p dist
-          cp "target/release/${{ matrix.binary }}" \
-             "dist/${{ matrix.binary }}"
+          cp \
+            "target/release/${{ matrix.binary }}" \
+            "dist/${{ matrix.binary }}"
 
       - name: Upload ${{ matrix.binary }}
         uses: actions/upload-artifact@v4
@@ -74,16 +98,36 @@ jobs:
           path: dist/${{ matrix.binary }}
           if-no-files-found: error
           compression-level: 0
+          retention-days: 90
 
-  build-lazygit:
-    name: Build lazygit
+  build-go:
+    name: Build ${{ matrix.name }}
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: lazygit
+            repository: jesseduffield/lazygit
+            binary: lazygit
+            package: .
+
+          - name: glow
+            repository: charmbracelet/glow
+            binary: glow
+            package: .
+
+          - name: fzf
+            repository: junegunn/fzf
+            binary: fzf
+            package: .
+
     steps:
-      - name: Check out lazygit
+      - name: Check out ${{ matrix.name }}
         uses: actions/checkout@v4
         with:
-          repository: jesseduffield/lazygit
+          repository: ${{ matrix.repository }}
 
       - name: Install Go
         uses: actions/setup-go@v5
@@ -91,24 +135,157 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Build lazygit
+      - name: Build ${{ matrix.name }}
+        env:
+          CGO_ENABLED: "0"
         run: |
           mkdir -p dist
+
           go build \
             -trimpath \
             -ldflags="-s -w" \
-            -o dist/lazygit \
-            .
+            -o "dist/${{ matrix.binary }}" \
+            "${{ matrix.package }}"
 
-      - name: Verify lazygit
+      - name: Verify ${{ matrix.binary }}
         run: |
-          test -x dist/lazygit
-          ./dist/lazygit --version
+          test -x "dist/${{ matrix.binary }}"
+          "dist/${{ matrix.binary }}" --version
 
-      - name: Upload lazygit
+      - name: Upload ${{ matrix.binary }}
         uses: actions/upload-artifact@v4
         with:
-          name: lazygit
-          path: dist/lazygit
+          name: ${{ matrix.binary }}
+          path: dist/${{ matrix.binary }}
           if-no-files-found: error
           compression-level: 0
+          retention-days: 90
+
+  build-tmux:
+    name: Build latest tmux release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find latest tmux release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(
+            gh api repos/tmux/tmux/releases/latest \
+              --jq '.tag_name'
+          )"
+
+          test -n "$tag"
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Building tmux $tag"
+
+      - name: Check out tmux ${{ steps.release.outputs.tag }}
+        uses: actions/checkout@v4
+        with:
+          repository: tmux/tmux
+          ref: ${{ steps.release.outputs.tag }}
+
+      - name: Install tmux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf \
+            automake \
+            bison \
+            build-essential \
+            libevent-dev \
+            libncurses-dev \
+            pkg-config
+
+      - name: Build tmux
+        run: |
+          sh autogen.sh
+          ./configure
+          make -j"$(nproc)"
+
+      - name: Verify tmux
+        run: |
+          test -x tmux
+          ./tmux -V
+
+      - name: Stage tmux
+        run: |
+          mkdir -p dist
+          cp tmux dist/tmux
+
+      - name: Upload tmux
+        uses: actions/upload-artifact@v4
+        with:
+          name: tmux
+          path: dist/tmux
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+
+  build-neovim:
+    name: Build latest Neovim release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find latest Neovim release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(
+            gh api repos/neovim/neovim/releases/latest \
+              --jq '.tag_name'
+          )"
+
+          test -n "$tag"
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Building Neovim $tag"
+
+      - name: Check out Neovim ${{ steps.release.outputs.tag }}
+        uses: actions/checkout@v4
+        with:
+          repository: neovim/neovim
+          ref: ${{ steps.release.outputs.tag }}
+
+      - name: Install Neovim build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            build-essential \
+            cmake \
+            curl \
+            gettext \
+            ninja-build \
+            pkg-config \
+            unzip
+
+      - name: Build Neovim
+        run: |
+          make \
+            CMAKE_BUILD_TYPE=Release \
+            CMAKE_INSTALL_PREFIX="$PWD/install" \
+            -j"$(nproc)"
+
+          make install
+
+      - name: Verify nvim
+        run: |
+          test -x install/bin/nvim
+          ./install/bin/nvim --version
+
+      - name: Stage nvim
+        run: |
+          mkdir -p dist
+          cp install/bin/nvim dist/nvim
+
+      - name: Upload nvim
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvim
+          path: dist/nvim
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
