@@ -10,12 +10,18 @@
 			url = "github:nix-community/home-manager";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
+
+		nixvim = {
+			url = "github:nix-community/nixvim";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
 	outputs = inputs @ {
 		nixpkgs,
 		nixos-wsl,
 		home-manager,
+		nixvim,
 		...
 	}: let
 		system = "x86_64-linux";
@@ -28,6 +34,8 @@
 				pkgs =
 					import nixpkgs {
 						inherit system;
+
+						config.allowUnfree = true;
 					};
 
 				extraSpecialArgs = {
@@ -35,7 +43,8 @@
 				};
 
 				modules = [
-					./home/default.nix
+					nixvim.homeModules.nixvim
+					./home
 				];
 			};
 	in {
@@ -50,6 +59,13 @@
 				modules = [
 					nixos-wsl.nixosModules.default
 					home-manager.nixosModules.home-manager
+
+					{
+						home-manager.sharedModules = [
+							nixvim.homeModules.nixvim
+						];
+					}
+
 					./hosts/nixos-wsl/configuration.nix
 				];
 			};

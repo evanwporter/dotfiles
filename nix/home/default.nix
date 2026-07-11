@@ -11,6 +11,6 @@
 	imports = [
 		./modules/cli.nix
 		./modules/dev.nix
-		./modules/neovim.nix
+		./modules/neovim
 	];
 }
