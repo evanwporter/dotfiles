@@ -93,17 +93,13 @@ jobs:
             aport: clang20
 
     steps:
-      - name: Clone Alpine aports
-        env:
-          BRANCH: ${{ env.APORTS_BRANCH }}
-        run: |
-          set -euo pipefail
-
-          git clone \
-            --depth=1 \
-            --branch "$BRANCH" \
-            https://gitlab.alpinelinux.org/alpine/aports.git \
-            aports
+      - name: Check out Alpine aports mirror
+        uses: actions/checkout@v4
+        with:
+          repository: alpinelinux/aports
+          ref: ${{ env.APORTS_BRANCH }}
+          path: aports
+          fetch-depth: 1
 
       - name: Build ${{ matrix.name }}
         env:
