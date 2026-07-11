@@ -70,10 +70,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          file "out/${{ matrix.bin }}"
+          file_output="$(file "out/${{ matrix.bin }}")"
           ldd_output="$(ldd "out/${{ matrix.bin }}" 2>&1 || true)"
+
+          printf '%s\n' "$file_output"
           printf '%s\n' "$ldd_output"
-          printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+
+          static_re="statically linked|static-pie linked"
+          static_re="$static_re|not a dynamic executable"
+          static_re="$static_re|not a valid dynamic program"
+
+          printf '%s\n%s\n' "$file_output" "$ldd_output" |
+            grep -Eiq "$static_re"
+
+          dynamic_re="dynamically linked|interpreter"
+          if printf '%s\n' "$file_output" | grep -Eiq "$dynamic_re"; then
+            exit 1
+          fi
+
           "out/${{ matrix.bin }}" ${{ matrix.version_arg }}
 
       - name: Upload binary
@@ -89,7 +103,7 @@ jobs:
     name: Rust / ${{ matrix.bin }}
     runs-on: ubuntu-24.04
     timeout-minutes: 120
-    container: alpine:edge
+    container: rust:alpine
 
     strategy:
       fail-fast: false
@@ -124,7 +138,6 @@ jobs:
           apk add --no-cache \
             build-base \
             ca-certificates \
-            cargo \
             cmake \
             file \
             git \
@@ -134,22 +147,23 @@ jobs:
             openssl-dev \
             openssl-libs-static \
             perl \
-            pkgconf \
-            rust
+            pkgconf
 
       - name: Build static binary
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: "true"
           OPENSSL_STATIC: "1"
-          RUSTFLAGS: "-C target-feature=+crt-static"
         run: |
           set -euo pipefail
 
           mkdir -p out
 
+          rustup target add x86_64-unknown-linux-musl
+
           cargo install \
             --locked \
             --root /tmp/cargo-root \
+            --target x86_64-unknown-linux-musl \
             "${{ matrix.crate }}" \
             ${{ matrix.extra_crates || '' }}
 
@@ -161,10 +175,24 @@ jobs:
         run: |
           set -euo pipefail
 
-          file "out/${{ matrix.bin }}"
+          file_output="$(file "out/${{ matrix.bin }}")"
           ldd_output="$(ldd "out/${{ matrix.bin }}" 2>&1 || true)"
+
+          printf '%s\n' "$file_output"
           printf '%s\n' "$ldd_output"
-          printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+
+          static_re="statically linked|static-pie linked"
+          static_re="$static_re|not a dynamic executable"
+          static_re="$static_re|not a valid dynamic program"
+
+          printf '%s\n%s\n' "$file_output" "$ldd_output" |
+            grep -Eiq "$static_re"
+
+          dynamic_re="dynamically linked|interpreter"
+          if printf '%s\n' "$file_output" | grep -Eiq "$dynamic_re"; then
+            exit 1
+          fi
+
           "out/${{ matrix.bin }}" ${{ matrix.version_arg }}
 
       - name: Upload binary
@@ -195,53 +223,18 @@ jobs:
               apk add --no-cache \
                 autoconf \
                 automake \
-                bison \
                 build-base \
                 ca-certificates \
                 file \
-                libtool \
-                linux-headers \
-                openssl-dev \
+                libevent-dev \
+                libevent-static \
+                ncurses-dev \
+                ncurses-static \
                 pkgconf \
                 wget
 
               work=/tmp/build-tmux
-              prefix=/tmp/tmux-root
-              mkdir -p "$work" "$prefix" out
-              cd "$work"
-
-              ncurses_base=https://invisible-mirror.net/archives/ncurses
-              wget -O ncurses.tar.gz "$ncurses_base/ncurses-6.5.tar.gz"
-              tar -xf ncurses.tar.gz
-              cd ncurses-6.5
-              ./configure \
-                --prefix="$prefix" \
-                --enable-pc-files \
-                --enable-static \
-                --disable-shared \
-                --without-ada \
-                --without-cxx \
-                --without-cxx-binding \
-                --without-manpages \
-                --without-progs
-              make -j"$(nproc)"
-              make install
-              cd "$work"
-
-              libevent_base=https://github.com/libevent/libevent/releases/download
-              libevent_version=2.1.12-stable
-              libevent_url="$libevent_base/release-$libevent_version"
-              libevent_url="$libevent_url/libevent-$libevent_version.tar.gz"
-              wget -O libevent.tar.gz "$libevent_url"
-              tar -xf libevent.tar.gz
-              cd libevent-2.1.12-stable
-              ./configure \
-                --prefix="$prefix" \
-                --enable-static \
-                --disable-shared \
-                --disable-openssl
-              make -j"$(nproc)"
-              make install
+              mkdir -p "$work" out
               cd "$work"
 
               tmux_base=https://github.com/tmux/tmux/releases/download
@@ -250,15 +243,15 @@ jobs:
               wget -O tmux.tar.gz "$tmux_url"
               tar -xf tmux.tar.gz
               cd tmux-3.5a
-              PKG_CONFIG_PATH="$prefix/lib/pkgconfig" \
-              CFLAGS="-I$prefix/include -Os" \
-              LDFLAGS="-L$prefix/lib -static" \
+              PKG_CONFIG="pkgconf --static" \
+              CFLAGS="-Os" \
+              LDFLAGS="-static" \
               ./configure \
                 --prefix=/usr \
                 --enable-static
               make -j"$(nproc)"
 
-              install -D -m 0755 tmux /github/workspace/out/tmux
+              install -D -m 0755 tmux "$GITHUB_WORKSPACE/out/tmux"
 
           - name: git-curl
             bins: curl git
@@ -307,7 +300,7 @@ jobs:
                 LDFLAGS="-static"
               make -j"$(nproc)"
               make install
-              install -D -m 0755 src/curl /github/workspace/out/curl
+              install -D -m 0755 src/curl "$GITHUB_WORKSPACE/out/curl"
               cd "$work"
 
               git_base=https://www.kernel.org/pub/software/scm/git
@@ -330,7 +323,7 @@ jobs:
                 CURL_LDFLAGS="-L$prefix/lib -lcurl -lssl -lcrypto -lz" \
                 V=1
 
-              install -D -m 0755 git /github/workspace/out/git
+              install -D -m 0755 git "$GITHUB_WORKSPACE/out/git"
 
           - name: samurai
             bins: samurai ninja
@@ -351,8 +344,8 @@ jobs:
               cd /tmp/samurai
               make -j"$(nproc)" LDFLAGS="-static"
 
-              install -D -m 0755 samu /github/workspace/out/samurai
-              install -D -m 0755 samu /github/workspace/out/ninja
+              install -D -m 0755 samu "$GITHUB_WORKSPACE/out/samurai"
+              install -D -m 0755 samu "$GITHUB_WORKSPACE/out/ninja"
 
           - name: cmake
             bins: cmake
@@ -388,7 +381,7 @@ jobs:
                 -DCMAKE_USE_OPENSSL=OFF
 
               make -j"$(nproc)"
-              install -D -m 0755 bin/cmake /github/workspace/out/cmake
+              install -D -m 0755 bin/cmake "$GITHUB_WORKSPACE/out/cmake"
 
           - name: fish
             bins: fish
@@ -402,10 +395,12 @@ jobs:
                 cmake \
                 file \
                 gettext-dev \
+                gettext-static \
                 ncurses-dev \
                 ncurses-static \
                 pcre2-dev \
                 pcre2-static \
+                rust \
                 wget
 
               fish_base=https://github.com/fish-shell/fish-shell/releases/download
@@ -424,7 +419,9 @@ jobs:
                 -DCMAKE_EXE_LINKER_FLAGS=-static
               cmake --build /tmp/fish-build --parallel "$(nproc)"
 
-              install -D -m 0755 /tmp/fish-build/fish /github/workspace/out/fish
+              install -D -m 0755 \
+                /tmp/fish-build/fish \
+                "$GITHUB_WORKSPACE/out/fish"
 
           - name: neovim
             bins: nvim
@@ -442,6 +439,7 @@ jobs:
                 file \
                 gettext \
                 gettext-dev \
+                gettext-static \
                 git \
                 libtool \
                 linux-headers \
@@ -463,7 +461,7 @@ jobs:
                 CMAKE_BUILD_TYPE=Release \
                 CMAKE_EXTRA_FLAGS="$nvim_flags"
 
-              install -D -m 0755 build/bin/nvim /github/workspace/out/nvim
+              install -D -m 0755 build/bin/nvim "$GITHUB_WORKSPACE/out/nvim"
 
     steps:
       - name: Build static binary
@@ -477,10 +475,24 @@ jobs:
           set -euo pipefail
 
           for bin in ${{ matrix.bins }}; do
-            file "out/$bin"
+            file_output="$(file "out/$bin")"
             ldd_output="$(ldd "out/$bin" 2>&1 || true)"
+
+            printf '%s\n' "$file_output"
             printf '%s\n' "$ldd_output"
-            printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+
+            static_re="statically linked|static-pie linked"
+            static_re="$static_re|not a dynamic executable"
+            static_re="$static_re|not a valid dynamic program"
+
+            printf '%s\n%s\n' "$file_output" "$ldd_output" |
+              grep -Eiq "$static_re"
+
+            dynamic_re="dynamically linked|interpreter"
+            if printf '%s\n' "$file_output" | grep -Eiq "$dynamic_re"; then
+              exit 1
+            fi
+
             "out/$bin" ${{ matrix.version_arg }}
           done
 
@@ -542,10 +554,23 @@ jobs:
 
           for bin in $expected; do
             command -v "$bin"
-            file "$(command -v "$bin")"
+            file_output="$(file "$(command -v "$bin")")"
             ldd_output="$(ldd "$(command -v "$bin")" 2>&1 || true)"
+
+            printf '%s\n' "$file_output"
             printf '%s\n' "$ldd_output"
-            printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+
+            static_re="statically linked|static-pie linked"
+            static_re="$static_re|not a dynamic executable"
+            static_re="$static_re|not a valid dynamic program"
+
+            printf '%s\n%s\n' "$file_output" "$ldd_output" |
+              grep -Eiq "$static_re"
+
+            dynamic_re="dynamically linked|interpreter"
+            if printf '%s\n' "$file_output" | grep -Eiq "$dynamic_re"; then
+              exit 1
+            fi
           done
 
           fzf --version
