@@ -27,59 +27,59 @@ jobs:
 
       matrix:
         include:
-          - name: curl
-            aport: curl
-
-          - name: git
-            aport: git
-
-          - name: gcc
-            aport: gcc
-
-          - name: cmake
-            aport: cmake
-
-          - name: ninja
-            aport: samurai
-
-          - name: make
-            aport: make
-
-          - name: clangd
-            aport: clang20
-
-          - name: ripgrep
-            aport: ripgrep
-
-          - name: eza
-            aport: eza
-
-          - name: bat
-            aport: bat
-
-          - name: fd
-            aport: fd
-
-          - name: yazi
-            aport: yazi
-
-          - name: fish
-            aport: fish
-
-          - name: delta
-            aport: delta
-
-          - name: uv
-            aport: uv
-
-          - name: lazygit
-            aport: lazygit
-
-          - name: glow
-            aport: glow
-
-          - name: fzf
-            aport: fzf
+          # - name: curl
+          #   aport: curl
+          #
+          # - name: git
+          #   aport: git
+          #
+          # - name: gcc
+          #   aport: gcc
+          #
+          # - name: cmake
+          #   aport: cmake
+          #
+          # - name: ninja
+          #   aport: samurai
+          #
+          # - name: make
+          #   aport: make
+          #
+          # - name: clangd
+          #   aport: clang20
+          #
+          # - name: ripgrep
+          #   aport: ripgrep
+          #
+          # - name: eza
+          #   aport: eza
+          #
+          # - name: bat
+          #   aport: bat
+          #
+          # - name: fd
+          #   aport: fd
+          #
+          # - name: yazi
+          #   aport: yazi
+          #
+          # - name: fish
+          #   aport: fish
+          #
+          # - name: delta
+          #   aport: delta
+          #
+          # - name: uv
+          #   aport: uv
+          #
+          # - name: lazygit
+          #   aport: lazygit
+          #
+          # - name: glow
+          #   aport: glow
+          #
+          # - name: fzf
+          #   aport: fzf
 
           - name: tmux
             aport: tmux
