@@ -1,11 +1,3 @@
-vim.keymap.set("n", "<localleader>a", function()
-  vim.cmd("normal! ggVG")
-end, { desc = "Select All" })
-
-vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", {
-  desc = "Quit",
-})
-
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(event)
     local map = function(keys, func, desc)
@@ -62,3 +54,34 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
 
 vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
+
+vim.keymap.set("v", ">", ">gv", { desc = "Indent and reselect" })
+vim.keymap.set("v", "<", "<gv", { desc = "Outdent and reselect" })
+
+vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
+
+vim.keymap.set("n", "<localleader>a", "ggVG", { desc = "Select All" })
+
+vim.keymap.set("n", "j", function()
+  if vim.v.count == 0 and vim.fn.line(".") == vim.fn.line("$") then
+    return "$"
+  end
+
+  return "j"
+end, {
+  expr = true,
+  silent = true,
+  desc = "Down",
+})
+
+vim.keymap.set({ "n", "x" }, "k", function()
+  if vim.v.count == 0 and vim.fn.line(".") == 1 then
+    return "0"
+  end
+
+  return "k"
+end, {
+  expr = true,
+  silent = true,
+  desc = "Up",
+})

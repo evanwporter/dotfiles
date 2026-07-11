@@ -1,3 +1,5 @@
+local selection = require("util.selection")
+
 return {
   {
     "ibhagwan/fzf-lua",
@@ -24,7 +26,7 @@ return {
       -- },
       {
         "<leader>ss",
-        "<cmd>FzfLua resume",
+        "<cmd>FzfLua resume<cr>",
         desc = "Resume Fzf search",
       },
       {
@@ -32,7 +34,15 @@ return {
         function()
           require("fzf-lua").live_grep()
         end,
-        desc = "Search Grep",
+        desc = "Grep",
+      },
+      {
+        "<leader>sg",
+        function()
+          require("fzf-lua").live_grep({ search = selection.get_visual_selection() })
+        end,
+        mode = "x",
+        desc = "Grep Selection",
       },
       {
         "<leader>sw",

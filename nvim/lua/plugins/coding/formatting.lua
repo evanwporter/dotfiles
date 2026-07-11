@@ -17,6 +17,7 @@ return {
         json = { "prettier" },
         jsonc = { "prettier" },
         json5 = { "prettier" },
+        yaml = { "prettier" },
 
         nix = { "alejandra" },
         cmake = { "cmake_format" },
