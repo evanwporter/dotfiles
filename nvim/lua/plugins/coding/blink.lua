@@ -126,11 +126,6 @@ return {
               preselect = false,
               auto_insert = true,
             },
-
-            cycle = {
-              from_top = true,
-              from_bottom = true,
-            },
           },
 
           menu = {
@@ -139,7 +134,6 @@ return {
 
           ghost_text = {
             enabled = true,
-            show_with_menu = true,
           },
         },
       },
