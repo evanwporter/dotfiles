@@ -45,7 +45,7 @@ jobs:
             aport: fish
 
           - name: delta
-            aport: git-delta
+            aport: delta
 
           - name: erdtree
             aport: erdtree
@@ -67,6 +67,15 @@ jobs:
 
           - name: neovim
             aport: neovim
+
+          - name: glow
+            aport: glow
+
+          - name: curl
+            aport: curl
+
+          - name: git
+            aport: git
 
     steps:
       - name: Clone Alpine aports
