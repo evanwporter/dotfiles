@@ -1,4 +1,4 @@
-name: Build Alpine CLI packages
+name: Build Alpine packages
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ env:
 jobs:
   build:
     name: Build ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -70,12 +70,14 @@ jobs:
 
     steps:
       - name: Clone Alpine aports
+        env:
+          BRANCH: ${{ env.APORTS_BRANCH }}
         run: |
           set -euo pipefail
 
           git clone \
             --depth=1 \
-            --branch "$APORTS_BRANCH" \
+            --branch "$BRANCH" \
             https://gitlab.alpinelinux.org/alpine/aports.git \
             aports
 
@@ -85,10 +87,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          rm -rf dist
           mkdir -p dist
 
           docker run --rm \
+            --privileged \
             --env APORT \
             --volume "$GITHUB_WORKSPACE:/workspace" \
             --workdir /workspace \
@@ -109,43 +111,32 @@ jobs:
 
               chmod 0600 /etc/doas.d/abuild.conf
 
-              # Locate the tracked APKBUILD through Git rather than scanning
-              # the filesystem or hard-coding main/community/testing.
-              matches="$(
-                git -C /workspace/aports \
-                  ls-files "*/$APORT/APKBUILD"
-              )"
+              package_dir=""
 
-              match_count="$(
-                printf "%s\n" "$matches" |
-                  sed "/^$/d" |
-                  wc -l
-              )"
+              for repository in main community testing; do
+                candidate="/workspace/aports/$repository/$APORT"
 
-              if [ "$match_count" -eq 0 ]; then
-                echo "No APKBUILD found for aport: $APORT" >&2
+                if [ -f "$candidate/APKBUILD" ]; then
+                  package_dir="$candidate"
+                  break
+                fi
+              done
+
+              if [ -z "$package_dir" ]; then
+                echo "Could not find APKBUILD for aport: $APORT" >&2
+                echo "Checked:" >&2
+                echo "  /workspace/aports/main/$APORT" >&2
+                echo "  /workspace/aports/community/$APORT" >&2
+                echo "  /workspace/aports/testing/$APORT" >&2
                 exit 1
               fi
 
-              if [ "$match_count" -ne 1 ]; then
-                echo "Multiple APKBUILD files found for aport: $APORT" >&2
-                printf "%s\n" "$matches" >&2
-                exit 1
-              fi
-
-              apkbuild="/workspace/aports/$matches"
-              package_dir="${apkbuild%/APKBUILD}"
-
-              test -f "$apkbuild"
-
-              echo "Aport:       $APORT"
-              echo "APKBUILD:    $apkbuild"
-              echo "Package dir: $package_dir"
+              echo "Aport:     $APORT"
+              echo "Directory: $package_dir"
 
               install -d \
                 -o builder \
                 -g builder \
-                /home/builder \
                 /home/builder/.abuild \
                 /home/builder/packages
 
@@ -153,74 +144,62 @@ jobs:
                 /workspace/aports \
                 /home/builder
 
-              # Generate the package-signing key as the build user.
               su builder -c "
                 set -eu
-                abuild-keygen -n
+                abuild-keygen -a -n
               "
 
-              # Trust the generated key while this temporary builder exists.
-              set -- /home/builder/.abuild/*.rsa.pub
+              public_key=""
 
-              if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
-                echo "Expected one generated abuild public key" >&2
+              for candidate in /home/builder/.abuild/*.rsa.pub; do
+                if [ -f "$candidate" ]; then
+                  public_key="$candidate"
+                  break
+                fi
+              done
+
+              if [ -z "$public_key" ]; then
+                echo "abuild-keygen did not create a public key" >&2
                 exit 1
               fi
 
-              cp "$1" /etc/apk/keys/
+              cp "$public_key" /etc/apk/keys/
 
-              # abuild reads source, depends, makedepends, checkdepends,
-              # build(), check(), package(), and subpackages from APKBUILD.
               su builder -c "
                 set -eu
                 cd \"$package_dir\"
                 abuild -r
               "
 
-              # abuild normally writes packages under:
-              # /home/builder/packages/<repository>/<architecture>/
-              set -- /home/builder/packages/*/*/*.apk
+              find /home/builder/packages \
+                -type f \
+                -name "*.apk" \
+                -exec cp -v {} /workspace/dist/ \;
 
-              if [ "$#" -eq 1 ] && [ ! -f "$1" ]; then
-                echo "abuild produced no APK packages" >&2
+              produced_package=""
+
+              for candidate in /workspace/dist/*.apk; do
+                if [ -f "$candidate" ]; then
+                  produced_package="$candidate"
+                  break
+                fi
+              done
+
+              if [ -z "$produced_package" ]; then
+                echo "abuild completed but produced no APK files" >&2
                 exit 1
               fi
-
-              cp -v "$@" /workspace/dist/
 
               echo
               echo "Produced packages:"
               ls -lh /workspace/dist
             '
 
-      - name: Record build information
-        env:
-          NAME: ${{ matrix.name }}
-          APORT: ${{ matrix.aport }}
-        run: |
-          set -euo pipefail
-
-          {
-            echo "name=$NAME"
-            echo "aport=$APORT"
-            echo "alpine_image=$ALPINE_IMAGE"
-            echo "aports_branch=$APORTS_BRANCH"
-            echo "aports_commit=$(git -C aports rev-parse HEAD)"
-            echo
-            echo "packages:"
-
-            for package in dist/*.apk; do
-              echo "  - $(basename "$package")"
-            done
-          } > dist/build-info.txt
-
-          cat dist/build-info.txt
-
       - name: Upload ${{ matrix.name }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}-alpine
-          path: dist/
+          path: dist/*.apk
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
