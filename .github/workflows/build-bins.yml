@@ -305,7 +305,7 @@ jobs:
                 --without-zstd \
                 --with-openssl
               make -j"$(nproc)" \
-                LDFLAGS="$LDFLAGS" \
+                LDFLAGS="-all-static $LDFLAGS" \
                 LIBS="$LIBS" \
                 V=1
               make install
@@ -422,6 +422,10 @@ jobs:
                 "$fish_base/$fish_version/fish-$fish_version.tar.xz"
               mkdir -p /tmp/fish-src /tmp/fish-build out
               tar -xf /tmp/fish.tar.xz -C /tmp/fish-src --strip-components=1
+
+              export RUSTFLAGS="-C target-feature=+crt-static"
+              RUSTFLAGS="$RUSTFLAGS -C link-arg=-static"
+              export RUSTFLAGS="$RUSTFLAGS -C link-arg=-static-libgcc"
 
               cmake \
                 -S /tmp/fish-src \
