@@ -1,0 +1,5 @@
+require("config.keymaps")
+require("config.buffers")
+require("config.options")
+require("config.lazygit")
+require("config.lsp")

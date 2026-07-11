@@ -1,0 +1,6 @@
+require("core.lazy")
+require("core.diagnostics")
+require("core.theme")
+require("core.terminal")
+require("core.dashboard")
+require("core.statuscolumn")
