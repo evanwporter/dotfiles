@@ -141,17 +141,17 @@ jobs:
             cmake \
             file \
             git \
-            libgit2-dev \
-            libssh2-dev \
             musl-dev \
             openssl-dev \
             openssl-libs-static \
             perl \
-            pkgconf
+            pkgconf \
+            zlib-static
 
       - name: Build static binary
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+          LIBZ_SYS_STATIC: "1"
           OPENSSL_STATIC: "1"
         run: |
           set -euo pipefail
@@ -223,6 +223,7 @@ jobs:
               apk add --no-cache \
                 autoconf \
                 automake \
+                bison \
                 build-base \
                 ca-certificates \
                 file \
@@ -285,6 +286,11 @@ jobs:
               wget -O curl.tar.xz https://curl.se/download/curl-8.14.1.tar.xz
               tar -xf curl.tar.xz
               cd curl-8.14.1
+              PKG_CONFIG="pkgconf --static" \
+              LDFLAGS="-static" \
+              OPENSSL_LIBS="-lssl -lcrypto" \
+              OPENSSL_CFLAGS="" \
+              LIBS="-lssl -lcrypto -lz" \
               ./configure \
                 --prefix="$prefix" \
                 --disable-shared \
@@ -296,9 +302,8 @@ jobs:
                 --without-libpsl \
                 --without-nghttp2 \
                 --without-zstd \
-                --with-openssl \
-                LDFLAGS="-static"
-              make -j"$(nproc)"
+                --with-openssl
+              make -j"$(nproc)" V=1
               make install
               install -D -m 0755 src/curl "$GITHUB_WORKSPACE/out/curl"
               cd "$work"
@@ -392,6 +397,7 @@ jobs:
               apk add --no-cache \
                 build-base \
                 ca-certificates \
+                cargo \
                 cmake \
                 file \
                 gettext-dev \
@@ -437,9 +443,6 @@ jobs:
                 cmake \
                 curl \
                 file \
-                gettext \
-                gettext-dev \
-                gettext-static \
                 git \
                 libtool \
                 linux-headers \
@@ -456,6 +459,7 @@ jobs:
 
               nvim_flags="-DBUILD_SHARED_LIBS=OFF"
               nvim_flags="$nvim_flags -DCMAKE_EXE_LINKER_FLAGS=-static"
+              nvim_flags="$nvim_flags -DENABLE_LIBINTL=OFF"
 
               make -j"$(nproc)" \
                 CMAKE_BUILD_TYPE=Release \
