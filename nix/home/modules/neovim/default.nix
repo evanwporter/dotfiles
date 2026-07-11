@@ -1,30 +1,16 @@
 {
-	lib,
+	config,
 	pkgs,
 	...
 }: let
 	nvimSource = ../../../../nvim;
-	luaSource = nvimSource + "/lua";
-
-	luaFiles = dir: prefix:
-		lib.concatMapAttrs (name: type: let
-			path =
-				if prefix == ""
-				then name
-				else "${prefix}/${name}";
-			source = dir + "/${name}";
-		in
-			if type == "directory"
-			then luaFiles source path
-			else if type == "regular" && lib.hasSuffix ".lua" name
-			then {
-				"${path}".source = source;
-			}
-			else {}) (builtins.readDir dir);
 in {
 	imports = [
 		./config
 	];
+
+	xdg.configFile."nvim/lua".source =
+		config.lib.file.mkOutOfStoreSymlink "/home/evanw/dotfiles/nvim/lua";
 
 	programs.nixvim = {
 		enable = true;
@@ -33,8 +19,6 @@ in {
 		viAlias = true;
 		vimAlias = true;
 		vimdiffAlias = true;
-
-		extraFiles = luaFiles luaSource "lua";
 
 		extraConfigLuaPost =
 			builtins.readFile (nvimSource + "/init.lua");

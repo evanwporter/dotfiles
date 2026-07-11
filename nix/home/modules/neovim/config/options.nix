@@ -1,18 +1,25 @@
 {
-	programs.nixvim.opts = {
-		tabstop = 4;
-		shiftwidth = 4;
-		softtabstop = 4;
-		expandtab = true;
-		smartindent = true;
+	programs.nixvim = {
+		globals = {
+			mapleader = " ";
+			maplocalleader = "\\";
+		};
 
-		number = true;
-		relativenumber = true;
+		opts = {
+			tabstop = 4;
+			shiftwidth = 4;
+			softtabstop = 4;
+			expandtab = true;
+			smartindent = true;
 
-		signcolumn = "yes";
+			number = true;
+			relativenumber = true;
 
-		confirm = true;
+			signcolumn = "yes";
 
-		clipboard = "unnamedplus";
+			confirm = true;
+
+			clipboard = "unnamedplus";
+		};
 	};
 }

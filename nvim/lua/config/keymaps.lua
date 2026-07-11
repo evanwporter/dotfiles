@@ -1,11 +1,3 @@
-vim.keymap.set("n", "<localleader>a", function()
-  vim.cmd("normal! ggVG")
-end, { desc = "Select All" })
-
-vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", {
-  desc = "Quit",
-})
-
 vim.keymap.set("n", "<leader>bd", function()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -22,20 +14,6 @@ vim.keymap.set("n", "<leader>bd", function()
   vim.cmd("bdelete " .. bufnr)
 end, {
   desc = "Delete Buffer",
-})
-
-vim.api.nvim_create_user_command("BdeleteAll", function()
-  vim.cmd("%bd")
-end, {
-  desc = "Delete all buffers",
-})
-
-vim.keymap.set("n", "<leader>bn", "<cmd>bnext<cr>", {
-  desc = "Next Buffer",
-})
-
-vim.keymap.set("n", "<leader>bp", "<cmd>bprevious<cr>", {
-  desc = "Previous Buffer",
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -86,11 +64,3 @@ for i = 1, 9 do
     require("harpoon"):list():select(i)
   end, { desc = "which_key_ignore" })
 end
-
-vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window" })
-vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window" })
-vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window" })
-vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
-
-vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
-vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
