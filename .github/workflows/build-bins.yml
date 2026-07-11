@@ -1,4 +1,4 @@
-name: Build selected Alpine packages from aports
+name: Build selected Alpine packages from source
 
 on:
   workflow_dispatch:
@@ -13,24 +13,44 @@ permissions:
   contents: read
 
 env:
+  # Pin these to an image digest and aports commit for reproducible builds.
   ALPINE_IMAGE: alpine:edge
   APORTS_REF: master
 
-  # Binary package names wanted in the final offline repository.
+  # These may be package names or subpackage names.
   ROOT_PACKAGES: >-
+    curl
+    git
+    gcc
+    g++
+    cmake
+    samurai
+    make
+    clang20-extra-tools
+    ripgrep
+    eza
+    bat
+    fd
+    yazi
+    fish
+    delta
+    erdtree
+    uv
+    lazygit
+    glow
     fzf
     tmux
     neovim
 
 jobs:
   build:
-    name: Build selected x86_64 APK runtime closure
+    name: Build selected package dependency closure
     runs-on: ubuntu-24.04
     timeout-minutes: 360
 
     steps:
       - name: Check out Alpine aports
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           repository: alpinelinux/aports
           ref: ${{ env.APORTS_REF }}
@@ -39,6 +59,7 @@ jobs:
           persist-credentials: false
 
       - name: Prepare workspace
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -49,22 +70,22 @@ jobs:
             metadata \
             offline-repository
 
-          git -C aports rev-parse HEAD \
-            > metadata/APORTS_COMMIT
+          git -C aports rev-parse HEAD > metadata/APORTS_COMMIT
 
-          printf '%s\n' $ROOT_PACKAGES \
-            > metadata/world.txt
+          printf '%s\n' "$ROOT_PACKAGES" |
+            tr ' ' '\n' |
+            sed '/^[[:space:]]*$/d' \
+            > metadata/ROOT_PACKAGES
 
           echo "Aports commit:"
           cat metadata/APORTS_COMMIT
 
           echo
-          echo "Requested binary packages:"
-          cat metadata/world.txt
+          echo "Root packages:"
+          cat metadata/ROOT_PACKAGES
 
-      - name: Resolve runtime closure and build its aports
-        env:
-          ROOT_PACKAGES: ${{ env.ROOT_PACKAGES }}
+      - name: Resolve and build source closure
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -75,22 +96,10 @@ jobs:
             --workdir /workspace \
             "$ALPINE_IMAGE" \
             sh -euxc '
-              #
-              # Disposable build infrastructure.
-              #
-              # These packages may come from Alpine binary repositories.
-              # They are not included in the final repository unless their
-              # corresponding aports are part of the selected runtime closure.
-              #
               apk add --no-cache \
                 alpine-sdk \
+                lua-aports \
                 doas
-
-              if ! apk query --help >/dev/null 2>&1; then
-                echo "This Alpine image does not provide apk query" >&2
-                echo "Use a current alpine:edge image with apk-tools 3." >&2
-                exit 1
-              fi
 
               adduser -D builder
               addgroup builder abuild
@@ -110,13 +119,18 @@ jobs:
                 /workspace/packages \
                 /workspace/distfiles \
                 /workspace/keys \
-                /workspace/metadata
+                /workspace/synthetic-aports/selected \
+                /workspace/filtered-aports/selected \
+                /workspace/build-logs
 
               chown -R builder:builder \
                 /workspace/aports \
                 /workspace/packages \
                 /workspace/distfiles \
                 /workspace/keys \
+                /workspace/synthetic-aports \
+                /workspace/filtered-aports \
+                /workspace/build-logs \
                 /workspace/metadata
 
               su builder -c "
@@ -141,32 +155,26 @@ jobs:
                 fi
               done
 
-              if [ -z "$private_key" ]; then
-                echo "No private abuild key was generated" >&2
-                exit 1
-              fi
-
-              if [ -z "$public_key" ]; then
-                echo "No public abuild key was generated" >&2
+              if [ -z "$private_key" ] || [ -z "$public_key" ]; then
+                echo "Could not find generated abuild signing keys" >&2
                 exit 1
               fi
 
               cp "$public_key" /etc/apk/keys/
               cp "$public_key" /workspace/keys/
 
-              jobs="$(getconf _NPROCESSORS_ONLN)"
-              arch="$(apk --print-arch)"
-
-              printf "%s\n" \
-                "REPODEST=/workspace/packages" \
-                "SRCDEST=/workspace/distfiles" \
-                "PACKAGER=\"Local Builder <builder@localhost>\"" \
-                "PACKAGER_PRIVKEY=\"$private_key\"" \
-                "JOBS=$jobs" \
-                > /home/builder/.abuild/abuild.conf
+              cat > /home/builder/.abuild/abuild.conf <<ABUILD_CONFIG
+          REPODEST=/workspace/packages
+          SRCDEST=/workspace/distfiles
+          PACKAGER="Local Builder <builder@localhost>"
+          PACKAGER_PRIVKEY="$private_key"
+          JOBS=$(getconf _NPROCESSORS_ONLN)
+          ABUILD_CONFIG
 
               chown builder:builder \
                 /home/builder/.abuild/abuild.conf
+
+              arch="$(apk --print-arch)"
 
               printf "%s\n" "$arch" \
                 > /workspace/metadata/ARCHITECTURE
@@ -174,161 +182,143 @@ jobs:
               cat /etc/alpine-release \
                 > /workspace/metadata/ALPINE_RELEASE
 
-              echo
-              echo "Architecture: $arch"
-              echo "Build jobs:   $jobs"
-
+              ################################################################
+              # Create one synthetic repository.
               #
-              # Resolve the binary runtime dependency closure with apk.
-              #
-              # The origin field identifies the source aport that produced
-              # each selected binary package. Multiple subpackages can map to
-              # the same origin, so sort -u gives one build per aport.
-              #
-              apk query \
-                --recursive \
-                --summarize origin \
-                $ROOT_PACKAGES |
-                sed \
-                  -e "s/^[[:space:]]*//" \
-                  -e "s/[[:space:]]*$//" \
-                  -e "/^$/d" |
-                sort -u \
-                > /workspace/metadata/aport-origins.txt
+              # ap normally operates on one repository at a time. Combining
+              # the three aports sections here lets it resolve package names
+              # across main, community, and testing.
+              ################################################################
 
-              if [ ! -s /workspace/metadata/aport-origins.txt ]; then
-                echo "Dependency resolution returned no aport origins" >&2
-                exit 1
-              fi
-
-              echo
-              echo "Resolved source aports:"
-              cat /workspace/metadata/aport-origins.txt
-
-              echo
-              echo "Number of source aports:"
-              wc -l < /workspace/metadata/aport-origins.txt
-
-              #
-              # Map every origin to its APKBUILD directory.
-              #
-              # Alpine repository policy permits:
-              #
-              #   main      -> main
-              #   community -> main, community
-              #   testing   -> main, community, testing
-              #
-              # An origin should therefore occur only once in the active
-              # aports tree. Fail if no APKBUILD or multiple APKBUILDs match.
-              #
-              : > /workspace/metadata/aport-directories.txt
-
-              while IFS= read -r origin; do
-                [ -n "$origin" ] || continue
-
-                matches=""
-
-                for repository in main community testing; do
-                  candidate="/workspace/aports/$repository/$origin/APKBUILD"
-
-                  if [ -f "$candidate" ]; then
-                    matches="$matches
-              /workspace/aports/$repository/$origin"
-                  fi
-                done
-
-                matches="$(
-                  printf "%s\n" "$matches" |
-                    sed "/^$/d"
-                )"
-
-                match_count="$(
-                  printf "%s\n" "$matches" |
-                    sed "/^$/d" |
-                    wc -l
-                )"
-
-                if [ "$match_count" -eq 0 ]; then
-                  echo "Could not find APKBUILD for origin: $origin" >&2
-                  exit 1
-                fi
-
-                if [ "$match_count" -ne 1 ]; then
-                  echo "Found multiple APKBUILDs for origin: $origin" >&2
-                  printf "%s\n" "$matches" >&2
-                  exit 1
-                fi
-
-                printf "%s\n" "$matches" \
-                  >> /workspace/metadata/aport-directories.txt
-              done < /workspace/metadata/aport-origins.txt
-
-              echo
-              echo "APKBUILD directories:"
-              cat /workspace/metadata/aport-directories.txt
-
-              chown -R builder:builder \
-                /workspace/packages \
-                /workspace/distfiles \
-                /workspace/metadata
-
-              #
-              # Build each source aport.
-              #
-              # Order is not significant here because abuild -r is allowed to
-              # install compilation dependencies from the builder repositories.
-              # Every aport in the final runtime closure is nevertheless built
-              # from the checked-out APKBUILD.
-              #
-              while IFS= read -r package_dir; do
-                [ -n "$package_dir" ] || continue
-
-                if [ ! -f "$package_dir/APKBUILD" ]; then
-                  echo "Missing APKBUILD: $package_dir" >&2
-                  exit 1
-                fi
-
-                echo
-                echo "=================================================="
-                echo "Building: ${package_dir#/workspace/aports/}"
-                echo "=================================================="
-
-                su builder -c "
-                  set -eu
-                  cd \"$package_dir\"
-                  abuild -r
-                "
-              done < /workspace/metadata/aport-directories.txt
-
-              built_count="$(
-                find /workspace/packages \
+              for repository in main community testing; do
+                find "/workspace/aports/$repository" \
+                  -mindepth 2 \
+                  -maxdepth 2 \
                   -type f \
-                  -name "*.apk" |
-                  wc -l
-              )"
+                  -name APKBUILD \
+                  -print |
+                while IFS= read -r apkbuild; do
+                  source_dir="${apkbuild%/APKBUILD}"
+                  aport_name="${source_dir##*/}"
+                  synthetic_name="${repository}__${aport_name}"
 
-              if [ "$built_count" -eq 0 ]; then
-                echo "No APK packages were built" >&2
+                  ln -s "$source_dir" \
+                    "/workspace/synthetic-aports/selected/$synthetic_name"
+                done
+              done
+
+              chown -hR builder:builder \
+                /workspace/synthetic-aports
+
+              ################################################################
+              # Resolve the root package names to owning APKBUILD directories.
+              #
+              # builddirs recursively includes build-time dependencies and
+              # prints the directories in dependency order.
+              ################################################################
+
+              set -- $ROOT_PACKAGES
+
+              su builder -c "
+                set -eu
+
+                ap \
+                  -d /workspace/synthetic-aports/selected \
+                  builddirs \
+                  \"\$@\" \
+                  > /workspace/metadata/BUILD_DIRECTORIES
+              " sh "$@"
+
+              if [ ! -s /workspace/metadata/BUILD_DIRECTORIES ]; then
+                echo "Dependency resolution returned no APKBUILD directories" >&2
                 exit 1
               fi
 
               echo
-              echo "Built APK count: $built_count"
+              echo "Resolved APKBUILD directories:"
+              cat /workspace/metadata/BUILD_DIRECTORIES
+
+              ################################################################
+              # Create a second repository containing only the resolved
+              # APKBUILD directories.
+              ################################################################
+
+              while IFS= read -r resolved_dir; do
+                [ -n "$resolved_dir" ] || continue
+
+                case "$resolved_dir" in
+                  /*)
+                    source_dir="$resolved_dir"
+                    ;;
+                  *)
+                    source_dir="/workspace/synthetic-aports/selected/$resolved_dir"
+                    ;;
+                esac
+
+                if [ ! -f "$source_dir/APKBUILD" ]; then
+                  echo "Resolved directory has no APKBUILD: $source_dir" >&2
+                  exit 1
+                fi
+
+                filtered_name="${source_dir##*/}"
+
+                ln -s "$source_dir" \
+                  "/workspace/filtered-aports/selected/$filtered_name"
+              done < /workspace/metadata/BUILD_DIRECTORIES
+
+              chown -hR builder:builder \
+                /workspace/filtered-aports
 
               echo
-              echo "Built package tree:"
+              echo "Filtered source repository contains:"
+
+              find /workspace/filtered-aports/selected \
+                -mindepth 1 \
+                -maxdepth 1 \
+                -type l \
+                -print |
+                sort
+
+              ################################################################
+              # Build only the filtered repository.
+              #
+              # buildrepo handles dependency ordering and repository indexes.
+              ################################################################
+
+              su builder -c "
+                set -eu
+
+                buildrepo \
+                  --aports /workspace/filtered-aports \
+                  --destdir /workspace/packages \
+                  --logdir /workspace/build-logs \
+                  selected
+              "
+
+              echo
+              echo "Built APKs:"
+
               find /workspace/packages \
                 -type f \
                 -name "*.apk" \
                 -print |
                 sort
 
-              echo
-              echo "Built repository size:"
-              du -sh /workspace/packages
+              count="$(
+                find /workspace/packages \
+                  -type f \
+                  -name "*.apk" |
+                wc -l
+              )"
+
+              if [ "$count" -eq 0 ]; then
+                echo "buildrepo produced no APK files" >&2
+                exit 1
+              fi
             '
 
-      - name: Collect built APKs
+      - name: Assemble offline repository
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -338,7 +328,7 @@ jobs:
 
             if [[ -e "$destination" ]]; then
               if ! cmp --silent "$package" "$destination"; then
-                echo "Conflicting APK files named: $filename" >&2
+                echo "Conflicting APK files named $filename" >&2
                 echo "Existing: $destination" >&2
                 echo "New:      $package" >&2
                 exit 1
@@ -351,31 +341,31 @@ jobs:
           done < <(
             find packages \
               -type f \
-              -name "*.apk" \
+              -name '*.apk' \
               -print0
           )
 
-          if ! compgen -G "offline-repository/*.apk" >/dev/null; then
-            echo "No APK files were found under packages/" >&2
+          if ! compgen -G 'offline-repository/*.apk' >/dev/null; then
+            echo "No APK files were produced" >&2
             exit 1
           fi
 
           cp -v keys/*.rsa.pub offline-repository/
           cp -v metadata/* offline-repository/
 
+          cp metadata/ROOT_PACKAGES \
+            offline-repository/world.txt
+
           echo
-          echo "Collected APK count:"
+          echo "Offline repository APK count:"
           find offline-repository \
             -maxdepth 1 \
             -type f \
-            -name "*.apk" |
+            -name '*.apk' |
             wc -l
 
-          echo
-          echo "Collected repository size:"
-          du -sh offline-repository
-
-      - name: Create final APK index
+      - name: Generate final APK index
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -385,26 +375,19 @@ jobs:
             "$ALPINE_IMAGE" \
             sh -euxc '
               apk index \
-                --allow-untrusted \
                 --description \
-                  "Locally source-built Alpine runtime closure" \
+                  "Locally source-built Alpine Edge x86_64 repository" \
                 --output /repository/APKINDEX.tar.gz \
                 /repository/*.apk
-
-              echo
-              echo "Repository index:"
-              ls -lh /repository/APKINDEX.tar.gz
             '
 
-      - name: Verify repository without networking
-        env:
-          ROOT_PACKAGES: ${{ env.ROOT_PACKAGES }}
+      - name: Verify offline installation
+        shell: bash
         run: |
           set -euo pipefail
 
           docker run --rm \
             --network none \
-            --env ROOT_PACKAGES \
             --volume \
               "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
             "$ALPINE_IMAGE" \
@@ -419,7 +402,7 @@ jobs:
               done
 
               if [ -z "$public_key" ]; then
-                echo "No public signing key was found" >&2
+                echo "No abuild public key found" >&2
                 exit 1
               fi
 
@@ -428,32 +411,73 @@ jobs:
               printf "%s\n" /offline \
                 > /etc/apk/repositories
 
+              # The generated top-level APKINDEX is not signed because the
+              # temporary private key is deliberately not exported.
               apk add \
                 --no-network \
                 --allow-untrusted \
-                $ROOT_PACKAGES
+                $(cat /offline/world.txt)
 
               echo
-              echo "Installed requested packages:"
+              echo "Installed root packages:"
+              apk info \
+                $(cat /offline/world.txt)
+            '
 
-              for package in $ROOT_PACKAGES; do
-                apk info -e "$package"
+      - name: Verify expected commands
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --network none \
+            --volume \
+              "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
+            "$ALPINE_IMAGE" \
+            sh -euxc '
+              public_key=""
+
+              for candidate in /offline/*.rsa.pub; do
+                if [ -f "$candidate" ]; then
+                  public_key="$candidate"
+                  break
+                fi
               done
 
-              echo
-              echo "fzf:"
+              cp "$public_key" /etc/apk/keys/
+              printf "%s\n" /offline > /etc/apk/repositories
+
+              apk add \
+                --no-network \
+                --allow-untrusted \
+                $(cat /offline/world.txt)
+
+              curl --version
+              git --version
+              gcc --version
+              g++ --version
+              cmake --version
+              ninja --version
+              make --version
+              clangd --version
+              rg --version
+              eza --version
+              bat --version
+              fd --version
+              yazi --version
+              fish --version
+              delta --version
+              erd --version
+              uv --version
+              lazygit --version
+              glow --version
               fzf --version
-
-              echo
-              echo "tmux:"
               tmux -V
-
-              echo
-              echo "Neovim:"
               nvim --version
             '
 
-      - name: Create repository archive
+      - name: Create offline repository archive
+        shell: bash
         run: |
           set -euo pipefail
 
@@ -467,13 +491,14 @@ jobs:
             alpine-edge-x86_64-offline-apks.tar.zst \
             > alpine-edge-x86_64-offline-apks.tar.zst.sha256
 
-          echo
+          du -sh offline-repository
+
           ls -lh \
             alpine-edge-x86_64-offline-apks.tar.zst \
             alpine-edge-x86_64-offline-apks.tar.zst.sha256
 
       - name: Upload offline APK repository
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: alpine-edge-x86_64-offline-apk-repository
           path: |
@@ -484,10 +509,21 @@ jobs:
           compression-level: 0
           retention-days: 90
 
-      - name: Upload source distfile cache
-        uses: actions/upload-artifact@v6
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: alpine-edge-source-distfiles
+          name: alpine-apk-build-logs
+          path: build-logs/
+          if-no-files-found: warn
+          compression-level: 6
+          retention-days: 30
+
+      - name: Upload source distfile cache
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpine-source-distfiles
           path: distfiles/
           if-no-files-found: warn
           compression-level: 0
