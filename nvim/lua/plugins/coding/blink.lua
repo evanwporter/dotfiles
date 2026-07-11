@@ -20,11 +20,13 @@ return {
 
   {
     "saghen/blink.cmp",
+    branch = "v1",
+
     dependencies = {
       "rafamadriz/friendly-snippets",
       -- "fang2hou/blink-copilot",
     },
-    branch = "v1",
+
     opts = {
       snippets = {
         preset = "default",
@@ -52,7 +54,7 @@ return {
       completion = {
         list = {
           selection = {
-            preselect = true,
+            preselect = false,
             auto_insert = false,
           },
         },
@@ -66,33 +68,78 @@ return {
         enabled = true,
 
         keymap = {
-          preset = "cmdline",
+          preset = "inherit",
 
+          -- Keep normal command-line cursor movement.
           ["<Right>"] = false,
           ["<Left>"] = false,
 
-          ["<Down>"] = { "select_next", "fallback" },
-          ["<Up>"] = { "select_prev", "fallback" },
-          ["<Tab>"] = { "select_next", "fallback" },
-          ["<S-Tab>"] = { "select_prev", "fallback" },
+          -- Cycle through candidates and update the inline preview.
+          ["<Tab>"] = {
+            "insert_next",
+            "fallback",
+          },
 
-          ["<CR>"] = { "accept_and_enter", "fallback" },
-          ["<C-y>"] = { "accept", "fallback" },
-          ["<C-e>"] = { "hide", "fallback" },
+          ["<S-Tab>"] = {
+            "insert_prev",
+            "fallback",
+          },
+
+          ["<Down>"] = {
+            "insert_next",
+            "fallback",
+          },
+
+          ["<Up>"] = {
+            "insert_prev",
+            "fallback",
+          },
+
+          -- Accept the selected completion and execute the command.
+          ["<CR>"] = {
+            "accept_and_enter",
+            "fallback",
+          },
+
+          -- Accept without executing.
+          ["<C-y>"] = {
+            "accept",
+            "fallback",
+          },
+
+          -- Cancel the current completion.
+          ["<C-e>"] = {
+            "cancel",
+            "fallback",
+          },
+
+          -- Manually show completion when needed.
+          ["<C-Space>"] = {
+            "show",
+            "fallback",
+          },
         },
 
         completion = {
           list = {
             selection = {
               preselect = false,
-              auto_insert = false,
+              auto_insert = true,
+            },
+
+            cycle = {
+              from_top = true,
+              from_bottom = true,
             },
           },
 
           menu = {
-            auto_show = function()
-              return vim.fn.getcmdtype() == ":"
-            end,
+            auto_show = true,
+          },
+
+          ghost_text = {
+            enabled = true,
+            show_with_menu = true,
           },
         },
       },

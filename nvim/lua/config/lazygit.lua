@@ -44,6 +44,14 @@ vim.keymap.set("n", "<leader>g", function()
     return
   end
 
+  -- Prevent the global terminal mapping from leaving terminal mode.
+  -- LazyGit receives the two Escape keypresses instead.
+  vim.keymap.set("t", "<Esc><Esc>", "<Esc><Esc>", {
+    buffer = bufnr,
+    remap = false,
+    desc = "Pass Escape Escape to LazyGit",
+  })
+
   vim.cmd("startinsert")
 end, {
   desc = "LazyGit",

@@ -1,3 +1,5 @@
+local nix_parsers = vim.env.NVIM_TREESITTER_PARSERS
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -39,5 +41,11 @@ require("lazy").setup({
 
   change_detection = {
     notify = false,
+  },
+
+  performance = {
+    rtp = {
+      paths = nix_parsers and { nix_parsers } or {},
+    },
   },
 })
