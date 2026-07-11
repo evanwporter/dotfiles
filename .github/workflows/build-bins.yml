@@ -1,4 +1,6 @@
-name: Build selected Alpine packages from source
+---
+# yamllint disable rule:truthy
+name: Build static Alpine-compatible binaries
 
 on:
   workflow_dispatch:
@@ -13,518 +15,554 @@ permissions:
   contents: read
 
 env:
-  # Pin these to an image digest and aports commit for reproducible builds.
   ALPINE_IMAGE: alpine:edge
-  APORTS_REF: master
-
-  # These may be package names or subpackage names.
-  ROOT_PACKAGES: >-
-    curl
-    git
-    gcc
-    g++
-    cmake
-    samurai
-    make
-    clang20-extra-tools
-    ripgrep
-    eza
-    bat
-    fd
-    yazi
-    fish
-    delta
-    erdtree
-    uv
-    lazygit
-    glow
-    fzf
-    tmux
-    neovim
 
 jobs:
-  build:
-    name: Build selected package dependency closure
+  go:
+    name: Go / ${{ matrix.bin }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 360
+    timeout-minutes: 60
+    container: alpine:edge
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - bin: fzf
+            package: github.com/junegunn/fzf
+            version_arg: --version
+          - bin: glow
+            package: github.com/charmbracelet/glow
+            version_arg: --version
+          - bin: lazygit
+            package: github.com/jesseduffield/lazygit
+            version_arg: --version
 
     steps:
-      - name: Check out Alpine aports
-        uses: actions/checkout@v4
-        with:
-          repository: alpinelinux/aports
-          ref: ${{ env.APORTS_REF }}
-          path: aports
-          fetch-depth: 1
-          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          apk add --no-cache \
+            ca-certificates \
+            file \
+            git \
+            go
 
-      - name: Prepare workspace
-        shell: bash
+      - name: Build static binary
+        env:
+          CGO_ENABLED: "0"
+          GOBIN: /tmp/out
         run: |
           set -euo pipefail
 
-          mkdir -p \
-            packages \
-            distfiles \
-            keys \
-            metadata \
-            offline-repository
+          mkdir -p "$GOBIN"
 
-          git -C aports rev-parse HEAD > metadata/APORTS_COMMIT
+          go install \
+            -trimpath \
+            -buildvcs=false \
+            -ldflags="-s -w" \
+            "${{ matrix.package }}@latest"
 
-          printf '%s\n' "$ROOT_PACKAGES" |
-            tr ' ' '\n' |
-            sed '/^[[:space:]]*$/d' \
-            > metadata/ROOT_PACKAGES
+          install -D -m 0755 \
+            "$GOBIN/${{ matrix.bin }}" \
+            "out/${{ matrix.bin }}"
 
-          echo "Aports commit:"
-          cat metadata/APORTS_COMMIT
-
-          echo
-          echo "Root packages:"
-          cat metadata/ROOT_PACKAGES
-
-      - name: Resolve and build source closure
-        shell: bash
+      - name: Verify static binary
         run: |
           set -euo pipefail
 
-          docker run --rm \
-            --privileged \
-            --env ROOT_PACKAGES \
-            --volume "$GITHUB_WORKSPACE:/workspace" \
-            --workdir /workspace \
-            "$ALPINE_IMAGE" \
-            sh -euxc '
-              apk add --no-cache \
-                alpine-sdk \
-                lua-aports \
-                doas
-
-              adduser -D builder
-              addgroup builder abuild
-
-              install -d -m 0755 /etc/doas.d
-
-              printf "%s\n" \
-                "permit nopass :abuild" \
-                > /etc/doas.d/abuild.conf
-
-              chmod 0600 /etc/doas.d/abuild.conf
-
-              install -d \
-                -o builder \
-                -g builder \
-                /home/builder/.abuild \
-                /workspace/packages \
-                /workspace/distfiles \
-                /workspace/keys \
-                /workspace/synthetic-aports/selected \
-                /workspace/filtered-aports/selected \
-                /workspace/build-logs
-
-              chown -R builder:builder \
-                /workspace/aports \
-                /workspace/packages \
-                /workspace/distfiles \
-                /workspace/keys \
-                /workspace/synthetic-aports \
-                /workspace/filtered-aports \
-                /workspace/build-logs \
-                /workspace/metadata
-
-              su builder -c "
-                set -eu
-                abuild-keygen -a -n
-              "
-
-              private_key=""
-              public_key=""
-
-              for candidate in /home/builder/.abuild/*.rsa; do
-                if [ -f "$candidate" ]; then
-                  private_key="$candidate"
-                  break
-                fi
-              done
-
-              for candidate in /home/builder/.abuild/*.rsa.pub; do
-                if [ -f "$candidate" ]; then
-                  public_key="$candidate"
-                  break
-                fi
-              done
-
-              if [ -z "$private_key" ] || [ -z "$public_key" ]; then
-                echo "Could not find generated abuild signing keys" >&2
-                exit 1
-              fi
-
-              cp "$public_key" /etc/apk/keys/
-              cp "$public_key" /workspace/keys/
-
-              cat > /home/builder/.abuild/abuild.conf <<ABUILD_CONFIG
-          REPODEST=/workspace/packages
-          SRCDEST=/workspace/distfiles
-          PACKAGER="Local Builder <builder@localhost>"
-          PACKAGER_PRIVKEY="$private_key"
-          JOBS=$(getconf _NPROCESSORS_ONLN)
-          ABUILD_CONFIG
-
-              chown builder:builder \
-                /home/builder/.abuild/abuild.conf
-
-              arch="$(apk --print-arch)"
-
-              printf "%s\n" "$arch" \
-                > /workspace/metadata/ARCHITECTURE
-
-              cat /etc/alpine-release \
-                > /workspace/metadata/ALPINE_RELEASE
-
-              ################################################################
-              # Create one synthetic repository.
-              #
-              # ap normally operates on one repository at a time. Combining
-              # the three aports sections here lets it resolve package names
-              # across main, community, and testing.
-              ################################################################
-
-              for repository in main community testing; do
-                find "/workspace/aports/$repository" \
-                  -mindepth 2 \
-                  -maxdepth 2 \
-                  -type f \
-                  -name APKBUILD \
-                  -print |
-                while IFS= read -r apkbuild; do
-                  source_dir="${apkbuild%/APKBUILD}"
-                  aport_name="${source_dir##*/}"
-                  synthetic_name="${repository}__${aport_name}"
-
-                  ln -s "$source_dir" \
-                    "/workspace/synthetic-aports/selected/$synthetic_name"
-                done
-              done
-
-              chown -hR builder:builder \
-                /workspace/synthetic-aports
-
-              ################################################################
-              # Resolve the root package names to owning APKBUILD directories.
-              #
-              # builddirs recursively includes build-time dependencies and
-              # prints the directories in dependency order.
-              ################################################################
-
-              set -- $ROOT_PACKAGES
-
-              su builder -c "
-                set -eu
-
-                ap \
-                  -d /workspace/synthetic-aports/selected \
-                  builddirs \
-                  \"\$@\" \
-                  > /workspace/metadata/BUILD_DIRECTORIES
-              " sh "$@"
-
-              if [ ! -s /workspace/metadata/BUILD_DIRECTORIES ]; then
-                echo "Dependency resolution returned no APKBUILD directories" >&2
-                exit 1
-              fi
-
-              echo
-              echo "Resolved APKBUILD directories:"
-              cat /workspace/metadata/BUILD_DIRECTORIES
-
-              ################################################################
-              # Create a second repository containing only the resolved
-              # APKBUILD directories.
-              ################################################################
-
-              while IFS= read -r resolved_dir; do
-                [ -n "$resolved_dir" ] || continue
-
-                case "$resolved_dir" in
-                  /*)
-                    source_dir="$resolved_dir"
-                    ;;
-                  *)
-                    source_dir="/workspace/synthetic-aports/selected/$resolved_dir"
-                    ;;
-                esac
-
-                if [ ! -f "$source_dir/APKBUILD" ]; then
-                  echo "Resolved directory has no APKBUILD: $source_dir" >&2
-                  exit 1
-                fi
-
-                filtered_name="${source_dir##*/}"
-
-                ln -s "$source_dir" \
-                  "/workspace/filtered-aports/selected/$filtered_name"
-              done < /workspace/metadata/BUILD_DIRECTORIES
-
-              chown -hR builder:builder \
-                /workspace/filtered-aports
-
-              echo
-              echo "Filtered source repository contains:"
-
-              find /workspace/filtered-aports/selected \
-                -mindepth 1 \
-                -maxdepth 1 \
-                -type l \
-                -print |
-                sort
-
-              ################################################################
-              # Build only the filtered repository.
-              #
-              # buildrepo handles dependency ordering and repository indexes.
-              ################################################################
-
-              su builder -c "
-                set -eu
-
-                buildrepo \
-                  --aports /workspace/filtered-aports \
-                  --destdir /workspace/packages \
-                  --logdir /workspace/build-logs \
-                  selected
-              "
-
-              echo
-              echo "Built APKs:"
-
-              find /workspace/packages \
-                -type f \
-                -name "*.apk" \
-                -print |
-                sort
-
-              count="$(
-                find /workspace/packages \
-                  -type f \
-                  -name "*.apk" |
-                wc -l
-              )"
-
-              if [ "$count" -eq 0 ]; then
-                echo "buildrepo produced no APK files" >&2
-                exit 1
-              fi
-            '
-
-      - name: Assemble offline repository
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          while IFS= read -r -d '' package; do
-            filename="$(basename "$package")"
-            destination="offline-repository/$filename"
-
-            if [[ -e "$destination" ]]; then
-              if ! cmp --silent "$package" "$destination"; then
-                echo "Conflicting APK files named $filename" >&2
-                echo "Existing: $destination" >&2
-                echo "New:      $package" >&2
-                exit 1
-              fi
-
-              continue
-            fi
-
-            cp -v "$package" "$destination"
-          done < <(
-            find packages \
-              -type f \
-              -name '*.apk' \
-              -print0
-          )
-
-          if ! compgen -G 'offline-repository/*.apk' >/dev/null; then
-            echo "No APK files were produced" >&2
-            exit 1
-          fi
-
-          cp -v keys/*.rsa.pub offline-repository/
-          cp -v metadata/* offline-repository/
-
-          cp metadata/ROOT_PACKAGES \
-            offline-repository/world.txt
-
-          echo
-          echo "Offline repository APK count:"
-          find offline-repository \
-            -maxdepth 1 \
-            -type f \
-            -name '*.apk' |
-            wc -l
-
-      - name: Generate final APK index
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          docker run --rm \
-            --volume \
-              "$GITHUB_WORKSPACE/offline-repository:/repository" \
-            "$ALPINE_IMAGE" \
-            sh -euxc '
-              apk index \
-                --description \
-                  "Locally source-built Alpine Edge x86_64 repository" \
-                --output /repository/APKINDEX.tar.gz \
-                /repository/*.apk
-            '
-
-      - name: Verify offline installation
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          docker run --rm \
-            --network none \
-            --volume \
-              "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
-            "$ALPINE_IMAGE" \
-            sh -euxc '
-              public_key=""
-
-              for candidate in /offline/*.rsa.pub; do
-                if [ -f "$candidate" ]; then
-                  public_key="$candidate"
-                  break
-                fi
-              done
-
-              if [ -z "$public_key" ]; then
-                echo "No abuild public key found" >&2
-                exit 1
-              fi
-
-              cp "$public_key" /etc/apk/keys/
-
-              printf "%s\n" /offline \
-                > /etc/apk/repositories
-
-              # The generated top-level APKINDEX is not signed because the
-              # temporary private key is deliberately not exported.
-              apk add \
-                --no-network \
-                --allow-untrusted \
-                $(cat /offline/world.txt)
-
-              echo
-              echo "Installed root packages:"
-              apk info \
-                $(cat /offline/world.txt)
-            '
-
-      - name: Verify expected commands
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          docker run --rm \
-            --network none \
-            --volume \
-              "$GITHUB_WORKSPACE/offline-repository:/offline:ro" \
-            "$ALPINE_IMAGE" \
-            sh -euxc '
-              public_key=""
-
-              for candidate in /offline/*.rsa.pub; do
-                if [ -f "$candidate" ]; then
-                  public_key="$candidate"
-                  break
-                fi
-              done
-
-              cp "$public_key" /etc/apk/keys/
-              printf "%s\n" /offline > /etc/apk/repositories
-
-              apk add \
-                --no-network \
-                --allow-untrusted \
-                $(cat /offline/world.txt)
-
-              curl --version
-              git --version
-              gcc --version
-              g++ --version
-              cmake --version
-              ninja --version
-              make --version
-              clangd --version
-              rg --version
-              eza --version
-              bat --version
-              fd --version
-              yazi --version
-              fish --version
-              delta --version
-              erd --version
-              uv --version
-              lazygit --version
-              glow --version
-              fzf --version
-              tmux -V
-              nvim --version
-            '
-
-      - name: Create offline repository archive
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          tar \
-            --create \
-            --zstd \
-            --file alpine-edge-x86_64-offline-apks.tar.zst \
-            offline-repository
-
-          sha256sum \
-            alpine-edge-x86_64-offline-apks.tar.zst \
-            > alpine-edge-x86_64-offline-apks.tar.zst.sha256
-
-          du -sh offline-repository
-
-          ls -lh \
-            alpine-edge-x86_64-offline-apks.tar.zst \
-            alpine-edge-x86_64-offline-apks.tar.zst.sha256
-
-      - name: Upload offline APK repository
+          file "out/${{ matrix.bin }}"
+          ldd_output="$(ldd "out/${{ matrix.bin }}" 2>&1 || true)"
+          printf '%s\n' "$ldd_output"
+          printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+          "out/${{ matrix.bin }}" ${{ matrix.version_arg }}
+
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: alpine-edge-x86_64-offline-apk-repository
-          path: |
-            offline-repository/
-            alpine-edge-x86_64-offline-apks.tar.zst
-            alpine-edge-x86_64-offline-apks.tar.zst.sha256
+          name: static-${{ matrix.bin }}-x86_64-linux-musl
+          path: out/${{ matrix.bin }}
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
 
-      - name: Upload build logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alpine-apk-build-logs
-          path: build-logs/
-          if-no-files-found: warn
-          compression-level: 6
-          retention-days: 30
+  rust:
+    name: Rust / ${{ matrix.bin }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    container: alpine:edge
 
-      - name: Upload source distfile cache
-        if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - bin: eza
+            crate: eza
+            version_arg: --version
+          - bin: erd
+            crate: erdtree
+            version_arg: --version
+          - bin: delta
+            crate: git-delta
+            version_arg: --version
+          - bin: fd
+            crate: fd-find
+            version_arg: --version
+          - bin: yazi
+            crate: yazi-fm
+            extra_crates: yazi-cli
+            version_arg: --version
+          - bin: bat
+            crate: bat
+            version_arg: --version
+          - bin: uv
+            crate: uv
+            version_arg: --version
+
+    steps:
+      - name: Install toolchain
+        run: |
+          apk add --no-cache \
+            build-base \
+            ca-certificates \
+            cargo \
+            cmake \
+            file \
+            git \
+            libgit2-dev \
+            libssh2-dev \
+            musl-dev \
+            openssl-dev \
+            openssl-libs-static \
+            perl \
+            pkgconf \
+            rust
+
+      - name: Build static binary
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+          OPENSSL_STATIC: "1"
+          RUSTFLAGS: "-C target-feature=+crt-static"
+        run: |
+          set -euo pipefail
+
+          mkdir -p out
+
+          cargo install \
+            --locked \
+            --root /tmp/cargo-root \
+            "${{ matrix.crate }}" \
+            ${{ matrix.extra_crates || '' }}
+
+          install -D -m 0755 \
+            "/tmp/cargo-root/bin/${{ matrix.bin }}" \
+            "out/${{ matrix.bin }}"
+
+      - name: Verify static binary
+        run: |
+          set -euo pipefail
+
+          file "out/${{ matrix.bin }}"
+          ldd_output="$(ldd "out/${{ matrix.bin }}" 2>&1 || true)"
+          printf '%s\n' "$ldd_output"
+          printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+          "out/${{ matrix.bin }}" ${{ matrix.version_arg }}
+
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: alpine-source-distfiles
-          path: distfiles/
-          if-no-files-found: warn
+          name: static-${{ matrix.bin }}-x86_64-linux-musl
+          path: out/${{ matrix.bin }}
+          if-no-files-found: error
           compression-level: 0
           retention-days: 90
+
+  c-family:
+    name: C/C++ / ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    container: alpine:edge
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tmux
+            bins: tmux
+            version_arg: -V
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                autoconf \
+                automake \
+                bison \
+                build-base \
+                ca-certificates \
+                file \
+                libtool \
+                linux-headers \
+                openssl-dev \
+                pkgconf \
+                wget
+
+              work=/tmp/build-tmux
+              prefix=/tmp/tmux-root
+              mkdir -p "$work" "$prefix" out
+              cd "$work"
+
+              ncurses_base=https://invisible-mirror.net/archives/ncurses
+              wget -O ncurses.tar.gz "$ncurses_base/ncurses-6.5.tar.gz"
+              tar -xf ncurses.tar.gz
+              cd ncurses-6.5
+              ./configure \
+                --prefix="$prefix" \
+                --enable-pc-files \
+                --enable-static \
+                --disable-shared \
+                --without-ada \
+                --without-cxx \
+                --without-cxx-binding \
+                --without-manpages \
+                --without-progs
+              make -j"$(nproc)"
+              make install
+              cd "$work"
+
+              libevent_base=https://github.com/libevent/libevent/releases/download
+              libevent_version=2.1.12-stable
+              libevent_url="$libevent_base/release-$libevent_version"
+              libevent_url="$libevent_url/libevent-$libevent_version.tar.gz"
+              wget -O libevent.tar.gz "$libevent_url"
+              tar -xf libevent.tar.gz
+              cd libevent-2.1.12-stable
+              ./configure \
+                --prefix="$prefix" \
+                --enable-static \
+                --disable-shared \
+                --disable-openssl
+              make -j"$(nproc)"
+              make install
+              cd "$work"
+
+              tmux_base=https://github.com/tmux/tmux/releases/download
+              tmux_version=3.5a
+              tmux_url="$tmux_base/$tmux_version/tmux-$tmux_version.tar.gz"
+              wget -O tmux.tar.gz "$tmux_url"
+              tar -xf tmux.tar.gz
+              cd tmux-3.5a
+              PKG_CONFIG_PATH="$prefix/lib/pkgconfig" \
+              CFLAGS="-I$prefix/include -Os" \
+              LDFLAGS="-L$prefix/lib -static" \
+              ./configure \
+                --prefix=/usr \
+                --enable-static
+              make -j"$(nproc)"
+
+              install -D -m 0755 tmux /github/workspace/out/tmux
+
+          - name: git-curl
+            bins: curl git
+            version_arg: --version
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                autoconf \
+                build-base \
+                ca-certificates \
+                curl \
+                expat-dev \
+                expat-static \
+                file \
+                openssl-dev \
+                openssl-libs-static \
+                pcre2-dev \
+                pcre2-static \
+                perl \
+                pkgconf \
+                wget \
+                zlib-dev \
+                zlib-static
+
+              work=/tmp/build-git-curl
+              prefix=/tmp/git-curl-root
+              mkdir -p "$work" "$prefix" out
+              cd "$work"
+
+              wget -O curl.tar.xz https://curl.se/download/curl-8.14.1.tar.xz
+              tar -xf curl.tar.xz
+              cd curl-8.14.1
+              ./configure \
+                --prefix="$prefix" \
+                --disable-shared \
+                --enable-static \
+                --disable-ldap \
+                --disable-ldaps \
+                --without-brotli \
+                --without-libidn2 \
+                --without-libpsl \
+                --without-nghttp2 \
+                --without-zstd \
+                --with-openssl \
+                LDFLAGS="-static"
+              make -j"$(nproc)"
+              make install
+              install -D -m 0755 src/curl /github/workspace/out/curl
+              cd "$work"
+
+              git_base=https://www.kernel.org/pub/software/scm/git
+              git_version=2.50.1
+              wget -O git.tar.xz "$git_base/git-$git_version.tar.xz"
+              tar -xf git.tar.xz
+              cd git-2.50.1
+              make configure
+              PKG_CONFIG_PATH="$prefix/lib/pkgconfig" \
+              CFLAGS="-I$prefix/include -Os" \
+              LDFLAGS="-L$prefix/lib -static" \
+              ./configure \
+                --prefix=/usr \
+                --with-curl="$prefix" \
+                --with-openssl
+              make -j"$(nproc)" \
+                NO_GETTEXT=YesPlease \
+                NO_TCLTK=YesPlease \
+                NO_INSTALL_HARDLINKS=YesPlease \
+                CURL_LDFLAGS="-L$prefix/lib -lcurl -lssl -lcrypto -lz" \
+                V=1
+
+              install -D -m 0755 git /github/workspace/out/git
+
+          - name: samurai
+            bins: samurai ninja
+            version_arg: --version
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                build-base \
+                ca-certificates \
+                file \
+                git
+
+              git clone \
+                --depth 1 \
+                https://github.com/michaelforney/samurai.git \
+                /tmp/samurai
+              cd /tmp/samurai
+              make -j"$(nproc)" LDFLAGS="-static"
+
+              install -D -m 0755 samu /github/workspace/out/samurai
+              install -D -m 0755 samu /github/workspace/out/ninja
+
+          - name: cmake
+            bins: cmake
+            version_arg: --version
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                build-base \
+                ca-certificates \
+                file \
+                linux-headers \
+                openssl-dev \
+                perl \
+                wget
+
+              cmake_base=https://github.com/Kitware/CMake/releases/download
+              cmake_version=4.1.0
+              wget \
+                -O /tmp/cmake.tar.gz \
+                "$cmake_base/v$cmake_version/cmake-$cmake_version.tar.gz"
+              mkdir -p /tmp/cmake-src out
+              tar -xf /tmp/cmake.tar.gz -C /tmp/cmake-src --strip-components=1
+              cd /tmp/cmake-src
+
+              ./bootstrap \
+                --parallel="$(nproc)" \
+                --prefix=/usr \
+                -- \
+                -DBUILD_CursesDialog=OFF \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_EXE_LINKER_FLAGS=-static \
+                -DCMAKE_USE_OPENSSL=OFF
+
+              make -j"$(nproc)"
+              install -D -m 0755 bin/cmake /github/workspace/out/cmake
+
+          - name: fish
+            bins: fish
+            version_arg: --version
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                build-base \
+                ca-certificates \
+                cmake \
+                file \
+                gettext-dev \
+                ncurses-dev \
+                ncurses-static \
+                pcre2-dev \
+                pcre2-static \
+                wget
+
+              fish_base=https://github.com/fish-shell/fish-shell/releases/download
+              fish_version=4.0.2
+              wget \
+                -O /tmp/fish.tar.xz \
+                "$fish_base/$fish_version/fish-$fish_version.tar.xz"
+              mkdir -p /tmp/fish-src /tmp/fish-build out
+              tar -xf /tmp/fish.tar.xz -C /tmp/fish-src --strip-components=1
+
+              cmake \
+                -S /tmp/fish-src \
+                -B /tmp/fish-build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DBUILD_SHARED_LIBS=OFF \
+                -DCMAKE_EXE_LINKER_FLAGS=-static
+              cmake --build /tmp/fish-build --parallel "$(nproc)"
+
+              install -D -m 0755 /tmp/fish-build/fish /github/workspace/out/fish
+
+          - name: neovim
+            bins: nvim
+            version_arg: --version
+            script: |
+              set -euo pipefail
+
+              apk add --no-cache \
+                autoconf \
+                automake \
+                build-base \
+                ca-certificates \
+                cmake \
+                curl \
+                file \
+                gettext \
+                gettext-dev \
+                git \
+                libtool \
+                linux-headers \
+                ninja \
+                pkgconf \
+                unzip
+
+              git clone \
+                --depth 1 \
+                --branch stable \
+                https://github.com/neovim/neovim.git \
+                /tmp/neovim
+              cd /tmp/neovim
+
+              nvim_flags="-DBUILD_SHARED_LIBS=OFF"
+              nvim_flags="$nvim_flags -DCMAKE_EXE_LINKER_FLAGS=-static"
+
+              make -j"$(nproc)" \
+                CMAKE_BUILD_TYPE=Release \
+                CMAKE_EXTRA_FLAGS="$nvim_flags"
+
+              install -D -m 0755 build/bin/nvim /github/workspace/out/nvim
+
+    steps:
+      - name: Build static binary
+        shell: sh
+        run: |
+          ${{ matrix.script }}
+
+      - name: Verify static binaries
+        shell: sh
+        run: |
+          set -euo pipefail
+
+          for bin in ${{ matrix.bins }}; do
+            file "out/$bin"
+            ldd_output="$(ldd "out/$bin" 2>&1 || true)"
+            printf '%s\n' "$ldd_output"
+            printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+            "out/$bin" ${{ matrix.version_arg }}
+          done
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-${{ matrix.name }}-x86_64-linux-musl
+          path: out/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+
+  verify:
+    name: Verify all binaries on Alpine
+    runs-on: ubuntu-24.04
+    needs:
+      - go
+      - rust
+      - c-family
+    timeout-minutes: 30
+    container: alpine:edge
+
+    steps:
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Verify commands
+        run: |
+          set -euo pipefail
+
+          apk add --no-cache file
+
+          mkdir -p /usr/local/bin
+          find artifacts -maxdepth 3 -type f -print -exec chmod 0755 {} \;
+          find artifacts -maxdepth 3 -type f -exec cp {} /usr/local/bin/ \;
+
+          expected="
+          fzf
+          tmux
+          git
+          curl
+          nvim
+          glow
+          lazygit
+          eza
+          erd
+          delta
+          fd
+          ninja
+          samurai
+          cmake
+          yazi
+          fish
+          bat
+          uv
+          "
+
+          for bin in $expected; do
+            command -v "$bin"
+            file "$(command -v "$bin")"
+            ldd_output="$(ldd "$(command -v "$bin")" 2>&1 || true)"
+            printf '%s\n' "$ldd_output"
+            printf '%s\n' "$ldd_output" | grep -q "not a dynamic executable"
+          done
+
+          fzf --version
+          tmux -V
+          git --version
+          curl --version
+          nvim --version
+          glow --version
+          lazygit --version
+          eza --version
+          erd --version
+          delta --version
+          fd --version
+          ninja --version
+          samurai --version
+          cmake --version
+          yazi --version
+          fish --version
+          bat --version
+          uv --version
