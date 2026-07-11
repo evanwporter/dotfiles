@@ -1,4 +1,4 @@
-name: Build Alpine packages
+name: Build Alpine CLI packages
 
 on:
   workflow_dispatch:
@@ -14,36 +14,70 @@ permissions:
 
 env:
   ALPINE_IMAGE: alpine:edge
+  APORTS_BRANCH: master
 
 jobs:
   build:
-    name: Build ${{ matrix.package }}
+    name: Build ${{ matrix.name }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
+
       matrix:
-        package:
-          - ripgrep
-          - eza
-          - bat
-          - fd
-          - yazi
-          - fish
-          - git-delta
-          - erdtree
-          - uv
-          - lazygit
-          - glow
-          - fzf
-          - tmux
-          - neovim
+        include:
+          - name: ripgrep
+            aport: ripgrep
+
+          - name: eza
+            aport: eza
+
+          - name: bat
+            aport: bat
+
+          - name: fd
+            aport: fd
+
+          - name: yazi
+            aport: yazi
+
+          - name: fish
+            aport: fish
+
+          - name: delta
+            aport: git-delta
+
+          - name: erdtree
+            aport: erdtree
+
+          - name: uv
+            aport: uv
+
+          - name: lazygit
+            aport: lazygit
+
+          - name: glow
+            aport: glow
+
+          - name: fzf
+            aport: fzf
+
+          - name: tmux
+            aport: tmux
+
+          - name: neovim
+            aport: neovim
 
     steps:
       - name: Clone Alpine aports
+        env:
+          BRANCH: ${{ env.APORTS_BRANCH }}
         run: |
+          set -euo pipefail
+
           git clone \
             --depth=1 \
+            --branch "$BRANCH" \
             https://gitlab.alpinelinux.org/alpine/aports.git \
             aports
 
@@ -53,126 +87,173 @@ jobs:
         run: |
           set -euo pipefail
 
-          docker run --rm \
-            --privileged \
-            --env APORT \
-            --volume "$GITHUB_WORKSPACE:/workspace" \
-            --workdir /workspace \
-            alpine:edge \- name: Build ${{ matrix.name }}
-        env:
-          APORT: ${{ matrix.aport }}
-        run: |
-          set -euo pipefail
+          mkdir -p dist
 
           docker run --rm \
             --privileged \
             --env APORT \
             --volume "$GITHUB_WORKSPACE:/workspace" \
             --workdir /workspace \
-            alpine:edge \
+            "$ALPINE_IMAGE" \
             sh -euxc '
               apk add --no-cache \
                 alpine-sdk \
                 doas \
                 findutils
 
+              # Create an unprivileged package builder.
               adduser -D builder
               addgroup builder abuild
 
+              # Permit members of the abuild group to install and remove
+              # temporary build dependencies without a password.
               install -d -m 0755 /etc/doas.d
-              echo "permit nopass builder" \
-                > /etc/doas.d/builder.conf
 
-              mkdir -p /home/builder/.abuild
-              chown -R builder:builder \
-                /home/builder \
-                /workspace/aports
+              cat > /etc/doas.d/abuild.conf <<EOF
+              permit nopass :abuild
+              EOF
 
-              package_dir="$(
+              chmod 0600 /etc/doas.d/abuild.conf
+
+              # Locate the requested aport by finding its APKBUILD directly.
+              apkbuild="$(
                 find \
                   /workspace/aports/main \
                   /workspace/aports/community \
                   /workspace/aports/testing \
-                  -mindepth 1 \
-                  -maxdepth 1 \
-                  -type d \
-                  -name "$APORT" \
+                  /workspace/aports/non-free \
+                  /workspace/aports/unmaintained \
+                  -path "*/$APORT/APKBUILD" \
+                  -type f \
                   -print \
-                  -quit
+                  -quit \
+                  2>/dev/null
               )"
 
-              if [ -z "$package_dir" ]; then
-                echo "Could 
-            sh -euxc '
-              apk add --no-cache \
-                alpine-sdk \
-                doas \
-                findutils
+              if [ -z "$apkbuild" ]; then
+                echo "Could not find APKBUILD for aport: $APORT" >&2
+                echo >&2
+                echo "Similar aport directories:" >&2
 
-              adduser -D builder
-              addgroup builder abuild
-
-              install -d -m 0755 /etc/doas.d
-              echo "permit nopass builder" \
-                > /etc/doas.d/builder.conf
-
-              mkdir -p /home/builder/.abuild
-              chown -R builder:builder \
-                /home/builder \
-                /workspace/aports
-
-              package_dir="$(
                 find \
                   /workspace/aports/main \
                   /workspace/aports/community \
                   /workspace/aports/testing \
+                  /workspace/aports/non-free \
+                  /workspace/aports/unmaintained \
                   -mindepth 1 \
                   -maxdepth 1 \
                   -type d \
-                  -name "$APORT" \
+                  -name "*$APORT*" \
                   -print \
-                  -quit
-              )"
+                  2>/dev/null \
+                  >&2 || true
 
-              if [ -z "$package_dir" ]; then
-                echo "Could not find aport: $APORT" >&2
                 exit 1
               fi
 
+              package_dir="$(dirname "$apkbuild")"
+
+              echo "Aport:     $APORT"
+              echo "APKBUILD:  $apkbuild"
+              echo "Directory: $package_dir"
+
               test -f "$package_dir/APKBUILD"
 
-              echo "Building aport from $package_dir"
+              # abuild must be run as a non-root user.
+              install -d \
+                -o builder \
+                -g builder \
+                /home/builder/.abuild \
+                /home/builder/packages
 
+              chown -R builder:builder \
+                /workspace/aports \
+                /home/builder
+
+              # Generate a signing key owned by the builder.
               su builder -c "
                 set -eu
-
                 abuild-keygen -a -n
+              "
 
+              # Trust the generated public key inside this temporary builder.
+              public_key="$(
+                find /home/builder/.abuild \
+                  -maxdepth 1 \
+                  -type f \
+                  -name "*.rsa.pub" \
+                  -print \
+                  -quit
+              )"
+
+              test -n "$public_key"
+              cp "$public_key" /etc/apk/keys/
+
+              # Build the package and all subpackages. abuild reads the
+              # depends, makedepends and checkdepends fields from APKBUILD.
+              su builder -c "
+                set -eu
                 cd \"$package_dir\"
                 abuild -r
               "
 
-              mkdir -p /workspace/dist
-
+              # Copy every APK produced by this isolated matrix job.
               find /home/builder/packages \
                 -type f \
                 -name "*.apk" \
                 -exec cp -v {} /workspace/dist/ \;
 
-              test -n "$(
+              built_packages="$(
                 find /workspace/dist \
+                  -maxdepth 1 \
                   -type f \
                   -name "*.apk" \
-                  -print \
-                  -quit
+                  -print
               )"
+
+              if [ -z "$built_packages" ]; then
+                echo "abuild completed but produced no APK files" >&2
+                exit 1
+              fi
+
+              echo
+              echo "Produced packages:"
+              printf "%s\n" "$built_packages"
+
+              ls -lh /workspace/dist
             '
 
-      - name: Upload ${{ matrix.package }}
+      - name: Record package metadata
+        env:
+          NAME: ${{ matrix.name }}
+          APORT: ${{ matrix.aport }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "name=$NAME"
+            echo "aport=$APORT"
+            echo "alpine_image=$ALPINE_IMAGE"
+            echo "aports_branch=$APORTS_BRANCH"
+            echo "aports_commit=$(git -C aports rev-parse HEAD)"
+            echo
+            echo "packages:"
+            find dist \
+              -maxdepth 1 \
+              -type f \
+              -name "*.apk" \
+              -printf "  - %f\n" \
+              | sort
+          } > dist/build-info.txt
+
+          cat dist/build-info.txt
+
+      - name: Upload ${{ matrix.name }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.package }}-alpine
-          path: dist/*.apk
+          name: ${{ matrix.name }}-alpine
+          path: dist/
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
