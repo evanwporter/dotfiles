@@ -1,7 +1,8 @@
-name: Build CLI binaries
+name: Build Alpine packages
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
@@ -11,281 +12,104 @@ on:
 permissions:
   contents: read
 
+env:
+  ALPINE_IMAGE: alpine:edge
+
 jobs:
-  build-rust:
-    name: Build ${{ matrix.name }}
+  build:
+    name: Build ${{ matrix.package }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: ripgrep
-            repository: BurntSushi/ripgrep
-            binary: rg
-
-          - name: eza
-            repository: eza-community/eza
-            binary: eza
-
-          - name: bat
-            repository: sharkdp/bat
-            binary: bat
-
-          - name: fd
-            repository: sharkdp/fd
-            binary: fd
-
-          - name: yazi
-            repository: sxyazi/yazi
-            binary: yazi
-
-          - name: fish
-            repository: fish-shell/fish-shell
-            binary: fish
-
-          - name: delta
-            repository: dandavison/delta
-            binary: delta
-
-          - name: erdtree
-            repository: solidiquis/erdtree
-            binary: erd
+        package:
+          - ripgrep
+          - eza
+          - bat
+          - fd
+          - yazi
+          - fish
+          - git-delta
+          - erdtree
+          - uv
+          - lazygit
+          - glow
+          - fzf
+          - tmux
+          - neovim
 
     steps:
-      - name: Check out ${{ matrix.name }}
+      - name: Check out aports
         uses: actions/checkout@v4
         with:
-          repository: ${{ matrix.repository }}
+          repository: alpine/aports
+          path: aports
 
-      - name: Install native build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes \
-            build-essential \
-            cmake \
-            gettext \
-            libpcre2-dev \
-            pkg-config
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Restore Rust cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.name }}
-
-      - name: Build ${{ matrix.name }}
-        run: cargo build --release --locked
-
-      - name: Verify ${{ matrix.binary }}
-        run: |
-          test -x "target/release/${{ matrix.binary }}"
-          "target/release/${{ matrix.binary }}" --version
-
-      - name: Stage ${{ matrix.binary }}
-        run: |
-          mkdir -p dist
-          cp \
-            "target/release/${{ matrix.binary }}" \
-            "dist/${{ matrix.binary }}"
-
-      - name: Upload ${{ matrix.binary }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.binary }}
-          path: dist/${{ matrix.binary }}
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
-
-  build-go:
-    name: Build ${{ matrix.name }}
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: lazygit
-            repository: jesseduffield/lazygit
-            binary: lazygit
-            package: .
-
-          - name: glow
-            repository: charmbracelet/glow
-            binary: glow
-            package: .
-
-          - name: fzf
-            repository: junegunn/fzf
-            binary: fzf
-            package: .
-
-    steps:
-      - name: Check out ${{ matrix.name }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.repository }}
-
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Build ${{ matrix.name }}
+      - name: Build ${{ matrix.package }}
         env:
-          CGO_ENABLED: "0"
+          PACKAGE: ${{ matrix.package }}
         run: |
-          mkdir -p dist
+          set -euo pipefail
 
-          go build \
-            -trimpath \
-            -ldflags="-s -w" \
-            -o "dist/${{ matrix.binary }}" \
-            "${{ matrix.package }}"
+          docker run --rm \
+            --privileged \
+            --env PACKAGE \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --workdir /workspace \
+            "$ALPINE_IMAGE" \
+            sh -euxc '
+              apk add --no-cache \
+                alpine-sdk \
+                doas \
+                findutils
 
-      - name: Verify ${{ matrix.binary }}
-        run: |
-          test -x "dist/${{ matrix.binary }}"
-          "dist/${{ matrix.binary }}" --version
+              adduser -D builder
+              addgroup builder abuild
 
-      - name: Upload ${{ matrix.binary }}
+              echo "permit nopass builder" > /etc/doas.d/builder.conf
+
+              mkdir -p /home/builder/.abuild
+              chown -R builder:builder \
+                /home/builder \
+                /workspace/aports
+
+              su builder -c "
+                abuild-keygen -a -n
+
+                cd /workspace/aports
+
+                package_dir=\$(
+                  find main community testing \
+                    -mindepth 2 \
+                    -maxdepth 2 \
+                    -type d \
+                    -name \"$PACKAGE\" \
+                    -print \
+                    -quit
+                )
+
+                test -n \"\$package_dir\"
+
+                cd \"\$package_dir\"
+                abuild -r
+              "
+
+              mkdir -p /workspace/dist
+
+              find /home/builder/packages \
+                -type f \
+                -name "*.apk" \
+                -exec cp {} /workspace/dist/ \;
+
+              test -n "$(find /workspace/dist -name "*.apk" -print -quit)"
+            '
+
+      - name: Upload ${{ matrix.package }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.binary }}
-          path: dist/${{ matrix.binary }}
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
-
-  build-tmux:
-    name: Build latest tmux release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Find latest tmux release
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="$(
-            gh api repos/tmux/tmux/releases/latest \
-              --jq '.tag_name'
-          )"
-
-          test -n "$tag"
-
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "Building tmux $tag"
-
-      - name: Check out tmux ${{ steps.release.outputs.tag }}
-        uses: actions/checkout@v4
-        with:
-          repository: tmux/tmux
-          ref: ${{ steps.release.outputs.tag }}
-
-      - name: Install tmux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes \
-            autoconf \
-            automake \
-            bison \
-            build-essential \
-            libevent-dev \
-            libncurses-dev \
-            pkg-config
-
-      - name: Build tmux
-        run: |
-          sh autogen.sh
-          ./configure
-          make -j"$(nproc)"
-
-      - name: Verify tmux
-        run: |
-          test -x tmux
-          ./tmux -V
-
-      - name: Stage tmux
-        run: |
-          mkdir -p dist
-          cp tmux dist/tmux
-
-      - name: Upload tmux
-        uses: actions/upload-artifact@v4
-        with:
-          name: tmux
-          path: dist/tmux
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
-
-  build-neovim:
-    name: Build latest Neovim release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Find latest Neovim release
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="$(
-            gh api repos/neovim/neovim/releases/latest \
-              --jq '.tag_name'
-          )"
-
-          test -n "$tag"
-
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "Building Neovim $tag"
-
-      - name: Check out Neovim ${{ steps.release.outputs.tag }}
-        uses: actions/checkout@v4
-        with:
-          repository: neovim/neovim
-          ref: ${{ steps.release.outputs.tag }}
-
-      - name: Install Neovim build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes \
-            build-essential \
-            cmake \
-            curl \
-            gettext \
-            ninja-build \
-            pkg-config \
-            unzip
-
-      - name: Build Neovim
-        run: |
-          make \
-            CMAKE_BUILD_TYPE=Release \
-            CMAKE_INSTALL_PREFIX="$PWD/install" \
-            -j"$(nproc)"
-
-          make install
-
-      - name: Verify nvim
-        run: |
-          test -x install/bin/nvim
-          ./install/bin/nvim --version
-
-      - name: Stage nvim
-        run: |
-          mkdir -p dist
-          cp install/bin/nvim dist/nvim
-
-      - name: Upload nvim
-        uses: actions/upload-artifact@v4
-        with:
-          name: nvim
-          path: dist/nvim
+          name: ${{ matrix.package }}-alpine
+          path: dist/*.apk
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
