@@ -66,6 +66,7 @@ jobs:
           # - name: fish
           #   aport: fish
           #
+
           # - name: delta
           #   aport: delta
           #
@@ -78,14 +79,14 @@ jobs:
           # - name: glow
           #   aport: glow
           #
-          # - name: fzf
-          #   aport: fzf
+          - name: fzf
+            aport: fzf
 
           - name: tmux
             aport: tmux
 
-          - name: neovim
-            aport: neovim
+          # - name: neovim
+          #   aport: neovim
 
     steps:
       - name: Check out Alpine aports mirror
