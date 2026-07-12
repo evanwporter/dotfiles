@@ -26,7 +26,9 @@ return {
             -- },
             {
                 "<leader>ss",
-                "<cmd>FzfLua resume<cr>",
+                function()
+                    require("fzf-lua").resume()
+                end,
                 desc = "Resume Fzf search",
             },
             {

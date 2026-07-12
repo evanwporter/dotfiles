@@ -9,7 +9,7 @@ return {
             --in this section, choose your own keymappings!
             {
                 "<leader>y",
-                mode = { "n", "v" },
+                mode = { "n" },
                 "<cmd>Yazi<cr>",
                 desc = "Yazi",
             },

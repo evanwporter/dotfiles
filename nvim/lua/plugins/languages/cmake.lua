@@ -1,3 +1,22 @@
+require("util.lsp").add_servers({
+    neocmake = {
+        cmd = {
+            "neocmakelsp",
+        },
+        filetypes = {
+            "cmake",
+        },
+        root_markers = {
+            "CMakePresets.json",
+            "CTestConfig.cmake",
+            ".git",
+        },
+        init_options = {
+            buildDirectory = "build",
+        },
+    },
+})
+
 return {
     {
         "Civitasv/cmake-tools.nvim",

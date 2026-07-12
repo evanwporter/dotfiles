@@ -9,6 +9,11 @@ return {
                 update_in_insert = false,
                 severity_sort = true,
             })
+
+            for server, server_opts in pairs(require("util.lsp").servers) do
+                vim.lsp.config(server, server_opts)
+                vim.lsp.enable(server)
+            end
         end,
     },
 }
