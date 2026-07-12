@@ -1,50 +1,50 @@
 vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(event)
-    local map = function(keys, func, desc)
-      vim.keymap.set("n", keys, func, {
-        buffer = event.buf,
-        desc = desc,
-      })
-    end
+    callback = function(event)
+        local map = function(keys, func, desc)
+            vim.keymap.set("n", keys, func, {
+                buffer = event.buf,
+                desc = desc,
+            })
+        end
 
-    map("gd", vim.lsp.buf.definition, "Go to Definition")
-    map("gD", vim.lsp.buf.declaration, "Go to Declaration")
-    map("gr", function()
-      require("fzf-lua").lsp_references()
-    end, "Go to References")
-    map("gi", vim.lsp.buf.implementation, "Go to Implementation")
+        map("gd", vim.lsp.buf.definition, "Go to Definition")
+        map("gD", vim.lsp.buf.declaration, "Go to Declaration")
+        map("gr", function()
+            require("fzf-lua").lsp_references()
+        end, "Go to References")
+        map("gi", vim.lsp.buf.implementation, "Go to Implementation")
 
-    map("K", vim.lsp.buf.hover, "Hover Documentation")
+        map("K", vim.lsp.buf.hover, "Hover Documentation")
 
-    map("<leader>cr", vim.lsp.buf.rename, "Rename")
-    map("<leader>ca", vim.lsp.buf.code_action, "Code Action")
-    map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+        map("<leader>cr", vim.lsp.buf.rename, "Rename")
+        map("<leader>ca", vim.lsp.buf.code_action, "Code Action")
+        map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
 
-    map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
-    map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
+        map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
+        map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
 
-    map("<leader>sd", function()
-      require("fzf-lua").lsp_document_symbols()
-    end, "Search Document Symbols")
+        map("<leader>sd", function()
+            require("fzf-lua").lsp_document_symbols()
+        end, "Search Document Symbols")
 
-    map("<leader>sD", function()
-      require("fzf-lua").lsp_live_workspace_symbols()
-    end, "Search Workspace Symbols")
+        map("<leader>sD", function()
+            require("fzf-lua").lsp_live_workspace_symbols()
+        end, "Search Workspace Symbols")
 
-    map("<leader>cx", function()
-      require("fzf-lua").diagnostics_document()
-    end, "Diagnostics Document")
+        map("<leader>cx", function()
+            require("fzf-lua").diagnostics_document()
+        end, "Diagnostics Document")
 
-    map("<leader>cX", function()
-      require("fzf-lua").diagnostics_workspace()
-    end, "Buffer Workspace")
-  end,
+        map("<leader>cX", function()
+            require("fzf-lua").diagnostics_workspace()
+        end, "Buffer Workspace")
+    end,
 })
 
 for i = 1, 9 do
-  vim.keymap.set("n", "<leader>" .. i, function()
-    require("harpoon"):list():select(i)
-  end, { desc = "which_key_ignore" })
+    vim.keymap.set("n", "<leader>" .. i, function()
+        require("harpoon"):list():select(i)
+    end, { desc = "which_key_ignore" })
 end
 
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window" })
@@ -63,25 +63,25 @@ vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
 vim.keymap.set("n", "<localleader>a", "ggVG", { desc = "Select All" })
 
 vim.keymap.set("n", "j", function()
-  if vim.v.count == 0 and vim.fn.line(".") == vim.fn.line("$") then
-    return "$"
-  end
+    if vim.v.count == 0 and vim.fn.line(".") == vim.fn.line("$") then
+        return "$"
+    end
 
-  return "j"
+    return "j"
 end, {
-  expr = true,
-  silent = true,
-  desc = "Down",
+    expr = true,
+    silent = true,
+    desc = "Down",
 })
 
 vim.keymap.set({ "n", "x" }, "k", function()
-  if vim.v.count == 0 and vim.fn.line(".") == 1 then
-    return "0"
-  end
+    if vim.v.count == 0 and vim.fn.line(".") == 1 then
+        return "0"
+    end
 
-  return "k"
+    return "k"
 end, {
-  expr = true,
-  silent = true,
-  desc = "Up",
+    expr = true,
+    silent = true,
+    desc = "Up",
 })
