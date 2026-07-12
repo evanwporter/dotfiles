@@ -28,11 +28,10 @@ return {
                     "Trouble",
                     "lazy",
                     "dap-repl",
-                    "dapui_scopes",
-                    "dapui_breakpoints",
-                    "dapui_stacks",
-                    "dapui_watches",
-                    "dapui_console",
+                    "dap-view",
+                    "dap-view-term",
+                    "dap-view-hover",
+                    "dap-view-help",
                 }, ft)
             end
 
@@ -65,11 +64,10 @@ return {
                     "snacks_dashboard",
                     "snacks_terminal",
                     "dap-repl",
-                    "dapui_scopes",
-                    "dapui_breakpoints",
-                    "dapui_stacks",
-                    "dapui_watches",
-                    "dapui_console",
+                    "dap-view",
+                    "dap-view-term",
+                    "dap-view-hover",
+                    "dap-view-help",
                 },
             })
         end,
