@@ -85,16 +85,6 @@ return {
                         "fallback",
                     },
 
-                    ["<Down>"] = {
-                        "insert_next",
-                        "fallback",
-                    },
-
-                    ["<Up>"] = {
-                        "insert_prev",
-                        "fallback",
-                    },
-
                     -- Accept the selected completion and execute the command.
                     ["<CR>"] = {
                         "accept_and_enter",
