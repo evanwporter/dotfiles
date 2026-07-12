@@ -64,12 +64,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end,
 })
 
-for i = 1, 9 do
-    vim.keymap.set("n", "<leader>" .. i, function()
-        require("harpoon"):list():select(i)
-    end, { desc = "which_key_ignore" })
-end
-
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window" })
 vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window" })
