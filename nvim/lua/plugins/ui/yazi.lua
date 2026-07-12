@@ -30,6 +30,15 @@ return {
             keymaps = {
                 show_help = "<f1>",
             },
+            hooks = {
+                yazi_opened = function(_, buffer)
+                    vim.keymap.set("t", "<Esc><Esc>", "<Esc><Esc>", {
+                        buffer = buffer,
+                        remap = false,
+                        desc = "Pass Escape Escape to Yazi",
+                    })
+                end,
+            },
 
             -- Make full screen
             floating_window_scaling_factor = 1,
