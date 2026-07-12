@@ -2,6 +2,7 @@ require("util.lsp").add_servers({
     neocmake = {
         cmd = {
             "neocmakelsp",
+            "stdio",
         },
         filetypes = {
             "cmake",
