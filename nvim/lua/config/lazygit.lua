@@ -1,4 +1,4 @@
-vim.keymap.set("n", "<leader>g", function()
+vim.keymap.set("n", "<leader>gg", function()
     vim.cmd("tabnew")
 
     -- Hide status column / line numbers in LazyGit terminal
