@@ -1,23 +1,20 @@
 return {
     {
         "MagicDuck/grug-far.nvim",
-        config = function()
-            require("grug-far").setup({
-                openTargetWindow = {
-                    preferredLocation = "right",
-                    exclude = {
-                        "dashboard",
-                    },
+        opts = {
+            openTargetWindow = {
+                preferredLocation = "right",
+                exclude = {
+                    "dashboard",
                 },
-            })
+            },
+        },
+        config = function(_, opts)
+            require("grug-far").setup(opts)
 
             -- Insert mode <Tab> goes to the next grug-far input
-            local group = vim.api.nvim_create_augroup("grug-far-tab-navigation", {
-                clear = true,
-            })
-
             vim.api.nvim_create_autocmd("FileType", {
-                group = group,
+                group = require("util.autocmd").augroup("grug-far-tab-navigation"),
                 pattern = "grug-far",
                 callback = function(event)
                     vim.keymap.set("i", "<Tab>", function()

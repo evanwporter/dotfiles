@@ -25,13 +25,6 @@ return {
             --   desc = "LSP references",
             -- },
             {
-                "<leader>ss",
-                function()
-                    require("fzf-lua").resume()
-                end,
-                desc = "Resume Fzf search",
-            },
-            {
                 "<leader>sg",
                 function()
                     require("fzf-lua").live_grep()
@@ -58,11 +51,21 @@ return {
             { "<leader>sD", desc = "Search Workspace Symbols" },
             { "<leader>cx", desc = "Diagnostics Document" },
             { "<leader>cX", desc = "Diagnostics Workspace" },
+            { "gai", desc = "LSP Incoming Calls" },
+            { "gao", desc = "LSP Outgoing Calls" },
         },
         opts = {
             fzf_opts = {
                 ["--layout"] = "reverse-list",
             },
         },
+        config = function(_, opts)
+            local fzf = require("fzf-lua")
+            fzf.setup(opts)
+
+            vim.keymap.set("n", "<leader>ss", fzf.resume, {
+                desc = "Resume Fzf search",
+            })
+        end,
     },
 }

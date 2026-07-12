@@ -1,35 +1,58 @@
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(event)
-        local map = function(keys, func, desc)
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
+
+        if not client then
+            return
+        end
+
+        local function map(keys, func, desc, method)
+            if method and not client:supports_method(method, event.buf) then
+                return
+            end
+
             vim.keymap.set("n", keys, func, {
                 buffer = event.buf,
                 desc = desc,
+                silent = true,
             })
         end
 
-        map("gd", vim.lsp.buf.definition, "Go to Definition")
-        map("gD", vim.lsp.buf.declaration, "Go to Declaration")
+        map("gd", vim.lsp.buf.definition, "Go to Definition", "textDocument/definition")
+
+        map("gD", vim.lsp.buf.declaration, "Go to Declaration", "textDocument/declaration")
+
         map("gr", function()
             require("fzf-lua").lsp_references()
-        end, "Go to References")
-        map("gi", vim.lsp.buf.implementation, "Go to Implementation")
+        end, "Go to References", "textDocument/references")
 
-        map("K", vim.lsp.buf.hover, "Hover Documentation")
+        map("gi", vim.lsp.buf.implementation, "Go to Implementation", "textDocument/implementation")
 
-        map("<leader>cr", vim.lsp.buf.rename, "Rename")
-        map("<leader>ca", vim.lsp.buf.code_action, "Code Action")
-        map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+        map("gai", function()
+            require("fzf-lua").lsp_incoming_calls()
+        end, "LSP Incoming Calls", "callHierarchy/incomingCalls")
 
-        map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
-        map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
+        map("gao", function()
+            require("fzf-lua").lsp_outgoing_calls()
+        end, "LSP Outgoing Calls", "callHierarchy/outgoingCalls")
+
+        map("K", vim.lsp.buf.hover, "Hover Documentation", "textDocument/hover")
+
+        map("<leader>cr", vim.lsp.buf.rename, "Rename", "textDocument/rename")
+
+        map("<leader>ca", vim.lsp.buf.code_action, "Code Action", "textDocument/codeAction")
 
         map("<leader>sd", function()
             require("fzf-lua").lsp_document_symbols()
-        end, "Search Document Symbols")
+        end, "Search Document Symbols", "textDocument/documentSymbol")
 
         map("<leader>sD", function()
             require("fzf-lua").lsp_live_workspace_symbols()
-        end, "Search Workspace Symbols")
+        end, "Search Workspace Symbols", "workspace/symbol")
+
+        map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+        map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
+        map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
 
         map("<leader>cx", function()
             require("fzf-lua").diagnostics_document()
@@ -37,7 +60,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         map("<leader>cX", function()
             require("fzf-lua").diagnostics_workspace()
-        end, "Buffer Workspace")
+        end, "Diagnostics Workspace")
     end,
 })
 
