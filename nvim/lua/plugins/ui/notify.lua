@@ -1,26 +1,26 @@
 return {
-  {
-    "rcarriga/nvim-notify",
-    event = "VeryLazy",
-    config = function()
-      local notify = require("notify")
+    {
+        "rcarriga/nvim-notify",
+        event = "VeryLazy",
+        config = function()
+            local notify = require("notify")
 
-      notify.setup({
-        stages = "static",
-        timeout = 3000,
-        background_colour = "#000000",
-        render = "wrapped-compact",
-        minimum_width = 50,
-        icons = {
-          ERROR = "",
-          WARN = "",
-          INFO = "",
-          DEBUG = "",
-          TRACE = "✎",
-        },
-      })
+            notify.setup({
+                stages = "static",
+                timeout = 3000,
+                background_colour = "#000000",
+                render = "wrapped-compact",
+                minimum_width = 50,
+                icons = {
+                    ERROR = "",
+                    WARN = "",
+                    INFO = "",
+                    DEBUG = "",
+                    TRACE = "✎",
+                },
+            })
 
-      vim.notify = notify
-    end,
-  },
+            vim.notify = notify
+        end,
+    },
 }
