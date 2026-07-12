@@ -3,8 +3,6 @@ return {
         "mfussenegger/nvim-dap",
         dependencies = {
             "ibhagwan/fzf-lua",
-            "rcarriga/nvim-dap-ui",
-            "nvim-neotest/nvim-nio",
             { "theHamsta/nvim-dap-virtual-text", opts = {} },
             "nvim-lua/plenary.nvim",
         },
@@ -178,33 +176,36 @@ return {
     },
 
     {
-        "rcarriga/nvim-dap-ui",
+        "igorlfs/nvim-dap-view",
+        version = "1.*",
         dependencies = {
             "mfussenegger/nvim-dap",
-            "nvim-neotest/nvim-nio",
         },
 
         -- stylua: ignore
         keys = {
-          { "<leader>dd", function() require("dapui").toggle({}) end, desc = "Dap UI" },
-          -- { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = { "n" } },
+          { "<leader>dd", function() require("dap-view").toggle(true) end, desc = "Dap View" },
+          { "<leader>de", function() require("dap-view").hover(nil, true) end, desc = "Eval", mode = { "n", "x" } },
         },
 
-        opts = {},
+        opts = {
+            winbar = {
+                controls = {
+                    enabled = true,
+                    position = "right",
+                },
+            },
+        },
 
         config = function(_, opts)
             local dap = require("dap")
-            local dapui = require("dapui")
+            local dapview = require("dap-view")
 
-            dapui.setup(opts)
+            dapview.setup(opts)
 
-            dap.listeners.after.event_initialized["dapui_config"] = function()
-                dapui.open({})
+            dap.listeners.after.event_initialized["dap_view_config"] = function()
+                dapview.open()
             end
-
-            -- Change these to close dap-ui automatically if you want.
-            dap.listeners.before.event_terminated["dapui_config"] = nil
-            dap.listeners.before.event_exited["dapui_config"] = nil
         end,
     },
 }
