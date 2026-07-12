@@ -1,3 +1,7 @@
+require("util.lsp").add_servers({
+    rust_analyzer = {},
+})
+
 return {
     {
         "mrcjkb/rustaceanvim",
