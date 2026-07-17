@@ -1,7 +1,8 @@
 {pkgs, ...}: {
 	home.packages = with pkgs; [
 		# build tools
-		gcc16
+		(lib.hiPrio gcc16)
+		clang_22
 		cmake
 		gnumake
 		ninja

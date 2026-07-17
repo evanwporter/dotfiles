@@ -11,13 +11,6 @@ return {
                 end,
                 desc = "Find buffers",
             },
-            -- {
-            --   "grr",
-            --   function()
-            --     require("fzf-lua").lsp_references()
-            --   end,
-            --   desc = "LSP references",
-            -- },
             {
                 "<leader>sg",
                 function()
@@ -28,7 +21,9 @@ return {
             {
                 "<leader>sg",
                 function()
-                    require("fzf-lua").live_grep({ search = selection.get_visual_selection() })
+                    require("fzf-lua").live_grep({
+                        search = selection.get_visual_selection(),
+                    })
                 end,
                 mode = "x",
                 desc = "Grep Selection",
@@ -71,33 +66,13 @@ return {
         },
         config = function(_, opts)
             local fzf = require("fzf-lua")
+
             fzf.setup(opts)
+            fzf.register_ui_select()
 
             vim.keymap.set("n", "<leader>ss", fzf.resume, {
                 desc = "Resume Fzf search",
             })
-        end,
-        init = function()
-            local original_select = vim.ui.select
-
-            vim.ui.select = function(...)
-                require("lazy").load({
-                    plugins = { "fzf-lua" },
-                })
-
-                -- fzf-lua's setup should have replaced vim.ui.select.
-                if vim.ui.select == original_select then
-                    return original_select(...)
-                end
-
-                local ret = vim.ui.select(...)
-
-                vim.defer_fn(function()
-                    pcall(vim.cmd, "startinsert")
-                end, 10)
-
-                return ret
-            end
         end,
     },
 }

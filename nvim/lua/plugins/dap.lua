@@ -185,7 +185,7 @@ return {
         -- stylua: ignore
         keys = {
           { "<leader>dd", function() require("dap-view").toggle(true) end, desc = "Dap View" },
-          { "<leader>de", function() require("dap-view").hover(nil, true) end, desc = "Eval", mode = { "n", "x" } },
+          -- { "<leader>de", function() require("dap-view").hover(nil, true) end, desc = "Eval", mode = { "n", "x" } },
         },
 
         opts = {
