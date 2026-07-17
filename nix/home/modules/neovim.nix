@@ -5,14 +5,18 @@
 }: let
 	parserNames = [
 		"bash"
-		"c"
 		"cmake"
+		"cpp"
 		"json"
+		"toml"
 		"nix"
+		"make"
 		"python"
 		"rust"
 		"toml"
 		"yaml"
+		"fish"
+		"systemverilog"
 	];
 
 	treesitterWithParsers =
