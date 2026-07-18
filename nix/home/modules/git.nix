@@ -1,30 +1,27 @@
 {pkgs, ...}: {
-	# Ensure these packages are available in your user environment
 	home.packages = with pkgs; [
 		gh
 		delta
+		lazygit
 	];
 
 	programs.git = {
 		enable = true;
-		userName = "Evan Porter";
-		userEmail = "evanwporter@gmail.com";
 
-		# This automatically sets up your delta integration
-		delta = {
-			enable = true;
-			options = {
-				features = "zenburn";
-				navigate = true;
-				side-by-side = true;
+		settings = {
+			user = {
+				name = "Evan Porter";
+				email = "evanwporter@gmail.com";
 			};
-		};
 
-		extraConfig = {
-			core.editor = "nvim";
-			merge.conflictStyle = "zdiff3";
+			core = {
+				editor = "nvim";
+			};
 
-			# Use the 'gh' CLI tool properly without hardcoded store paths
+			merge = {
+				conflictStyle = "zdiff3";
+			};
+
 			"credential \"https://github.com\"" = {
 				helper = "!gh auth git-credential";
 			};
@@ -32,8 +29,19 @@
 				helper = "!gh auth git-credential";
 			};
 
-			# If you have custom themes, keep the include path
-			include.path = "./.config/delta/themes.gitconfig";
+			include = {
+				path = "./.config/delta/themes.gitconfig";
+			};
+		};
+	};
+
+	programs.delta = {
+		enable = true;
+		enableGitIntegration = true;
+		options = {
+			features = "zenburn";
+			navigate = true;
+			side-by-side = true;
 		};
 	};
 
