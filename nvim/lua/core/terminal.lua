@@ -57,7 +57,7 @@ local function toggle_terminal()
     vim.cmd("startinsert")
 end
 
-vim.keymap.set({ "n", "t" }, "<C-_>", toggle_terminal, {
+vim.keymap.set({ "n", "t" }, "<C-/>", toggle_terminal, {
     desc = "Toggle fullscreen terminal",
 })
 

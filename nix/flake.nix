@@ -1,69 +1,59 @@
 {
-	description = "Evan's Nix config";
+    description = "Evan's Nix config";
 
-	inputs = {
-		nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    inputs = {
+        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+        nixos-wsl.url = "github:nix-community/NixOS-WSL";
 
-		nixos-wsl.url = "github:nix-community/NixOS-WSL";
+        home-manager = {
+            url = "github:nix-community/home-manager";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+    };
 
-		home-manager = {
-			url = "github:nix-community/home-manager";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-	};
+    outputs = inputs @ {
+        nixpkgs,
+        nixos-wsl,
+        home-manager,
+        ...
+    }: let
+        system = "x86_64-linux";
 
-	outputs = inputs @ {
-		nixpkgs,
-		nixos-wsl,
-		home-manager,
-		...
-	}: let
-		system = "x86_64-linux";
+        mkHome = {
+            username,
+            homeDirectory ? "/home/${username}",
+        }:
+            home-manager.lib.homeManagerConfiguration {
+                pkgs = import nixpkgs { inherit system; };
+                extraSpecialArgs = { inherit inputs username homeDirectory; };
+                modules = [ ./home/default.nix ];
+            };
+    in {
+        nixosConfigurations = {
+            # Your existing WSL configuration
+            wsl = nixpkgs.lib.nixosSystem {
+                inherit system;
+                specialArgs = { inherit inputs; };
+                modules = [
+                    nixos-wsl.nixosModules.default
+                    home-manager.nixosModules.home-manager
+                    ./hosts/wsl/configuration.nix
+                ];
+            };
 
-		mkHome = {
-			username,
-			homeDirectory ? "/home/${username}",
-		}:
-			home-manager.lib.homeManagerConfiguration {
-				pkgs =
-					import nixpkgs {
-						inherit system;
-					};
+            # YOUR NEW FRESH INSTALL CONFIGURATION
+            laptop = nixpkgs.lib.nixosSystem {
+                inherit system;
+                specialArgs = { inherit inputs; };
+                modules = [
+                    home-manager.nixosModules.home-manager
+                    ./hosts/laptop/configuration.nix
+                ];
+            };
+        };
 
-				extraSpecialArgs = {
-					inherit inputs username homeDirectory;
-				};
-
-				modules = [
-					./home/default.nix
-				];
-			};
-	in {
-		nixosConfigurations.nixos-wsl =
-			nixpkgs.lib.nixosSystem {
-				inherit system;
-
-				specialArgs = {
-					inherit inputs;
-				};
-
-				modules = [
-					nixos-wsl.nixosModules.default
-					home-manager.nixosModules.home-manager
-					./hosts/nixos-wsl/configuration.nix
-				];
-			};
-
-		homeConfigurations = {
-			evanw =
-				mkHome {
-					username = "evanw";
-				};
-
-			eporter =
-				mkHome {
-					username = "eporter";
-				};
-		};
-	};
+        homeConfigurations = {
+            evanp = mkHome { username = "evanp"; };
+        };
+    };
 }
