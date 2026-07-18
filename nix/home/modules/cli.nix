@@ -22,9 +22,8 @@
 
 		codex
 
-		# git tools
-		lazygit
-		gh
-		delta
+		# useful libs/tools
+		openssl
+		zlib
 	];
 }

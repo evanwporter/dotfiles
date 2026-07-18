@@ -56,6 +56,7 @@ in {
 			ruff
 			cmake-format
 			verible
+			llvmPackages_22.clang-tools
 		];
 	};
 }

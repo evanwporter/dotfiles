@@ -43,6 +43,7 @@ link_file "$DOTFILES_DIR/delta" "$HOME/.config/delta"
 link_file "$DOTFILES_DIR/bat" "$HOME/.config/bat"
 link_file "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
 link_file "$DOTFILES_DIR/kitty" "$HOME/.config/kitty"
+link_file "DOTFILES_DIR/erdtree" "$HOME/.config/erdtree"
 # link_file "$DOTFILES_DIR/nvimpager" "$HOME/.config/nvimpager"
 # link_file "$DOTFILES_DIR/glow" "$HOME/.config/glow"
 
