@@ -57,9 +57,11 @@ local function toggle_terminal()
     vim.cmd("startinsert")
 end
 
-vim.keymap.set({ "n", "t" }, "<C-/>", toggle_terminal, {
-    desc = "Toggle fullscreen terminal",
-})
+for _, lhs in ipairs({ "<C-/>", "<C-_>" }) do
+    vim.keymap.set({ "n", "t" }, lhs, toggle_terminal, {
+        desc = "Toggle fullscreen terminal",
+    })
+end
 
 vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], {
     desc = "Exit terminal mode",

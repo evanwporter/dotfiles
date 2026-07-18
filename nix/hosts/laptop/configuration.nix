@@ -84,10 +84,10 @@
 		isNormalUser = true;
 		description = "Evan Porter";
 		extraGroups = ["networkmanager" "wheel"];
-		packages = with pkgs; [
-			kdePackages.kate
-			#  thunderbird
-		];
+		# packages = with pkgs; [
+		# 	kdePackages.kate
+		# 	#  thunderbird
+		# ];
 		shell = pkgs.fish;
 	};
 
@@ -127,6 +127,8 @@
 		kitty
 		tmux
 		git
+		obsidian
+		spotify
 	];
 
 	# Some programs need SUID wrappers, can be configured further or are
