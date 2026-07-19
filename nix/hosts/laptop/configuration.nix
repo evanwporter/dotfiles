@@ -9,6 +9,7 @@
 	imports = [
 		# Include the results of the hardware scan.
 		./hardware-configuration.nix
+		../../modules/firefox.nix
 	];
 
 	# Bootloader.
@@ -109,9 +110,6 @@
 	fonts.packages = with pkgs; [
 		nerd-fonts.jetbrains-mono
 	];
-
-	# Install firefox.
-	programs.firefox.enable = true;
 
 	programs.fish.enable = true;
 
