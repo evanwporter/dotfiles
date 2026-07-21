@@ -99,7 +99,7 @@ jobs:
           compression-level: 0
           retention-days: 90
   
-  codelldb:
+    codelldb:
     name: C/C++/Rust / codelldb
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -116,13 +116,13 @@ jobs:
             cmake \
             file \
             git \
+            libc++-dev \
+            libc++-static \
             lldb \
             lldb-dev \
             llvm \
             llvm-dev \
-            libc++-dev \
-            libc++-static \
-            libunwind \
+            llvm-libunwind \
             lld \
             rust \
             cargo \
@@ -139,6 +139,23 @@ jobs:
             https://gitlab.com/simon-nicholls/codelldb.git \
             /tmp/codelldb
 
+      - name: Create LLDB package from system LLDB
+        run: |
+          set -euo pipefail
+
+          mkdir -p /tmp/lldb-package/lib /tmp/lldb-package/bin
+
+          # Copy LLDB library and related files
+          cp -r /usr/lib/liblldb*.so* /tmp/lldb-package/lib/ || true
+          cp -r /usr/lib/python3*/site-packages/lldb /tmp/lldb-package/lib/ || true
+
+          # Copy LLDB binaries
+          cp /usr/bin/lldb* /tmp/lldb-package/bin/ || true
+
+          # Create the zip package
+          cd /tmp/lldb-package
+          zip -r /tmp/lldb.zip *
+
       - name: Build static codelldb
         run: |
           set -euo pipefail
@@ -146,9 +163,10 @@ jobs:
           mkdir -p /tmp/codelldb/build out
           cd /tmp/codelldb/build
 
-          # Build for x86_64 Alpine (musl)
+          # Build for x86_64 Alpine (musl) with system LLDB
           cmake .. \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-x86_64-alpine-linux-musl.cmake \
+            -DLLDB_PACKAGE=/tmp/lldb.zip \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-stdlib=libstdc++"
 
