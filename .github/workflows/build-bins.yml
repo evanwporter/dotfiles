@@ -111,15 +111,22 @@ jobs:
           apk add --no-cache \
             build-base \
             ca-certificates \
+            clang \
+            clang-dev \
             cmake \
             file \
             git \
             lldb \
             lldb-dev \
+            llvm \
+            llvm-dev \
+            lld \
             rust \
             cargo \
             npm \
-            pkgconf
+            nodejs \
+            pkgconf \
+            python3
 
       - name: Clone Alpine-patched codelldb
         run: |
