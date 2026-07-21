@@ -122,8 +122,7 @@ jobs:
             llvm-dev \
             libc++-dev \
             libc++-static \
-            libunwind-dev \
-            libunwind-static \
+            libunwind \
             lld \
             rust \
             cargo \
