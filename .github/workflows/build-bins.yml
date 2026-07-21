@@ -170,12 +170,16 @@ jobs:
           mkdir -p /tmp/codelldb/build out
           cd /tmp/codelldb/build
 
+          # Override the toolchain's stdlib choice
+          export CXXFLAGS="-stdlib=libstdc++"
+
           # Build for x86_64 Alpine (musl) with system LLDB
           cmake .. \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-x86_64-alpine-linux-musl.cmake \
             -DLLDB_PACKAGE=/tmp/lldb.zip \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-stdlib=libstdc++"
+            -DCMAKE_CXX_FLAGS="-stdlib=libstdc++" \
+            -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libstdc++"
 
           make -j"$(nproc)"
           make strip_binaries
@@ -208,6 +212,7 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
+
 
 
   rust:
