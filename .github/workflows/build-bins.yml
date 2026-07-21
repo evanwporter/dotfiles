@@ -129,7 +129,8 @@ jobs:
             npm \
             nodejs \
             pkgconf \
-            python3
+            python3 \
+            zip
 
       - name: Clone Alpine-patched codelldb
         run: |
@@ -145,12 +146,18 @@ jobs:
 
           mkdir -p /tmp/lldb-package/lib /tmp/lldb-package/bin
 
-          # Copy LLDB library and related files
-          cp -r /usr/lib/liblldb*.so* /tmp/lldb-package/lib/ || true
-          cp -r /usr/lib/python3*/site-packages/lldb /tmp/lldb-package/lib/ || true
+          # Copy LLDB library
+          cp -r /usr/lib/liblldb*.so* /tmp/lldb-package/lib/ 2>/dev/null || true
+
+          # Try to copy Python LLDB bindings if they exist
+          for pydir in /usr/lib/python3.*/site-packages/lldb; do
+            if [ -d "$pydir" ]; then
+              cp -r "$pydir" /tmp/lldb-package/lib/
+            fi
+          done
 
           # Copy LLDB binaries
-          cp /usr/bin/lldb* /tmp/lldb-package/bin/ || true
+          cp /usr/bin/lldb* /tmp/lldb-package/bin/ 2>/dev/null || true
 
           # Create the zip package
           cd /tmp/lldb-package
@@ -201,6 +208,7 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
+
 
   rust:
     name: Rust / ${{ matrix.bin }}
