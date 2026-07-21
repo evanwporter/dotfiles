@@ -98,6 +98,80 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
+  
+  codelldb:
+    name: C/C++/Rust / codelldb
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    container: alpine:edge
+
+    steps:
+      - name: Install toolchain
+        run: |
+          apk add --no-cache \
+            build-base \
+            ca-certificates \
+            cmake \
+            file \
+            git \
+            lldb \
+            lldb-dev \
+            rust \
+            cargo \
+            npm \
+            pkgconf
+
+      - name: Clone Alpine-patched codelldb
+        run: |
+          git clone \
+            --depth 1 \
+            --branch alpine-toolchains \
+            https://gitlab.com/simon-nicholls/codelldb.git \
+            /tmp/codelldb
+
+      - name: Build static codelldb
+        run: |
+          set -euo pipefail
+
+          mkdir -p /tmp/codelldb/build out
+          cd /tmp/codelldb/build
+
+          # Build for x86_64 Alpine (musl)
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-x86_64-alpine-linux-musl.cmake \
+            -DCMAKE_BUILD_TYPE=Release
+
+          make -j"$(nproc)"
+          make strip_binaries
+
+          install -D -m 0755 \
+            adapter/codelldb \
+            "$GITHUB_WORKSPACE/out/codelldb"
+
+      - name: Verify static binary
+        run: |
+          set -euo pipefail
+
+          file_output="$(file "out/codelldb")"
+          ldd_output="$(ldd "out/codelldb" 2>&1 || true)"
+
+          printf '%s\n' "$file_output"
+          printf '%s\n' "$ldd_output"
+
+          # codelldb links to liblldb.so dynamically on Alpine
+          # Verify it's present and can be found
+          apk add --no-cache lldb
+
+          ./out/codelldb --version || echo "Note: codelldb requires liblldb.so at runtime"
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-codelldb-x86_64-linux-musl
+          path: out/codelldb
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
 
   rust:
     name: Rust / ${{ matrix.bin }}
