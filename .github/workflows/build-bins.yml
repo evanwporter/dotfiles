@@ -149,7 +149,8 @@ jobs:
           # Build for x86_64 Alpine (musl)
           cmake .. \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain-x86_64-alpine-linux-musl.cmake \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-stdlib=libstdc++"
 
           make -j"$(nproc)"
           make strip_binaries
