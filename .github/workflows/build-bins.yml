@@ -120,6 +120,10 @@ jobs:
             lldb-dev \
             llvm \
             llvm-dev \
+            libc++-dev \
+            libc++-static \
+            libunwind-dev \
+            libunwind-static \
             lld \
             rust \
             cargo \
