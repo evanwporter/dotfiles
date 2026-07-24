@@ -37,11 +37,11 @@ set_defaults() {
     window_bell_style='bold'
     prefix_highlight_style='bold'
     theme='gold'
-    g0='#262626'
-    g1='#303030'
-    g2='#3a3a3a'
-    g3='#444444'
-    g4='#626262'
+    g0='#282828'
+    g1='#3c3836'
+    g2='#504945'
+    g3='#665c54'
+    g4='#d4be98'
     status_interval='1'
 }
 
@@ -91,7 +91,7 @@ configure_status_bar() {
 
 build_left_status() {
     local LS
-    LS="#{?client_prefix,#[fg=#16161d]#[bg=#ff5d62]#[bold] #S #[fg=#ff5d62]#[bg=#1f1f28]$right_arrow_icon,#[fg=#16161d]#[bg=#e6c384]#[bold] #S #[fg=#e6c384]#[bg=#1f1f28]$right_arrow_icon}"
+    LS="#{?client_prefix,#[fg=#282828]#[bg=#ea6962]#[bold] #S #[fg=#ea6962]#[bg=#282828]$right_arrow_icon,#[fg=#282828]#[bg=#d8a657]#[bold] #S #[fg=#d8a657]#[bg=#282828]$right_arrow_icon}"
 
     if [[ $prefix_highlight_pos == 'L' || $prefix_highlight_pos == 'LR' ]]; then
         LS="$LS#{prefix_highlight}"
@@ -102,12 +102,10 @@ build_left_status() {
 
 build_right_status() {
     local RS
-    RS="#[fg=#7e9cd8]CPU #(awk '{print \$1}' /proc/loadavg)"
-    RS+=" #[fg=#727169]│ #[fg=#957fb8]MEM #(awk '/MemTotal/ { total=\$2 } /MemAvailable/ { available=\$2 } END { printf \"%.0f%%\", (total-available)*100/total }' /proc/meminfo)"
-    RS+=" #[fg=#727169]│ #[fg=#7aa89f]#(nmcli -t -f TYPE,STATE device status | awk -F: '\$2 == \"connected\" && \$1 == \"wifi\" { print \"󰖩\"; found=1; exit } \$2 == \"connected\" && \$1 == \"ethernet\" { wired=1 } END { if (!found) print wired ? \"󰈀\" : \"󰖪\" }')"
-    RS+=" #[fg=#727169]│ #[fg=#ffa066]BAT #(awk 'NR == 1 { pct=\$1; next } { icon = \$1 == \"Charging\" ? \"⇡\" : (\$1 == \"Full\" ? \"•\" : \"⇣\"); print icon \" \" pct \"%\" }' /sys/class/power_supply/BAT0/capacity /sys/class/power_supply/BAT0/status)"
-    RS+=" #[fg=#727169]│ #[fg=#7fb4ca]#(whoami)#[fg=#727169]@#[fg=#c0a36e]#H"
-    RS+=" #[fg=#727169]│ #[fg=#98bb6c]%B %-d #[fg=#e6c384]%H:%M "
+    # RS="#[fg=#7daea3]CPU #(awk '{print $1}' /proc/loadavg) "
+    # RS+="#[fg=#a89984]|"
+    RS+="#[fg=#7daea3]#(whoami)#[fg=#a89984]@#[fg=#d8a657]#H "
+    RS+="#[fg=#a89984]| #[fg=#a9b665]%B %-d #[fg=#d8a657]#(TZ='America/Los_Angeles' date +'%-I:%M %p') "
 
     if [[ $prefix_highlight_pos == 'R' || $prefix_highlight_pos == 'LR' ]]; then
         RS="#{prefix_highlight}$RS"
@@ -119,8 +117,8 @@ build_right_status() {
 # Window, pane, and message styles
 
 configure_ui_styles() {
-    tmux_set window-status-format         "#[fg=$G0,bg=$G2]$right_arrow_icon#[fg=#727169,bg=$G2] #I:#W#F #[fg=$G2,bg=$G0]$right_arrow_icon"
-    tmux_set window-status-current-format "#[fg=#1f1f28,bg=#7e9cd8]$right_arrow_icon#[fg=#1f1f28,bg=#7e9cd8,$window_current_style] #I:#W#F #[fg=#7e9cd8,bg=#1f1f28,none]$right_arrow_icon"
+    tmux_set window-status-format         "#[fg=$G0,bg=$G2]$right_arrow_icon#[fg=#d4be98,bg=$G2] #I:#W#F #[fg=$G2,bg=$G0]$right_arrow_icon"
+    tmux_set window-status-current-format "#[fg=#282828,bg=#7daea3]$right_arrow_icon#[fg=#282828,bg=#7daea3,$window_current_style] #I:#W#F #[fg=#7daea3,bg=#282828,none]$right_arrow_icon"
 
     tmux_set window-status-style          "fg=$TC,bg=$G0,none"
     tmux_set window-status-last-style     "fg=$TC,bg=$G0,$window_last_style"

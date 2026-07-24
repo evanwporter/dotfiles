@@ -5,6 +5,7 @@ return {
             "nvim-lua/plenary.nvim",
             "nvim-neotest/nvim-nio",
             "evanwporter/neotest-ctest",
+            "nvim-neotest/neotest-python",
         },
         keys = {
             -- {
@@ -76,6 +77,11 @@ return {
                                 or name:match("tests%.cpp$")
                                 or name:match("Tests%.cpp$")
                         end,
+                    }),
+                    require("neotest-python")({
+                        dap = { justMyCode = false },
+                        args = { "--log-level", "DEBUG" },
+                        runner = "pytest",
                     }),
                 },
             })

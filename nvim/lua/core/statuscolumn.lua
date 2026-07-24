@@ -278,7 +278,8 @@ function M._get()
             num = vim.v.lnum
         end
 
-        components[2] = "%=" .. num .. " "
+        -- Format number with at least 2 digits of width
+        components[2] = string.format("%%=%2d ", num)
     end
 
     if show_signs or show_folds then

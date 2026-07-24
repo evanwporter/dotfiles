@@ -11,6 +11,10 @@ require("util.lsp").add_servers({
                 telemetry = {
                     enable = false,
                 },
+                completion = {
+                    callSnippet = "Disable",
+                    keywordSnippet = "Disable",
+                },
             },
         },
     },

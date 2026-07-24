@@ -45,72 +45,18 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
-local function source_file(event, command)
-    vim.keymap.set("n", "<localleader>s", function()
-        vim.cmd.write()
-
-        local file = vim.api.nvim_buf_get_name(event.buf)
-        local result = vim.system(vim.list_extend(vim.deepcopy(command), { file }), {
-            text = true,
-        }):wait()
-
-        if result.code == 0 then
-            vim.notify("Sourced " .. vim.fn.fnamemodify(file, ":t"), vim.log.levels.INFO)
-        else
-            vim.notify(result.stderr ~= "" and result.stderr or "Failed to source " .. file, vim.log.levels.ERROR)
-        end
-    end, {
-        buffer = event.buf,
-        silent = true,
-        desc = "Source file",
-    })
-end
-
-vim.api.nvim_create_autocmd("FileType", {
-    group = augroup("source_shell_files"),
-    pattern = { "bash", "sh", "tmux", "fish", "dotenv" },
-    callback = function(event)
-        local commands = {
-            bash = { "bash", "-c", 'source "$1"', "bash" },
-            sh = { "bash", "-c", 'source "$1"', "bash" },
-            tmux = { "tmux", "source-file" },
-            fish = { "fish", "-c", 'source "$argv[1]"' },
-            dotenv = { "bash", "-c", 'set -a; source "$1"; set +a', "bash" },
-        }
-
-        local command = commands[vim.bo[event.buf].filetype]
-        if command then
-            source_file(event, command)
-        end
-    end,
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    group = augroup("source_fish_files"),
-    pattern = "*.fish",
-    callback = function(event)
-        source_file(event, { "fish", "-c", 'source "$argv[1]"' })
-    end,
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    group = augroup("source_tmux_files"),
-    pattern = { ".tmux.conf", "tmux.conf" },
-    callback = function(event)
-        source_file(event, { "tmux", "source-file" })
-    end,
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    group = augroup("source_env_files"),
-    pattern = ".env*",
-    callback = function(event)
-        source_file(event, { "bash", "-c", 'set -a; source "$1"; set +a', "bash" })
-    end,
-})
-
 vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)
         pcall(vim.treesitter.start, args.buf)
+    end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+    group = augroup("yaml_indent"),
+    pattern = "yaml",
+    callback = function()
+        vim.bo.shiftwidth = 4
+        vim.bo.softtabstop = 4
+        vim.bo.tabstop = 4
     end,
 })
