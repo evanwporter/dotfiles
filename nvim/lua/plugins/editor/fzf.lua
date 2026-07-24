@@ -11,6 +11,13 @@ return {
                 end,
                 desc = "Find buffers",
             },
+            -- {
+            --   "grr",
+            --   function()
+            --     require("fzf-lua").lsp_references()
+            --   end,
+            --   desc = "LSP references",
+            -- },
             {
                 "<leader>sg",
                 function()
@@ -21,9 +28,7 @@ return {
             {
                 "<leader>sg",
                 function()
-                    require("fzf-lua").live_grep({
-                        search = selection.get_visual_selection(),
-                    })
+                    require("fzf-lua").live_grep({ search = selection.get_visual_selection() })
                 end,
                 mode = "x",
                 desc = "Grep Selection",
@@ -66,13 +71,20 @@ return {
         },
         config = function(_, opts)
             local fzf = require("fzf-lua")
-
             fzf.setup(opts)
-            fzf.register_ui_select()
 
             vim.keymap.set("n", "<leader>ss", fzf.resume, {
                 desc = "Resume Fzf search",
             })
+        end,
+        init = function()
+            vim.ui.select = function(...)
+                require("lazy").load({ plugins = { "fzf-lua" } })
+                require("fzf-lua").register_ui_select(
+                    require("lazy.core.config").plugins["fzf-lua"].opts.ui_select or nil
+                )
+                return vim.ui.select(...)
+            end
         end,
     },
 }

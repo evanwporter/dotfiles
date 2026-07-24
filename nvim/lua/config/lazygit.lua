@@ -28,11 +28,15 @@ vim.keymap.set("n", "<leader>gg", function()
     vim.bo[bufnr].bufhidden = "wipe"
     vim.bo[bufnr].buflisted = false
     vim.bo[bufnr].swapfile = false
+    vim.bo[bufnr].buftype = "nofile"
 
     vim.wo.number = false
     vim.wo.relativenumber = false
     vim.wo.signcolumn = "no"
     vim.wo.statuscolumn = ""
+    vim.wo.winbar = ""
+
+    vim.opt_local.showtabline = 0
 
     local job_id = vim.fn.termopen("lazygit", {
         on_exit = close_lazygit_tab,

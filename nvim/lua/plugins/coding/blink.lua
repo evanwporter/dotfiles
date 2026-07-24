@@ -32,6 +32,8 @@ return {
                 preset = "default",
             },
 
+            signature = { enabled = true },
+
             sources = {
                 default = {
                     "lsp",
@@ -57,6 +59,9 @@ return {
                         preselect = false,
                         auto_insert = false,
                     },
+                },
+                documentation = {
+                    auto_show = true,
                 },
             },
 

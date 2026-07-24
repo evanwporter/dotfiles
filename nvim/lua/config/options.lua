@@ -12,3 +12,20 @@ vim.opt.signcolumn = "yes"
 vim.opt.confirm = true
 
 vim.opt.clipboard = "unnamedplus"
+
+vim.env.PATH = vim.fn.expand("~/.local/share/nvim/tools/bin") .. ":" .. vim.env.PATH
+
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel = 99
+-- vim.opt.foldlevelstart = 0
+vim.opt.foldtext = ""
+
+vim.opt.fillchars = {
+    fold = " ",
+    foldopen = "",
+    foldclose = "",
+    foldsep = " ",
+}
+
+-- vim.cmd.syntax("manual")

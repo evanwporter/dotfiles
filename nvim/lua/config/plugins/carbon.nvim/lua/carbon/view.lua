@@ -1,0 +1,1155 @@
+local util = require('carbon.util')
+local entry = require('carbon.entry')
+local watcher = require('carbon.watcher')
+local settings = require('carbon.settings')
+local constants = require('carbon.constants')
+
+--- @class carbon.view.LineHighlight
+--- @field [1] string Highlight group name
+--- @field [2] integer Start column
+--- @field [3] integer End column
+--- @field extmark carbon.util.Extmark
+
+--- @class carbon.view.Line
+--- @field path carbon.entry.Entry[]
+--- @field lnum integer
+--- @field depth integer
+--- @field entry carbon.entry.Entry
+--- @field line string
+--- @field icon_width integer
+--- @field highlights carbon.view.LineHighlight[]
+
+--- @class carbon.view.Sidebar
+--- @field origin integer
+--- @field target integer
+--- @field position? carbon.settings.SidebarPosition
+
+--- @class carbon.view.Float
+--- @field origin integer
+--- @field target integer
+
+--- @class carbon.view.View
+--- @field index integer
+--- @field initial string,
+--- @field states table<string, table<string, boolean>>
+--- @field show_hidden boolean
+--- @field root carbon.entry.Entry
+local view = {}
+
+view.__index = view
+
+--- @type carbon.view.Sidebar
+view.sidebar = { origin = -1, target = -1 }
+
+--- @type carbon.view.Float
+view.float = { origin = -1, target = -1 }
+
+--- @type table<integer, carbon.view.View>
+view.items = {}
+
+--- @type table<string, boolean>
+view.resync_paths = {}
+
+--- @type integer
+view.last_index = 0
+
+--- @class carbon.view.CursorContext
+--- @field target carbon.entry.Entry
+--- @field line table
+
+--- @class carbon.view.CursorEditingContext : carbon.view.CursorContext
+--- @field view carbon.view.View
+--- @field prev_compressible boolean
+--- @field prev_open boolean
+--- @field edit_col integer
+--- @field edit_lnum integer
+--- @field edit_prefix string
+
+--- @param ctx carbon.view.CursorEditingContext
+local function create_leave(ctx)
+  vim.cmd.stopinsert()
+  ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
+  util.cursor(ctx.line.lnum, 1)
+  vim.keymap.del('i', '<cr>', { buffer = 0 })
+  vim.keymap.del('i', '<esc>', { buffer = 0 })
+  util.clear_autocmd('CursorMovedI', { buffer = 0 })
+  ctx.view:update()
+  ctx.view:render()
+end
+
+--- @param ctx carbon.view.CursorEditingContext
+local function create_confirm(ctx)
+  return function()
+    local confirm_lnum = vim.api.nvim_win_get_cursor(0)[1]
+    local text = vim.trim(string.sub(util.get_line(confirm_lnum), ctx.edit_col))
+    local name = vim.fs.basename(text)
+    local parent_directory = ctx.target.path
+      .. '/'
+      .. vim.trim(vim.fs.dirname(text))
+
+    vim.fn.mkdir(parent_directory, 'p')
+
+    if name ~= '' then
+      vim.fn.writefile({}, parent_directory .. '/' .. name)
+    end
+
+    create_leave(ctx)
+    view.resync(vim.fs.dirname(parent_directory))
+  end
+end
+
+--- @param ctx carbon.view.CursorEditingContext
+local function create_cancel(ctx)
+  return function()
+    ctx.view:set_path_attr(ctx.target.path, 'open', ctx.prev_open)
+    create_leave(ctx)
+  end
+end
+
+--- @param ctx carbon.view.CursorEditingContext
+local function create_insert_move(ctx)
+  return function()
+    local col = ctx.edit_col
+    local lnum = ctx.edit_lnum
+    local insert_lnum = vim.api.nvim_win_get_cursor(0)[1]
+    local text = ctx.edit_prefix
+      .. vim.trim(string.sub(util.get_line(insert_lnum), col))
+    local current_slash_col = 0 --[[@type integer?]]
+    local last_slash_col = 0
+
+    while current_slash_col do
+      last_slash_col = current_slash_col
+      current_slash_col = string.find(text, '/', last_slash_col + 1, true)
+    end
+
+    local path_hl_start = { lnum, 0 }
+    local path_hl_separator = { lnum, last_slash_col }
+    local path_hl_end = { lnum, -1 }
+
+    vim.api.nvim_buf_set_lines(0, lnum, lnum + 1, true, { text })
+    util.clear_extmarks(0, path_hl_start, path_hl_end, {})
+    util.add_highlight(0, 'CarbonDir', path_hl_start, path_hl_separator)
+    util.add_highlight(0, 'CarbonFile', path_hl_separator, path_hl_end)
+    util.cursor(lnum + 1, math.max(col, vim.api.nvim_win_get_cursor(0)[2] + 1))
+  end
+end
+
+function view.file_icons()
+  if settings.file_icons then
+    local ok, module = pcall(require, 'nvim-web-devicons')
+
+    if ok then
+      return module
+    end
+  end
+end
+
+--- @param path string
+--- @return carbon.view.View?
+function view.find(path)
+  local resolved = util.resolve(path)
+
+  return select(
+    1,
+    util.tbl_find(view.items, function(target_view)
+      return target_view.root.path == resolved
+    end)
+  )
+end
+
+--- @param path string?
+--- @return carbon.view.View
+function view.get(path)
+  path = path or vim.uv.cwd() or '/'
+  local found_view = path and view.find(path)
+
+  if found_view then
+    return found_view
+  end
+
+  view.last_index = view.last_index + 1
+
+  local resolved = util.resolve(path)
+  local instance = setmetatable({
+    index = view.last_index,
+    initial = resolved,
+    states = {},
+    show_hidden = false,
+    root = entry.new(resolved),
+  }, view)
+
+  view.items[instance.index] = instance
+
+  return instance
+end
+
+--- @param opts {reveal?: boolean, float?: boolean, sidebar?: 'right' | 'left', path?: string}?
+function view.activate(opts)
+  local options = opts or {}
+  local original_window = vim.api.nvim_get_current_win()
+  local current_view = (options.path and view.get(options.path))
+    or view.current()
+    or view.get(vim.uv.cwd())
+
+  if options.reveal or settings.auto_reveal then
+    current_view:expand_to_path(vim.fn.expand('%'))
+  end
+
+  if options.sidebar then
+    if vim.api.nvim_win_is_valid(view.sidebar.origin) then
+      vim.api.nvim_set_current_win(view.sidebar.origin)
+    else
+      local split = options.sidebar == 'right' and 'botright' or 'topleft'
+      local target_side = options.sidebar == 'right' and 'left' or 'right'
+
+      vim.cmd.split({ mods = { vertical = true, split = split } })
+
+      local origin_id = vim.api.nvim_get_current_win()
+      local neighbor = util.window_neighbors(origin_id, { target_side })[1]
+      local target = neighbor and neighbor.target or original_window
+
+      view.sidebar = {
+        position = options.sidebar,
+        origin = origin_id,
+        target = target,
+      }
+    end
+
+    --- @diagnostic disable-next-line: deprecated
+    vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
+    vim.api.nvim_win_set_buf(view.sidebar.origin, current_view:buffer())
+  elseif options.float then
+    local win_config
+    local float_settings = settings.float_settings
+      or settings.defaults.float_settings
+
+    if type(float_settings) == 'function' then
+      win_config = float_settings()
+    else
+      win_config = vim.deepcopy(float_settings)
+    end
+
+    view.float = {
+      target = original_window,
+      origin = vim.api.nvim_open_win(current_view:buffer(), true, win_config),
+    }
+
+    vim.api.nvim_set_option_value(
+      'winhl',
+      'FloatBorder:CarbonFloatBorder,Normal:CarbonFloat',
+      { win = view.float.origin }
+    )
+  else
+    vim.api.nvim_win_set_buf(0, current_view:buffer())
+  end
+  vim.api.nvim_set_option_value(
+    'filetype',
+    'carbon.explorer',
+    { buf = current_view:buffer() }
+  )
+end
+
+function view.close_sidebar()
+  if vim.api.nvim_win_is_valid(view.sidebar.origin) then
+    vim.api.nvim_win_close(view.sidebar.origin, true)
+  end
+
+  view.sidebar = { origin = -1, target = -1 }
+end
+
+function view.close_float()
+  if vim.api.nvim_win_is_valid(view.float.origin) then
+    vim.api.nvim_win_close(view.float.origin, true)
+  end
+
+  view.float = { origin = -1, target = -1 }
+end
+
+function view.handle_sidebar_or_float()
+  local current_window = vim.api.nvim_get_current_win()
+
+  if current_window == view.sidebar.origin then
+    if vim.api.nvim_win_is_valid(view.sidebar.target) then
+      vim.api.nvim_set_current_win(view.sidebar.target)
+    else
+      local split = view.sidebar.position == 'right' and 'topleft' or 'botright'
+      local target_side = view.sidebar.position == 'right' and 'left' or 'right'
+      local neighbor =
+        util.window_neighbors(view.sidebar.origin, { target_side })[1]
+
+      if neighbor then
+        view.sidebar.target = neighbor.target
+        vim.api.nvim_set_current_win(neighbor.target)
+      else
+        vim.cmd.split({ mods = { vertical = true, split = split } })
+
+        view.sidebar.target = vim.api.nvim_get_current_win()
+
+        --- @diagnostic disable-next-line: deprecated
+        vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
+      end
+    end
+  elseif current_window == view.float.origin then
+    view.close_float()
+  end
+end
+
+--- @return carbon.view.View?
+function view.current()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
+
+  if ref then
+    return view.items[ref.index]
+  end
+end
+
+--- @param callback fun(...): ...
+--- @return ...?
+function view.execute(callback)
+  local current_view = view.current()
+
+  if current_view then
+    return callback(current_view)
+  end
+end
+
+--- @param path string
+function view.resync(path)
+  view.resync_paths[path] = true
+
+  if view.resync_timer and not view.resync_timer:is_closing() then
+    view.resync_timer:close()
+  end
+
+  view.resync_timer = vim.defer_fn(function()
+    for _, current_view in pairs(view.items) do
+      if util.is_directory(current_view.root.path) then
+        current_view.root:synchronize(view.resync_paths)
+        current_view:update()
+        current_view:render()
+      else
+        current_view:terminate()
+      end
+    end
+
+    if view.resync_timer and not view.resync_timer:is_closing() then
+      view.resync_timer:close()
+    end
+
+    view.resync_timer = nil
+    view.resync_paths = {}
+  end, settings.sync_delay)
+end
+
+--- @param path string
+function view:expand_to_path(path)
+  local resolved = util.resolve(path)
+
+  if vim.startswith(resolved, self.root.path) then
+    local dirs = vim.split(string.sub(resolved, #self.root.path + 2), '/')
+    local current = self.root
+
+    if current then
+      for _, dir in ipairs(dirs) do
+        current:children()
+
+        local next = entry.find(string.format('%s/%s', current.path, dir))
+
+        if next then
+          self:set_path_attr(next.path, 'open', true)
+
+          current = next
+        else
+          break
+        end
+      end
+    end
+
+    if current and current.path == resolved then
+      self.flash = current
+
+      self:update()
+
+      return true
+    end
+
+    return false
+  end
+end
+
+--- @param path string
+--- @param attr string
+function view:get_path_attr(path, attr)
+  local state = self.states[path]
+  local value = state and state[attr]
+
+  if attr == 'compressible' and value == nil then
+    return true
+  end
+
+  return value
+end
+
+--- @param path string
+--- @param attr string
+--- @param value unknown
+function view:set_path_attr(path, attr, value)
+  if not self.states[path] then
+    self.states[path] = {}
+  end
+
+  self.states[path][attr] = value
+
+  return value
+end
+
+--- @return integer[]
+function view:buffers()
+  return vim.tbl_filter(function(bufnr)
+    local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
+
+    return ref and ref.index == self.index
+  end, vim.api.nvim_list_bufs())
+end
+
+function view:terminate()
+  local reopen = #vim.api.nvim_list_wins() == 1
+
+  for _, bufnr in ipairs(self:buffers()) do
+    vim.api.nvim_buf_delete(bufnr, { force = true })
+  end
+
+  if not util.is_directory(self.root.path) then
+    self.root:terminate()
+  end
+
+  if reopen then
+    vim.cmd.Carbon()
+  end
+
+  view.items[self.index] = nil
+end
+
+function view:update()
+  self.cached_lines = nil
+end
+
+function view:render()
+  local cursor
+  local lines = {}
+  local hls = {}
+
+  for _, line_data in ipairs(self:current_lines()) do
+    lines[#lines + 1] = line_data.line
+
+    if self.flash and self.flash.path == line_data.entry.path then
+      cursor = {
+        lnum = line_data.lnum,
+        col = 1 + (line_data.depth + 1) * 2,
+        line = line_data.line,
+      }
+    end
+
+    for _, hl in ipairs(line_data.highlights) do
+      hls[#hls + 1] = hl
+    end
+  end
+
+  local buf = self:buffer()
+  local set_opts = { buf = buf }
+  local current_mode = string.lower(vim.api.nvim_get_mode().mode)
+
+  vim.api.nvim_buf_clear_namespace(buf, constants.hl, 0, -1)
+  vim.api.nvim_set_option_value('modifiable', true, set_opts)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
+  vim.api.nvim_set_option_value('modified', false, set_opts)
+
+  if not string.find(current_mode, 'i') then
+    vim.api.nvim_set_option_value('modifiable', false, set_opts)
+  end
+
+  for _, hl in ipairs(hls) do
+    util.add_extmark(buf, hl.extmark)
+  end
+
+  if cursor then
+    util.cursor(cursor.lnum, cursor.col)
+
+    if settings.flash then
+      vim.defer_fn(function()
+        self:focus_flash(
+          settings.flash.duration,
+          'CarbonFlash',
+          { cursor.lnum - 1, cursor.col - 1 },
+          { cursor.lnum - 1, #cursor.line + 1 }
+        )
+      end, settings.flash.delay)
+    end
+  end
+
+  self.flash = nil
+end
+
+--- Create a temporary highlight
+--- @param duration number Duration in milliseconds
+--- @param group string Highlight group name
+--- @param start [integer, integer] | string Start of region
+--- @param finish [integer, integer] | string Start of region
+function view:focus_flash(duration, group, start, finish)
+  local buf = self:buffer()
+
+  vim.hl.range(buf, constants.hl_tmp, group, start, finish)
+
+  vim.defer_fn(function()
+    if vim.api.nvim_buf_is_valid(buf) then
+      vim.api.nvim_buf_clear_namespace(buf, constants.hl_tmp, 0, -1)
+    end
+  end, duration)
+end
+
+--- @return number Buffer number of view instance.
+function view:buffer()
+  local buffers = self:buffers()
+
+  if buffers[1] then
+    return buffers[1]
+  end
+
+  local mappings = {
+    { 'n', 'i', '<nop>' },
+    { 'n', 'I', '<nop>' },
+    { 'n', 'o', '<nop>' },
+    { 'n', 'O', '<nop>' },
+  }
+
+  for action, mapping in pairs(settings.actions or {}) do
+    if type(mapping) == 'string' then
+      mapping = { mapping }
+    end
+
+    if type(mapping) == 'table' then
+      for _, key in ipairs(mapping) do
+        mappings[#mappings + 1] =
+          { 'n', key, util.plug(action), { nowait = true } }
+      end
+    end
+  end
+
+  local buffer = util.create_scratch_buf({
+    name = self.root.path,
+    filetype = 'carbon.explorer',
+    modifiable = false,
+    modified = false,
+    bufhidden = 'wipe',
+    mappings = mappings,
+    autocmds = {
+      BufHidden = function()
+        self:hide()
+      end,
+      BufWinEnter = function()
+        self:show()
+      end,
+    },
+  })
+
+  vim.api.nvim_buf_set_var(
+    buffer,
+    'carbon',
+    { index = self.index, path = self.root.path }
+  )
+
+  return buffer
+end
+
+function view:hide() -- luacheck:ignore unused argument self
+  vim.opt_local.wrap = vim.opt_global.wrap:get()
+  vim.opt_local.spell = vim.opt_global.spell:get()
+  vim.opt_local.fillchars = vim.opt_global.fillchars:get()
+
+  view.sidebar = { origin = -1, target = -1 }
+  view.float = { origin = -1, target = -1 }
+end
+
+function view:show()
+  vim.opt_local.wrap = false
+  vim.opt_local.spell = false
+  vim.opt_local.fillchars = { eob = ' ' }
+
+  self:render()
+end
+
+--- @param count integer? Number of directories to go up. Default 1
+function view:up(count)
+  local parents = self:parents(count)
+  local destination = parents[#parents]
+
+  if destination and self:switch_to_existing_view(destination.path) then
+    return true
+  end
+
+  for idx, parent_entry in ipairs(parents) do
+    self:set_path_attr(self.root.path, 'open', true)
+    self:set_root(parent_entry, { rename = idx == #parents })
+  end
+
+  return #parents ~= 0
+end
+
+function view:reset()
+  return self:cd(self.initial)
+end
+
+--- @param path string Path to cd into
+function view:cd(path)
+  if path == self.root.path then
+    return false
+  elseif vim.startswith(self.root.path, path) then
+    local new_depth = select(2, string.gsub(path, '/', ''))
+    local current_depth = select(2, string.gsub(self.root.path, '/', ''))
+
+    if current_depth - new_depth > 0 then
+      return self:up(current_depth - new_depth)
+    end
+  elseif self:switch_to_existing_view(path) then
+    return true
+  else
+    return self:set_root(entry.find(path) or entry.new(path))
+  end
+end
+
+--- @param count integer? Number of directories to go down. Default 1, minimum 1.
+function view:down(count)
+  local cursor = self:cursor({ count = math.max(1, count or vim.v.count1) })
+  local new_root = cursor.target
+
+  if not new_root.is_directory then
+    new_root = new_root.parent
+  end
+
+  if not new_root or new_root.path == self.root.path then
+    return false
+  end
+
+  if self:switch_to_existing_view(new_root.path) then
+    return true
+  else
+    self:set_path_attr(self.root.path, 'open', true)
+
+    return self:set_root(new_root)
+  end
+end
+
+--- @param target carbon.entry.Entry
+--- @param opts? { rename: boolean }
+function view:set_root(target, opts)
+  local options = opts or {}
+  local is_cwd = self.root.path == vim.uv.cwd()
+
+  if type(target) == 'string' then
+    target = entry.new(target)
+  end
+
+  if target.path == self.root.path then
+    return false
+  end
+
+  self.root = target
+
+  if options.rename ~= false then
+    vim.api.nvim_buf_set_name(self:buffer(), self.root.raw_path)
+  end
+
+  vim.api.nvim_buf_set_var(
+    self:buffer(),
+    'carbon',
+    { index = self.index, path = self.root.path }
+  )
+
+  watcher.keep(function(path)
+    for _, target_view in pairs(view.items) do
+      if vim.startswith(path, target_view.root.path) then
+        return true
+      end
+    end
+
+    return false
+  end)
+
+  if settings.sync_pwd and is_cwd then
+    vim.api.nvim_set_current_dir(self.root.path)
+  end
+
+  return true
+end
+
+function view:current_lines()
+  if not self.cached_lines then
+    self.cached_lines = self:lines()
+  end
+
+  return self.cached_lines
+end
+
+--- @param target carbon.entry.Entry
+function view:entry_children(target)
+  if self.show_hidden then
+    return target:children()
+  else
+    return vim.tbl_filter(function(child)
+      return not util.is_excluded(child.path)
+    end, target:children())
+  end
+end
+
+--- @param input_target carbon.entry.Entry?
+--- @param lines carbon.view.Line[]?
+--- @param depth integer?
+--- @return carbon.view.Line[]
+function view:lines(input_target, lines, depth)
+  lines = lines or {}
+  depth = depth or 0
+  local target = input_target or self.root
+  local expand_indicator = ' '
+  local collapse_indicator = ' '
+  local file_icons = view.file_icons()
+
+  if type(settings.indicators) == 'table' then
+    expand_indicator = settings.indicators.expand or expand_indicator
+    collapse_indicator = settings.indicators.collapse or collapse_indicator
+  end
+
+  if not input_target and #lines == 0 then
+    local line = self.root.name .. '/'
+    local extmark = {
+      start_row = 0,
+      start_col = 0,
+      opts = {
+        hl_group = 'CarbonDir',
+        end_row = 0,
+        end_col = #line,
+        strict = false,
+      },
+    }
+
+    lines[#lines + 1] = {
+      lnum = 1,
+      depth = -1,
+      entry = self.root,
+      line = line,
+      highlights = { { 'CarbonDir', 0, #line, extmark = extmark } },
+      icon_width = 0,
+      path = {},
+    }
+
+    watcher.register(self.root.path)
+  end
+
+  for _, child in ipairs(self:entry_children(target)) do
+    local tmp = child
+    local hls = {}
+    local path = {}
+    local lnum = 1 + #lines
+    local indent = string.rep('  ', depth)
+    local is_empty = true
+    local indicator = ''
+    local path_suffix = ''
+
+    if settings.compress then
+      while
+        tmp.is_directory
+        and #self:entry_children(tmp) == 1
+        and self:get_path_attr(tmp.path, 'compressible')
+      do
+        local child = self:entry_children(tmp)[1]
+        -- Only compress if the child is also a directory
+        if not child.is_directory then
+          break
+        end
+
+        watcher.register(tmp.path)
+
+        path[#path + 1] = tmp
+        tmp = child
+      end
+    end
+
+    if tmp.is_directory then
+      watcher.register(tmp.path)
+
+      is_empty = #self:entry_children(tmp) == 0
+      path_suffix = '/'
+
+      if not is_empty and self:get_path_attr(tmp.path, 'open') then
+        indicator = collapse_indicator
+      elseif not is_empty then
+        indicator = expand_indicator
+      else
+        indent = indent .. '  '
+      end
+    else
+      indent = indent .. '  '
+    end
+
+    local icon = ''
+    local icon_highlight
+
+    if file_icons and settings.file_icons then
+      if tmp.is_directory then
+        -- Use folder icons for directories based on open/empty state
+        local is_open = self:get_path_attr(tmp.path, 'open')
+        if is_empty then
+          icon = is_open and '' or '' -- empty open / empty closed
+        else
+          icon = is_open and '' or '󰉋' -- open / closed
+        end
+        icon_highlight = 'Directory'
+      else
+        -- Get file icon for files
+        local info = {
+          file_icons.get_icon(
+            tmp.name .. path_suffix,
+            util.extname(tmp.name),
+            { default = true }
+          ),
+        }
+        icon = info[1] or ' '
+        icon_highlight = info[2]
+      end
+    end
+
+    local full_path = tmp.name .. path_suffix
+    local indent_end = #indent
+    local icon_width = #icon ~= 0 and #icon + 1 or 0
+    local indicator_width = #indicator ~= 0 and #indicator + 1 or 0
+    local path_start = indent_end + icon_width + indicator_width
+    local dir_path = table.concat(
+      vim.tbl_map(function(parent)
+        return parent.name
+      end, path),
+      '/'
+    )
+
+    if path[1] then
+      full_path = dir_path .. '/' .. full_path
+    end
+
+    if indicator_width ~= 0 and not is_empty then
+      hls[#hls + 1] =
+        { 'CarbonIndicator', indent_end, indent_end + indicator_width }
+    end
+
+    if icon and icon_highlight then
+      hls[#hls + 1] =
+        { icon_highlight, indent_end + indicator_width, path_start - 1 }
+    end
+
+    local entries = { unpack(path) }
+    entries[#entries + 1] = tmp
+
+    for _, current_entry in ipairs(entries) do
+      local part = current_entry.name .. '/'
+      local path_end = path_start + #part
+      local highlight_group = 'CarbonFile'
+
+      if current_entry.is_symlink == 1 then
+        highlight_group = 'CarbonSymlink'
+      elseif current_entry.is_symlink == 2 then
+        highlight_group = 'CarbonBrokenSymlink'
+      elseif current_entry.is_directory then
+        highlight_group = 'CarbonDir'
+      elseif current_entry.is_executable then
+        highlight_group = 'CarbonExe'
+      end
+
+      hls[#hls + 1] = { highlight_group, path_start, path_end }
+      path_start = path_end
+    end
+
+    local line_prefix = indent
+
+    if indicator_width ~= 0 then
+      line_prefix = line_prefix .. indicator .. ' '
+    end
+
+    if icon_width ~= 0 then
+      line_prefix = line_prefix .. icon .. ' '
+    end
+
+    lines[#lines + 1] = {
+      lnum = lnum,
+      depth = depth,
+      entry = tmp,
+      line = line_prefix .. full_path,
+      icon_width = icon_width,
+      highlights = hls,
+      path = path,
+    }
+
+    if tmp.is_directory and self:get_path_attr(tmp.path, 'open') then
+      self:lines(tmp, lines, depth + 1)
+    end
+  end
+
+  for _, line in ipairs(lines) do
+    for _, hl in ipairs(line.highlights) do
+      if not hl.extmark then
+        hl.extmark = {
+          start_row = line.lnum - 1,
+          start_col = hl[2],
+          opts = {
+            hl_group = hl[1],
+            end_row = line.lnum - 1,
+            end_col = hl[3],
+            strict = false,
+          },
+        }
+      end
+    end
+  end
+
+  return lines
+end
+
+--- @param opts { target_directory_only?: boolean, count?: integer }?
+--- @return { target: carbon.entry.Entry, line: carbon.view.Line }
+function view:cursor(opts)
+  local options = opts or {}
+  local lines = self:current_lines()
+  local line = lines[vim.api.nvim_win_get_cursor(0)[1]]
+  local target = line.entry
+
+  if options.target_directory_only and not target.is_directory then
+    target = target.parent
+  end
+
+  target = line.path[options.count or vim.v.count] or target
+  line = util.tbl_find(lines, function(current)
+    if current.entry.path == target.path then
+      return true
+    end
+
+    return util.tbl_find(current.path, function(parent)
+      if parent.path == target.path then
+        return true
+      end
+    end)
+  end) or line
+
+  return { target = target, line = line }
+end
+
+function view:create()
+  local cursor =
+    vim.tbl_extend('force', {}, self:cursor({ target_directory_only = true }))
+
+  cursor.view = self
+  cursor.compact = cursor.target.is_directory and #cursor.target:children() == 0
+  cursor.prev_open = self:get_path_attr(cursor.target.path, 'open')
+  cursor.prev_compressible =
+    self:get_path_attr(cursor.target.path, 'compressible')
+
+  self:set_path_attr(cursor.target.path, 'open', true)
+  self:set_path_attr(cursor.target.path, 'compressible', false)
+
+  if cursor.compact then
+    cursor.edit_prefix = cursor.line.line
+    cursor.edit_lnum = cursor.line.lnum - 1
+    cursor.edit_col = #cursor.edit_prefix + 1
+    cursor.init_end_lnum = cursor.edit_lnum + 1
+  else
+    cursor.edit_prefix = string.rep('  ', cursor.line.depth + 2)
+    cursor.edit_lnum = cursor.line.lnum + #self:lines(cursor.target)
+    cursor.edit_col = #cursor.edit_prefix + 1
+    cursor.init_end_lnum = cursor.edit_lnum
+  end
+
+  self:update()
+  self:render()
+  util.autocmd('CursorMovedI', create_insert_move(cursor), { buffer = 0 })
+  vim.keymap.set('i', '<cr>', create_confirm(cursor), { buffer = 0 })
+  vim.keymap.set('i', '<esc>', create_cancel(cursor), { buffer = 0 })
+  vim.cmd.startinsert({ bang = true })
+  vim.api.nvim_set_option_value('modifiable', true, { buf = 0 })
+  vim.api.nvim_buf_set_lines(
+    0,
+    cursor.edit_lnum,
+    cursor.init_end_lnum,
+    true,
+    { cursor.edit_prefix }
+  )
+  util.cursor(cursor.edit_lnum + 1, cursor.edit_col)
+end
+
+function view:delete()
+  local cursor = self:cursor()
+  local target = cursor.target
+  local target_count = #cursor.line.path + 1
+  local lnum_idx = cursor.line.lnum - 1
+  local indent = cursor.line.depth * 2 + 2 + cursor.line.icon_width
+  local hl = { 'CarbonFile', indent, lnum_idx }
+  local count = vim.v.count == 0 and target_count
+    or math.min(target_count, vim.v.count1)
+
+  if target.path == self.root.path or #target.path < #self.root.path then
+    return
+  end
+
+  if target.is_directory then
+    hl[1] = 'CarbonDir'
+  end
+
+  for idx = 1, count - 1 do
+    hl[2] = hl[2] + #cursor.line.path[idx].name + 1
+  end
+
+  util.clear_extmarks(0, { lnum_idx, hl[2] }, { lnum_idx, -1 }, {})
+  util.add_highlight(0, 'CarbonDanger', { lnum_idx, hl[2] }, { lnum_idx, -1 })
+  vim.cmd.redraw()
+
+  local paths = table.concat(
+    vim.tbl_map(function(path)
+      return string.format('=> %s', util.relative_path(path))
+    end, { target.path }),
+    '\n'
+  )
+
+  local answer = vim.fn.confirm(
+    string.format('Confirm deletion of specified paths:\n%s\n', paths),
+    '&Delete\n&Cancel',
+    2,
+    'Error'
+  )
+
+  if answer == 1 then
+    local result = vim.fs.rm(target.path, { recursive = target.is_directory })
+
+    if result == -1 then
+      vim.api.nvim_echo({
+        { 'Failed to delete: ', 'CarbonDanger' },
+        { util.relative_path(target.path), 'CarbonIndicator' },
+      }, false, {})
+    else
+      view.resync(vim.fs.dirname(target.path))
+    end
+  else
+    util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
+
+    for _, lhl in ipairs(cursor.line.highlights) do
+      util.add_extmark(0, lhl.extmark)
+    end
+
+    self:render()
+  end
+end
+
+function view:move()
+  local cursor = self:cursor()
+  local line = cursor.line
+  local targets = vim.list_extend({ unpack(line.path) }, { line.entry })
+  local target_names = vim.tbl_map(function(part)
+    return part.name
+  end, targets)
+
+  if cursor.target.path == self.root.path then
+    return
+  end
+
+  local path_start = line.depth * 2 + 2 + line.icon_width
+  local lnum_idx = line.lnum - 1
+  local target_idx = util.tbl_key(targets, cursor.target)
+  local clamped_names = { unpack(target_names, 1, target_idx - 1) }
+  local start_hl = path_start + #table.concat(clamped_names, '/')
+
+  if target_idx > 1 then
+    start_hl = start_hl + 1
+  end
+
+  util.clear_extmarks(0, { lnum_idx, start_hl }, { lnum_idx, -1 }, {})
+  util.add_highlight(
+    0,
+    'CarbonPending',
+    { lnum_idx, start_hl },
+    { lnum_idx, -1 }
+  )
+  vim.cmd.redraw({ bang = true })
+  vim.cmd.echohl('CarbonPending')
+
+  local updated_path = string.gsub(
+    vim.fn.input({
+      prompt = 'destination: ',
+      default = cursor.target.path,
+      cancelreturn = cursor.target.path,
+    }),
+    '/+$',
+    ''
+  )
+
+  vim.cmd.echohl('None')
+  vim.api.nvim_echo({ { ' ' } }, false, {})
+
+  if updated_path == cursor.target.path then
+    self:render()
+  elseif vim.uv.fs_stat(updated_path) then
+    self:render()
+    vim.api.nvim_echo({
+      { 'Failed to move: ', 'CarbonDanger' },
+      { util.relative_path(cursor.target.path), 'CarbonIndicator' },
+      { ' => ' },
+      { util.relative_path(updated_path), 'CarbonIndicator' },
+      { ' (destination exists)', 'CarbonPending' },
+    }, false, {})
+  else
+    local directory = vim.fs.dirname(updated_path)
+    local tmp_path = cursor.target.path
+
+    if vim.startswith(updated_path, tmp_path) then
+      tmp_path = vim.fn.tempname()
+
+      vim.uv.fs_rename(cursor.target.path, tmp_path)
+    end
+
+    vim.fn.mkdir(directory, 'p')
+    vim.uv.fs_rename(tmp_path, updated_path)
+    view.resync(vim.fs.dirname(cursor.target.path))
+  end
+end
+
+--- @param count integer? Amount of parent entries from root to retrieve
+--- @return carbon.entry.Entry[]
+function view:parents(count)
+  local path = self.root.path
+  local parents = {}
+
+  if path ~= '' then
+    for _ = count or vim.v.count1, 1, -1 do
+      path = vim.fs.dirname(path)
+      parents[#parents + 1] = entry.new(path)
+
+      if path == '/' then
+        break
+      end
+    end
+  end
+
+  return parents
+end
+
+--- @param path string
+function view:switch_to_existing_view(path)
+  local destination_view = view.find(path)
+
+  if destination_view then
+    vim.api.nvim_win_set_buf(0, destination_view:buffer())
+
+    if settings.sync_pwd and self.root.path == vim.uv.cwd() then
+      vim.api.nvim_set_current_dir(destination_view.root.path)
+    end
+
+    return true
+  end
+end
+
+-- util.profile_module(view, 'view', { 'render' })
+
+return view

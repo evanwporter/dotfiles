@@ -1,5 +1,6 @@
 require("util.lsp").add_servers({
-    yaml_language_server = {
+    yamlls = {
+        cmd = { vim.fn.stdpath("data") .. "/mason/bin/yaml-language-server", "--stdio" },
         -- Have to add this for yamlls to understand that we support line folding
         capabilities = {
             textDocument = {

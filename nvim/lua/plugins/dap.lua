@@ -5,6 +5,7 @@ return {
             "ibhagwan/fzf-lua",
             { "theHamsta/nvim-dap-virtual-text", opts = {} },
             "nvim-lua/plenary.nvim",
+            "jay-babu/mason-nvim-dap.nvim",
         },
 
     -- stylua: ignore
@@ -172,9 +173,95 @@ return {
                     },
                 }
             end
+
+            -- Python debugging configurations
+            -- Note: adapter is automatically configured by mason-nvim-dap
+            dap.configurations.python = {
+                {
+                    type = "python",
+                    request = "launch",
+                    name = "Launch file",
+                    program = "${file}",
+                    pythonPath = function()
+                        local cwd = vim.fn.getcwd()
+                        if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                            return cwd .. "/venv/bin/python"
+                        elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                            return cwd .. "/.venv/bin/python"
+                        else
+                            return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+                        end
+                    end,
+                },
+                {
+                    type = "python",
+                    request = "launch",
+                    name = "Launch file with arguments",
+                    program = "${file}",
+                    args = function()
+                        local args_string = vim.fn.input("Arguments: ")
+                        return vim.split(args_string, " +")
+                    end,
+                    pythonPath = function()
+                        local cwd = vim.fn.getcwd()
+                        if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                            return cwd .. "/venv/bin/python"
+                        elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                            return cwd .. "/.venv/bin/python"
+                        else
+                            return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+                        end
+                    end,
+                },
+                {
+                    type = "python",
+                    request = "attach",
+                    name = "Attach remote",
+                    connect = function()
+                        local host = vim.fn.input("Host [127.0.0.1]: ")
+                        host = host ~= "" and host or "127.0.0.1"
+                        local port = tonumber(vim.fn.input("Port [5678]: ")) or 5678
+                        return { host = host, port = port }
+                    end,
+                },
+            }
         end,
     },
 
+    -- nvim-dap-ui: VSCode-like debug interface
+    -- Uncomment this and comment out nvim-dap-view to use it
+    -- {
+    --     "rcarriga/nvim-dap-ui",
+    --     dependencies = {
+    --         "mfussenegger/nvim-dap",
+    --         "nvim-neotest/nvim-nio",
+    --     },
+    --
+    --     -- stylua: ignore
+    --     keys = {
+    --       { "<leader>dd", function() require("dapui").toggle({}) end, desc = "Dap UI" },
+    --       { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = { "n", "x" } },
+    --     },
+    --
+    --     opts = {},
+    --
+    --     config = function(_, opts)
+    --         local dap = require("dap")
+    --         local dapui = require("dapui")
+    --
+    --         dapui.setup(opts)
+    --
+    --         dap.listeners.after.event_initialized["dapui_config"] = function()
+    --             dapui.open({})
+    --         end
+    --
+    --         dap.listeners.before.event_terminated["dapui_config"] = nil
+    --         dap.listeners.before.event_exited["dapui_config"] = nil
+    --     end,
+    -- },
+
+    -- nvim-dap-view: Minimalist debug interface
+    -- Uncomment this and comment out nvim-dap-ui to use it
     {
         "igorlfs/nvim-dap-view",
         version = "1.*",
@@ -185,11 +272,31 @@ return {
         -- stylua: ignore
         keys = {
           { "<leader>dd", function() require("dap-view").toggle(true) end, desc = "Dap View" },
-          -- { "<leader>de", function() require("dap-view").hover(nil, true) end, desc = "Eval", mode = { "n", "x" } },
+          { "<leader>de", function() require("dap-view").hover(nil, true) end, desc = "Eval", mode = { "n", "x" } },
         },
 
         opts = {
+            windows = {
+                size = 0.25,
+                position = "right",
+                terminal = {
+                    size = 0.5,
+                    position = "left",
+                    hide = {},
+                },
+            },
             winbar = {
+                show = true,
+                sections = {
+                    "watches",
+                    "scopes",
+                    "exceptions",
+                    "breakpoints",
+                    -- "threads",
+                    "repl",
+                },
+                default_section = "scopes",
+                show_keymap_hints = false,
                 controls = {
                     enabled = true,
                     position = "right",

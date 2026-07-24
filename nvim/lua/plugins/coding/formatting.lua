@@ -21,6 +21,10 @@ return {
 
                 nix = { "alejandra" },
                 cmake = { "cmake_format" },
+
+                xml = { "xmlstarlet" },
+
+                jinja = { "djlint" },
             },
 
             formatters = {
@@ -30,6 +34,8 @@ return {
                         "--experimental-config",
                         vim.fn.expand("~/.config/alejandra/alejandra.toml"),
                     },
+                xmlstarlet = {
+                    args = { "fo", "--indent-tab" },
                 },
             },
 

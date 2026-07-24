@@ -27,6 +27,12 @@ local excluded_filetypes = {
     ["dap-view-term"] = true,
     ["dap-view-hover"] = true,
     ["dap-view-help"] = true,
+    dapui_console = true,
+    dapui_watches = true,
+    dapui_stacks = true,
+    dapui_breakpoints = true,
+    dapui_scopes = true,
+    ["dapui-repl"] = true,
 }
 
 local function set_highlights()
@@ -172,6 +178,10 @@ local function should_show_winbar(winid)
     end
 
     if filetype:match("^snacks") then
+        return false
+    end
+
+    if filetype:match("^dapui") then
         return false
     end
 
@@ -465,7 +475,11 @@ local function update_window(winid)
     if should_show_winbar(winid) then
         vim.wo[winid].winbar = WINBAR_EXPR
     else
-        vim.wo[winid].winbar = ""
+        -- Don't clear winbar if it's set by another plugin (like dap-ui)
+        local current_winbar = vim.wo[winid].winbar
+        if current_winbar == WINBAR_EXPR or current_winbar == "" then
+            vim.wo[winid].winbar = ""
+        end
     end
 end
 
