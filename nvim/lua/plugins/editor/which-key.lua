@@ -29,6 +29,8 @@ return {
                     { "<C-w>j", hidden = true },
                     { "<C-w>k", hidden = true },
                     { "<C-w>l", hidden = true },
+                    { "gt", hidden = true },
+                    { "gT", hidden = true },
                 },
             },
         },
