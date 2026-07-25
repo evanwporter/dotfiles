@@ -50,13 +50,3 @@ vim.api.nvim_create_autocmd("FileType", {
         pcall(vim.treesitter.start, args.buf)
     end,
 })
-
-vim.api.nvim_create_autocmd("FileType", {
-    group = augroup("yaml_indent"),
-    pattern = "yaml",
-    callback = function()
-        vim.bo.shiftwidth = 4
-        vim.bo.softtabstop = 4
-        vim.bo.tabstop = 4
-    end,
-})
