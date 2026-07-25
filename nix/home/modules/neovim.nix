@@ -44,6 +44,7 @@ in {
 			tree-sitter
 
 			vscode-extensions.vadimcn.vscode-lldb
+			vscode-langservers-extracted
 			yaml-language-server
 			lua-language-server
 			stylua
