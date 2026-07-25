@@ -53,6 +53,7 @@ local function toggle_terminal()
     vim.wo.relativenumber = false
     vim.wo.signcolumn = "no"
     vim.wo.statuscolumn = ""
+    vim.opt_local.showtabline = 0
 
     vim.cmd("startinsert")
 end
