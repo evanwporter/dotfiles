@@ -1,10 +1,7 @@
-{
-	pkgs,
-	lib,
-	...
-}: let
+{pkgs, ...}: let
 	parserNames = [
 		"bash"
+		"typescript"
 		"cmake"
 		"cpp"
 		"json"
@@ -14,9 +11,11 @@
 		"python"
 		"rust"
 		"toml"
+		"ninja"
 		"yaml"
 		"fish"
 		"systemverilog"
+		"rst"
 	];
 
 	treesitterWithParsers =
@@ -58,6 +57,7 @@ in {
 			cmake-format
 			verible
 			llvmPackages_22.clang-tools
+			nodejs
 		];
 	};
 }
