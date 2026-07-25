@@ -20,6 +20,8 @@ local mode_foreground = "#282828"
 local section_foreground = "#ddc7a1"
 local git_background = "#504945"
 local filetype_background = "#32302f"
+local path_min_width = 24
+local path_max_width = 80
 
 local function set_highlights()
     api.nvim_set_hl(0, "StatusLineModeNormal", {
@@ -124,6 +126,49 @@ local function statusline_bufnr()
     return api.nvim_get_current_buf()
 end
 
+---@return integer
+local function statusline_width()
+    local winid = vim.g.statusline_winid
+
+    if type(winid) == "number" and api.nvim_win_is_valid(winid) then
+        return api.nvim_win_get_width(winid)
+    end
+
+    return vim.o.columns
+end
+
+---@param path string
+---@return integer
+local function path_display_width(path)
+    return fn.strdisplaywidth(path)
+end
+
+---@param path string
+---@param max_width integer
+---@return string
+local function truncate_path(path, max_width)
+    if path_display_width(path) <= max_width then
+        return path
+    end
+
+    local shortened = fn.pathshorten(path)
+
+    if path_display_width(shortened) <= max_width then
+        return shortened
+    end
+
+    local prefix = "..."
+    local tail_width = math.max(1, max_width - #prefix)
+    local tail = fn.strcharpart(shortened, math.max(0, fn.strchars(shortened) - tail_width))
+
+    return prefix .. tail
+end
+
+---@return integer
+local function max_path_width()
+    return math.max(path_min_width, math.min(path_max_width, math.floor(statusline_width() * 0.45)))
+end
+
 ---@return string
 M.mode = function()
     local name, hl = get_mode()
@@ -162,6 +207,8 @@ M.path_file = function()
     elseif vim.startswith(filename, cwd) then
         filename = fn.fnamemodify(bufname, ":.")
     end
+
+    filename = truncate_path(filename, max_path_width())
 
     return string.format("%%#StatusLinePathFile# %s %%*", filename)
 end
