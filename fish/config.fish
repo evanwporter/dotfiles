@@ -48,3 +48,5 @@ set -g theme_nerd_fonts yes
 
 set -gx EDITOR nvim
 set -gx VISUAL nvim
+
+direnv hook fish | source
