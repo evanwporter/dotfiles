@@ -239,7 +239,7 @@ function M._get()
         local is_insert = mode:match("^[iR]") ~= nil
 
         nu = true
-        rnu = not is_insert
+        rnu = rnu and not is_insert
     end
 
     local show_signs = vim.v.virtnum == 0 and vim.wo[win].signcolumn ~= "no"
