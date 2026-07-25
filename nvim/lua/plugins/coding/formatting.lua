@@ -34,8 +34,9 @@ return {
                         "--experimental-config",
                         vim.fn.expand("~/.config/alejandra/alejandra.toml"),
                     },
-                xmlstarlet = {
-                    args = { "fo", "--indent-tab" },
+                    xmlstarlet = {
+                        args = { "fo", "--indent-tab" },
+                    },
                 },
             },
 

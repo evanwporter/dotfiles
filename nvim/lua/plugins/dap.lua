@@ -5,7 +5,6 @@ return {
             "ibhagwan/fzf-lua",
             { "theHamsta/nvim-dap-virtual-text", opts = {} },
             "nvim-lua/plenary.nvim",
-            "jay-babu/mason-nvim-dap.nvim",
         },
 
     -- stylua: ignore
