@@ -24,13 +24,18 @@ return {
                     { "<leader>y", group = "Yazi", icon = "󰇥" },
                     { "<leader>x", group = "Trouble", icon = "" },
                     { "<leader>g", group = "Git", icon = "" },
+                    { "<leader>gh", group = "Hunks" },
                     { "<leader>gg", group = "Lazygit" },
+
+                    -- Hidden Keys
                     { "<C-w>h", hidden = true },
                     { "<C-w>j", hidden = true },
                     { "<C-w>k", hidden = true },
                     { "<C-w>l", hidden = true },
                     { "gt", hidden = true },
                     { "gT", hidden = true },
+                    { "]B", hidden = true },
+                    { "[B", hidden = true },
                 },
             },
         },

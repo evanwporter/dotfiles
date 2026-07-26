@@ -40,6 +40,8 @@ return {
                 end,
                 desc = "Search Word Under Cursor",
             },
+
+            -- lsp
             { "gr", desc = "Go to References" },
             { "<leader>sd", desc = "Search Document Symbols" },
             { "<leader>sD", desc = "Search Workspace Symbols" },
@@ -47,6 +49,11 @@ return {
             { "<leader>cX", desc = "Diagnostics Workspace" },
             { "gai", desc = "LSP Incoming Calls" },
             { "gao", desc = "LSP Outgoing Calls" },
+
+            -- git
+            { "<leader>gd", "<cmd>FzfLua git_diff<cr>", desc = "Git Diff (files)" },
+            { "<leader>gs", "<cmd>FzfLua git_status<CR>", desc = "Status" },
+            { "<leader>gS", "<cmd>FzfLua git_stash<cr>", desc = "Git Stash" },
         },
         opts = {
             fzf_opts = {
