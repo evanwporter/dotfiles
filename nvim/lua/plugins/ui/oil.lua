@@ -1,7 +1,11 @@
 return {
     "stevearc/oil.nvim",
+    dependencies = { { "nvim-mini/mini.icons", opts = {} } },
     opts = {
         skip_confirm_for_simple_edits = true,
+        columns = {
+            "icon",
+        },
         keymaps = {
             ["q"] = {
                 callback = function()
@@ -31,17 +35,16 @@ return {
             },
         },
     },
-    dependencies = { "nvim-mini/mini.icons" },
     keys = {
         {
-            "<leader>o",
+            "<leader>e",
             function()
                 require("oil").open()
             end,
             desc = "Oil",
         },
         {
-            "<leader>O",
+            "<leader>E",
             function()
                 require("oil").open(vim.uv.cwd())
             end,
