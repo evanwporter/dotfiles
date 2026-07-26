@@ -18,7 +18,7 @@ return {
                     { "<leader>b", group = "Buffer", icon = "󰈔" },
                     { "<leader>c", group = "Code", icon = "󰅩" },
                     { "<leader>d", group = "Debug", icon = "󰃤" },
-                    { "<leader>e", group = "Explorer", icon = "󰙅" },
+                    { "<leader>e", group = "Oil", icon = "󰙅" },
                     { "<leader>s", group = "Find", icon = "󰈞" },
                     { "<leader>t", group = "Test", icon = "󰙨" },
                     { "<leader>tt", group = "Test Summary", icon = "󰙨" },
