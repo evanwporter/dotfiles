@@ -28,6 +28,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         map("gi", vim.lsp.buf.implementation, "Go to Implementation", "textDocument/implementation")
 
+        map("gy", vim.lsp.buf.type_definition, "Go to T[y]pe Definition")
+        -- map("gK", function()
+        --     return vim.lsp.buf.signature_help()
+        -- end, "Signature Help", "textDocument/signatureHelp")
+
         map("gai", function()
             require("fzf-lua").lsp_incoming_calls()
         end, "LSP Incoming Calls", "callHierarchy/incomingCalls")

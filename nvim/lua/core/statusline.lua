@@ -13,6 +13,7 @@ local mode_backgrounds = {
     replace = "#d8a657",
     command = "#7daea3",
     terminal = "#d3869b",
+    surround = "#89b482",
     other = "#504945",
 }
 
@@ -22,6 +23,7 @@ local git_background = "#504945"
 local filetype_background = "#32302f"
 local path_min_width = 24
 local path_max_width = 80
+local enable_surround_mode = false
 
 local function set_highlights()
     api.nvim_set_hl(0, "StatusLineModeNormal", {
@@ -60,6 +62,12 @@ local function set_highlights()
         bold = true,
     })
 
+    api.nvim_set_hl(0, "StatusLineModeSurround", {
+        fg = mode_foreground,
+        bg = mode_backgrounds.surround,
+        bold = true,
+    })
+
     api.nvim_set_hl(0, "StatusLineModeOther", {
         fg = mode_foreground,
         bg = mode_backgrounds.other,
@@ -87,6 +95,15 @@ set_highlights()
 ---@return string, string
 local function get_mode()
     local mode = api.nvim_get_mode().mode
+
+    if enable_surround_mode then
+        local ok, surround = pcall(require, "nvim-surround")
+        if ok and surround.pending_surround then
+            if vim.startswith(mode, "no") then
+                return "SURROUND", "StatusLineModeSurround"
+            end
+        end
+    end
 
     if vim.startswith(mode, "i") then
         return "INSERT", "StatusLineModeInsert"
@@ -292,5 +309,14 @@ api.nvim_create_autocmd("ColorScheme", {
     group = api.nvim_create_augroup("CustomStatusLine", { clear = true }),
     callback = set_highlights,
 })
+
+if enable_surround_mode then
+    api.nvim_create_autocmd("ModeChanged", {
+        group = api.nvim_create_augroup("CustomStatusLineMode", { clear = true }),
+        callback = function()
+            vim.cmd.redrawstatus()
+        end,
+    })
+end
 
 return M
