@@ -40,5 +40,12 @@ return {
             end,
             desc = "Oil",
         },
+        {
+            "<leader>O",
+            function()
+                require("oil").open(vim.uv.cwd())
+            end,
+            desc = "Oil (root dir)",
+        },
     },
 }
