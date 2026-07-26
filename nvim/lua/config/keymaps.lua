@@ -102,3 +102,31 @@ end, {
     silent = true,
     desc = "Up",
 })
+
+-- Buffer Navigation
+vim.keymap.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
+vim.keymap.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+
+-- Quickfix list navigation
+vim.keymap.set("n", "[q", "<cmd>cprevious<cr>", { desc = "Prev Quickfix" })
+vim.keymap.set("n", "]q", "<cmd>cnext<cr>", { desc = "Next Quickfix" })
+vim.keymap.set("n", "[Q", "<cmd>cfirst<cr>", { desc = "First Quickfix" })
+vim.keymap.set("n", "]Q", "<cmd>clast<cr>", { desc = "Last Quickfix" })
+vim.keymap.set("n", "[<C-q>", "<cmd>cpfile<cr>", { desc = "Prev Quickfix File" })
+vim.keymap.set("n", "]<C-q>", "<cmd>cnfile<cr>", { desc = "Next Quickfix File" })
+
+-- Location list navigation
+vim.keymap.set("n", "[l", "<cmd>lprevious<cr>", { desc = "Prev Location Item" })
+vim.keymap.set("n", "]l", "<cmd>lnext<cr>", { desc = "Next Location Item" })
+vim.keymap.set("n", "[L", "<cmd>lfirst<cr>", { desc = "First Location Item" })
+vim.keymap.set("n", "]L", "<cmd>llast<cr>", { desc = "Last Location Item" })
+vim.keymap.set("n", "[<C-l>", "<cmd>lpfile<cr>", { desc = "Prev Location File" })
+vim.keymap.set("n", "]<C-l>", "<cmd>lnfile<cr>", { desc = "Next Location File" })
+
+-- Tag Navigation (Cursor jump)
+vim.keymap.set("n", "[t", "<cmd>tprevious<cr>", { desc = "Prev Tag" })
+vim.keymap.set("n", "]t", "<cmd>tnext<cr>", { desc = "Next Tag" })
+vim.keymap.set("n", "[T", "<cmd>tfirst<cr>", { desc = "First Tag" })
+vim.keymap.set("n", "]T", "<cmd>tlast<cr>", { desc = "Last Tag" })
+vim.keymap.set("n", "[<C-t>", "<cmd>ptprevious<cr>", { desc = "Prev Preview Tag" })
+vim.keymap.set("n", "]<C-t>", "<cmd>ptnext<cr>", { desc = "Next Preview Tag" })
