@@ -40,7 +40,7 @@ return {
                 end,
                 desc = "Search Word Under Cursor",
             },
-
+            { "<leader>sc", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
             -- lsp
             { "gr", desc = "Go to References" },
             { "<leader>sd", desc = "Search Document Symbols" },

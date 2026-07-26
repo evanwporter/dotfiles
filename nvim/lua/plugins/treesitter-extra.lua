@@ -123,6 +123,14 @@ return {
                 ts_move.goto_previous_start("@loop.outer", "textobjects")
             end, { desc = "Previous loop" })
 
+            -- Block
+            vim.keymap.set({ "n", "x", "o" }, "]o", function()
+                ts_move.goto_next_start("@block.outer", "textobjects")
+            end, { desc = "Next block" })
+            vim.keymap.set({ "n", "x", "o" }, "[o", function()
+                ts_move.goto_previous_start("@block.outer", "textobjects")
+            end, { desc = "Previous block" })
+
             -- -----------
             -- Repeat Move
             -- -----------
