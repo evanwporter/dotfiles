@@ -1,7 +1,7 @@
 return {
     {
         "evanwporter/nvim-tree.lua",
-        -- enabled = false,
+        enabled = false,
         dependencies = {
             {
                 "nvim-mini/mini.icons",
