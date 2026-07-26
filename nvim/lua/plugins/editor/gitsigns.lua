@@ -2,7 +2,6 @@ return {
     {
         "lewis6991/gitsigns.nvim",
         event = { "BufReadPre", "BufNewFile" },
-
         opts = {
             signs = {
                 add = { text = "▎" },
@@ -19,44 +18,34 @@ return {
                 topdelete = { text = "" },
                 changedelete = { text = "▎" },
             },
-        },
-        keys = {
-            {
-                "]h",
-                function()
+            on_attach = function(buffer)
+                local gs = package.loaded.gitsigns
+
+                local function map(mode, l, r, desc)
+                    vim.keymap.set(mode, l, r, { buffer = buffer, desc = desc, silent = true })
+                end
+
+                map("n", "]h", function()
                     if vim.wo.diff then
                         vim.cmd.normal({ "]c", bang = true })
                     else
-                        require("gitsigns").nav_hunk("next")
+                        gs.nav_hunk("next")
                     end
-                end,
-                desc = "Next Hunk",
-            },
-            {
-                "[h",
-                function()
+                end, "Next Hunk")
+
+                map("n", "[h", function()
                     if vim.wo.diff then
                         vim.cmd.normal({ "[c", bang = true })
                     else
-                        require("gitsigns").nav_hunk("prev")
+                        gs.nav_hunk("prev")
                     end
-                end,
-                desc = "Prev Hunk",
-            },
-            {
-                "<leader>ghd",
-                function()
-                    require("gitsigns").diffthis()
-                end,
-                desc = "Diff This",
-            },
-            {
-                "<leader>ghD",
-                function()
-                    require("gitsigns").diffthis("~")
-                end,
-                desc = "Diff This ~",
-            },
+                end, "Prev Hunk")
+
+                map("n", "<leader>ghd", gs.diffthis, "Diff This")
+                map("n", "<leader>ghD", function()
+                    gs.diffthis("~")
+                end, "Diff This ~")
+            end,
         },
     },
 }
