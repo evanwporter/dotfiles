@@ -1,16 +1,14 @@
-require("util.lsp").add_servers({
-  pyrefly = {
+vim.lsp.config("pyrefly", {
     settings = {
-      python = {
-        analysis = {
-          typeCheckingMode = "basic",
-          autoSearchPaths = true,
-          useLibraryCodeForTypes = true,
+        python = {
+            analysis = {
+                typeCheckingMode = "basic",
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
+            },
         },
-      },
     },
-  },
 })
-
+vim.lsp.enable("pyrefly")
 
 return {}

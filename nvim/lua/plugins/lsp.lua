@@ -1,6 +1,9 @@
 return {
     {
         "neovim/nvim-lspconfig",
+        dependencies = {
+            "b0o/schemastore.nvim",
+        },
         config = function()
             vim.diagnostic.config({
                 virtual_text = true,
@@ -9,11 +12,6 @@ return {
                 update_in_insert = false,
                 severity_sort = true,
             })
-
-            for server, server_opts in pairs(require("util.lsp").servers) do
-                vim.lsp.config(server, server_opts)
-                vim.lsp.enable(server)
-            end
         end,
     },
 }
