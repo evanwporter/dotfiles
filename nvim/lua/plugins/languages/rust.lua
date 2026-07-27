@@ -1,6 +1,5 @@
-require("util.lsp").add_servers({
-    rust_analyzer = {},
-})
+vim.lsp.config("rust_analyzer", {})
+vim.lsp.enable("rust_analyzer")
 
 return {
     {

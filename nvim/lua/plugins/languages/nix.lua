@@ -1,5 +1,4 @@
-require("util.lsp").add_servers({
-    nil_ls = {},
-})
+vim.lsp.config("nil_ls", {})
+vim.lsp.enable("nil_ls")
 
 return {}
