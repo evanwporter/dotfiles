@@ -46,6 +46,7 @@ link_file "$DOTFILES_DIR/kitty" "$HOME/.config/kitty"
 link_file "DOTFILES_DIR/erdtree" "$HOME/.config/erdtree"
 # link_file "$DOTFILES_DIR/nvimpager" "$HOME/.config/nvimpager"
 # link_file "$DOTFILES_DIR/glow" "$HOME/.config/glow"
+link_file "DOTFILES_DIR/i3" "$HOME/.config/i3"
 
 echo
 echo "Done."
