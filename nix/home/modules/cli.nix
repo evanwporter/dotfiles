@@ -21,6 +21,7 @@
 		erdtree
 
 		codex
+		opencode
 
 		# useful libs/tools
 		openssl
