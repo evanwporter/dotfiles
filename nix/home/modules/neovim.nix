@@ -1,4 +1,9 @@
-{pkgs, ...}: let
+{
+	config,
+	homeDirectory,
+	pkgs,
+	...
+}: let
 	parserNames = [
 		"bash"
 		"typescript"
@@ -28,6 +33,9 @@
 			paths = treesitterWithParsers.dependencies;
 		};
 in {
+	xdg.configFile."nvim".source =
+		config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dotfiles/nvim";
+
 	programs.neovim = {
 		enable = true;
 		defaultEditor = true;
@@ -37,6 +45,29 @@ in {
 			"--set"
 			"NVIM_TREESITTER_PARSERS"
 			"${treesitterParsers}"
+			"--set"
+			"NVIM_PLUGIN_MANAGER"
+			"nix"
+		];
+
+		plugins = with pkgs.vimPlugins; [
+			lz-n
+			oil-nvim
+			gruvbox-material
+			fzf-lua
+			which-key-nvim
+			flash-nvim
+			gitsigns-nvim
+			conform-nvim
+			nvim-treesitter
+			nvim-treesitter-textobjects
+			nvim-treesitter-context
+			nvim-lspconfig
+			mason-nvim-dap-nvim
+			mason-nvim
+			plenary-nvim
+			nvim-dap
+			neotest
 		];
 
 		extraPackages = with pkgs; [

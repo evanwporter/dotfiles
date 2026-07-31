@@ -1,26 +1,33 @@
--- vim.pack + lz.n orchestration
--- vim.pack handles plugin installation and built-in lockfile (~/.local/share/nvim/state/pack-lock.json)
--- lz.n handles lazy-loading configuration
+-- Plugin orchestration.
+-- vim.pack handles installation unless NVIM_PLUGIN_MANAGER=nix is set.
+-- lz.n handles lazy-loading configuration in both modes.
 
--- Bootstrap lz.n via vim.pack
-vim.pack.add({ "https://github.com/lumen-oss/lz.n" })
+local plugin_manager = vim.env.NVIM_PLUGIN_MANAGER or "vim.pack"
+local use_nix_plugins = plugin_manager == "nix"
+
+if not use_nix_plugins then
+	-- Bootstrap lz.n via vim.pack
+	vim.pack.add({ "https://github.com/lumen-oss/lz.n" })
+end
 
 -- Verify lz.n can be loaded
 local ok, lzn = pcall(require, "lz.n")
 if not ok then
-	vim.notify("Failed to load lz.n", vim.log.levels.ERROR)
+	vim.notify("Failed to load lz.n for plugin manager: " .. plugin_manager, vim.log.levels.ERROR)
 	return
 end
 
--- Install all plugins from sources.lua
--- Don't load them yet (lz.n will handle loading)
-local sources = require("sources")
-for _, spec in ipairs(sources) do
-	if type(spec) == "string" then
-		vim.pack.add({ spec }, { load = function() end })
-	else
-		-- Table spec with version or other options
-		vim.pack.add({ spec }, { load = function() end })
+if not use_nix_plugins then
+	-- Install all plugins from sources.lua.
+	-- Don't load them yet (lz.n will handle loading).
+	local sources = require("sources")
+	for _, spec in ipairs(sources) do
+		if type(spec) == "string" then
+			vim.pack.add({ spec }, { load = function() end })
+		else
+			-- Table spec with version or other options
+			vim.pack.add({ spec }, { load = function() end })
+		end
 	end
 end
 
