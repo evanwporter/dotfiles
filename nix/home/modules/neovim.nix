@@ -32,6 +32,19 @@
 			name = "neovim-treesitter-parsers";
 			paths = treesitterWithParsers.dependencies;
 		};
+
+	blink-lib =
+		pkgs.vimUtils.buildVimPlugin {
+			pname = "blink.lib";
+			version = "5876dd95deeb70aadbe9f1c0b7117a135061cdac";
+			src =
+				pkgs.fetchFromGitHub {
+					owner = "saghen";
+					repo = "blink.lib";
+					rev = "5876dd95deeb70aadbe9f1c0b7117a135061cdac";
+					sha256 = "15zrgs89l8awxrdc59rmfvcc05j053q7cnpd21sgkpc3320drh0n";
+				};
+		};
 in {
 	xdg.configFile."nvim".source =
 		config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dotfiles/nvim";
@@ -59,15 +72,20 @@ in {
 			flash-nvim
 			gitsigns-nvim
 			conform-nvim
-			nvim-treesitter
 			nvim-treesitter-textobjects
 			nvim-treesitter-context
 			nvim-lspconfig
-			mason-nvim-dap-nvim
-			mason-nvim
 			plenary-nvim
-			nvim-dap
+			# nvim-dap
 			neotest
+			blink-cmp
+			blink-lib
+			blink-pairs
+			blink-indent
+			fff-nvim
+			SchemaStore-nvim
+			hardtime-nvim
+			mini-icons
 		];
 
 		extraPackages = with pkgs; [
