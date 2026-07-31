@@ -8,12 +8,18 @@
 		# Avoid programs.firefox.profiles.*.settings/user.js here because those
 		# are reapplied on each launch and can override manual Firefox changes.
 		policies = {
+			# about:policies#documentation
+
 			DisableAppUpdate = true;
 			DisableFirefoxStudies = true;
 			DisableTelemetry = true;
 			DisablePocket = true;
 			DisplayBookmarksToolbar = "always";
 			DontCheckDefaultBrowser = true;
+
+			# Builtin Password Manager
+			OfferToSaveLogins = false;
+			PasswordManagerEnabled = false;
 
 			FirefoxHome = {
 				TopSites = false;

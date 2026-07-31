@@ -58,6 +58,7 @@ in {
 			verible
 			llvmPackages_22.clang-tools
 			nodejs
+			tombi
 		];
 	};
 }
