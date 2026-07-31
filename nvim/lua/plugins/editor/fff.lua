@@ -1,38 +1,35 @@
+-- fff - Fast file finder with preview
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "dmtrKovalenko/fff",
-        build = function()
-            -- downloads a prebuilt binary or falls back to cargo build
-            require("fff.download").download_or_build_binary()
-        end,
-
-        commit = "63fac0b45534be1645c9f23713963e45172dc89b",
-
-        keys = {
-            {
-                "<leader><leader>",
-                function()
-                    require("fff").find_files()
-                end,
-                desc = "Find files",
-            },
+    "fff",
+    lazy = true,
+    keys = {
+        {
+            "<leader><leader>",
+            function()
+                require("fff").find_files()
+            end,
+            desc = "Find files",
         },
-
-        init = function()
-            local function set_fff_highlights()
-                vim.api.nvim_set_hl(0, "FFFCursorLine", {
-                    bg = "#504945",
-                })
-            end
-
-            set_fff_highlights()
-
-            vim.api.nvim_create_autocmd("ColorScheme", {
-                callback = set_fff_highlights,
+    },
+    before = function()
+        -- Set up highlights before plugin loads (init equivalent)
+        local function set_fff_highlights()
+            vim.api.nvim_set_hl(0, "FFFCursorLine", {
+                bg = "#504945",
             })
-        end,
+        end
 
-        opts = {
+        set_fff_highlights()
+
+        vim.api.nvim_create_autocmd("ColorScheme", {
+            callback = set_fff_highlights,
+        })
+    end,
+    after = function()
+        -- Setup plugin (config equivalent with opts)
+        require("fff").setup({
             prompt = " ",
 
             hl = {
@@ -48,10 +45,6 @@ return {
                 enabled = true,
                 cursorlineopt = "both",
             },
-        },
-
-        config = function(_, opts)
-            require("fff").setup(opts)
-        end,
-    },
+        })
+    end,
 }

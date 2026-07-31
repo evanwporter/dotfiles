@@ -1,21 +1,25 @@
+-- Gitsigns - Git decorations and utilities
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "lewis6991/gitsigns.nvim",
-        event = { "BufReadPre", "BufNewFile" },
-        opts = {
+    "gitsigns.nvim",
+    lazy = true,
+    event = { "BufReadPre", "BufNewFile" },
+    after = function()
+        require("gitsigns").setup({
             signs = {
                 add = { text = "▎" },
                 change = { text = "▎" },
-                delete = { text = "" },
-                topdelete = { text = "" },
+                delete = { text = "" },
+                topdelete = { text = "" },
                 changedelete = { text = "▎" },
                 untracked = { text = "▎" },
             },
             signs_staged = {
                 add = { text = "▎" },
                 change = { text = "▎" },
-                delete = { text = "" },
-                topdelete = { text = "" },
+                delete = { text = "" },
+                topdelete = { text = "" },
                 changedelete = { text = "▎" },
             },
             on_attach = function(buffer)
@@ -46,6 +50,6 @@ return {
                     gs.diffthis("~")
                 end, "Diff This ~")
             end,
-        },
-    },
+        })
+    end,
 }

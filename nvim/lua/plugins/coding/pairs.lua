@@ -1,15 +1,26 @@
+-- blink.pairs - Auto pairs
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "saghen/blink.pairs",
-        version = "*",
-        event = "VeryLazy",
-        dependencies = {
-            "saghen/blink.lib",
-        },
-        build = function()
-            require("blink.pairs").download():pwait(60000)
-        end,
-        opts = {
+    "blink.pairs",
+    event = "DeferredUIEnter",
+    beforeAll = function()
+        -- Ensure blink.lib is loaded first (dependency)
+        require("lz.n").trigger_load("blink.lib")
+    end,
+    after = function()
+        local pairs = require("blink.pairs")
+
+        -- Download binary before setup (for vim.pack)
+        local ok = pcall(function()
+            pairs.download():pwait(60000)
+        end)
+        if not ok then
+            vim.notify("blink.pairs: failed to download binary", vim.log.levels.ERROR)
+            return
+        end
+
+        pairs.setup({
             mappings = {
                 pairs = {
                     ['"'] = {
@@ -83,6 +94,6 @@ return {
                     },
                 },
             },
-        },
-    },
+        })
+    end,
 }

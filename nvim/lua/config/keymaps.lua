@@ -74,9 +74,6 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window" })
 vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window" })
 vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window" })
 
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up" })
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down" })
-
 vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
 

@@ -1,8 +1,12 @@
+-- CMake tools
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "Civitasv/cmake-tools.nvim",
-        ft = { "c", "cpp", "cmake" },
-        opts = {
+    "cmake-tools.nvim",
+    lazy = true,
+    ft = { "c", "cpp", "cmake" },
+    after = function()
+        require("cmake-tools").setup({
             cmake_command = "cmake",
             ctest_command = "ctest",
             cmake_use_preset = true,
@@ -23,7 +27,6 @@ return {
                 name = "quickfix",
                 opts = {
                     show = "always",
-                    -- auto_close_when_success = false,
                 },
             },
 
@@ -40,6 +43,6 @@ return {
                 runInTerminal = true,
                 console = "integratedTerminal",
             },
-        },
-    },
+        })
+    end,
 }

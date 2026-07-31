@@ -1,8 +1,12 @@
+-- C/C++ extensions for clangd
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "p00f/clangd_extensions.nvim",
-        ft = { "c", "cpp", "h", "hpp" },
-        opts = {
+    "clangd_extensions.nvim",
+    lazy = true,
+    ft = { "c", "cpp", "h", "hpp" },
+    after = function()
+        require("clangd_extensions").setup({
             ast = {
                 -- These are unicode, should be available in any font
                 role_icons = {
@@ -32,6 +36,6 @@ return {
             symbol_info = {
                 border = "none",
             },
-        },
-    },
+        })
+    end,
 }

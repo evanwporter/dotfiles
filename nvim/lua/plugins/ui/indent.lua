@@ -1,6 +1,7 @@
+-- blink.indent - Indent guides
+-- Installation handled by lua/sources.lua
+
 return {
-    {
-        "saghen/blink.indent",
-        event = "VeryLazy",
-    },
+    "blink.indent",
+    event = "DeferredUIEnter",
 }

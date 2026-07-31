@@ -1,9 +1,7 @@
-require("core.lazy")
 require("core.diagnostics")
-require("core.theme")
 require("core.terminal")
 require("core.dashboard")
 require("core.statuscolumn")
 require("core.statusline")
 require("core.notifications")
--- require("core.bufferline")
+-- require("core.bufferline")  -- Disabled for now
