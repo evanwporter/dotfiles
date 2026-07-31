@@ -1,0 +1,8 @@
+require("config.lsp.clangd")
+require("config.lsp.jsonls")
+require("config.lsp.lua_ls")
+require("config.lsp.neocmake")
+require("config.lsp.nil_ls")
+require("config.lsp.pyright")
+require("config.lsp.schemastore")
+require("config.lsp.yamlls")

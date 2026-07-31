@@ -2,11 +2,9 @@ return {
     {
         "saghen/blink.cmp",
         branch = "v1",
-
+        event = "VeryLazy",
         dependencies = {
             "rafamadriz/friendly-snippets",
-            "fang2hou/blink-copilot",
-            "zbirenbaum/copilot.lua",
         },
 
         opts = {
@@ -22,16 +20,6 @@ return {
                     "path",
                     "snippets",
                     "buffer",
-                    "copilot",
-                },
-
-                providers = {
-                    copilot = {
-                        name = "copilot",
-                        module = "blink-copilot",
-                        score_offset = 100,
-                        async = true,
-                    },
                 },
             },
 

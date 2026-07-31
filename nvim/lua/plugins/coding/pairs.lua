@@ -2,6 +2,7 @@ return {
     {
         "saghen/blink.pairs",
         version = "*",
+        event = "VeryLazy",
         dependencies = {
             "saghen/blink.lib",
         },

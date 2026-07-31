@@ -9,6 +9,8 @@ vim.opt.relativenumber = true
 
 vim.opt.signcolumn = "yes"
 
+vim.opt_local.showtabline = 0
+
 vim.opt.confirm = true
 
 vim.opt.clipboard = "unnamedplus"

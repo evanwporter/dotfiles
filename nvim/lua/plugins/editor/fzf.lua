@@ -51,7 +51,7 @@ return {
             { "gao", desc = "LSP Outgoing Calls" },
 
             -- git
-            { "<leader>gd", "<cmd>FzfLua git_diff<cr>", desc = "Git Diff (files)" },
+            -- { "<leader>gd", "<cmd>FzfLua git_diff<cr>", desc = "Git Diff (files)" },
             { "<leader>gs", "<cmd>FzfLua git_status<CR>", desc = "Status" },
             { "<leader>gS", "<cmd>FzfLua git_stash<cr>", desc = "Git Stash" },
         },
