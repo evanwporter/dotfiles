@@ -46,6 +46,53 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
+    group = augroup("source_shell_file"),
+    pattern = { "fish", "sh" },
+    callback = function(event)
+        vim.keymap.set("n", "<localleader>s", function()
+            local path = vim.api.nvim_buf_get_name(event.buf)
+
+            if path == "" then
+                vim.notify("Cannot source an unnamed buffer", vim.log.levels.WARN)
+                return
+            end
+
+            local ok, err = pcall(vim.cmd.write)
+
+            if not ok then
+                vim.notify("Could not save before sourcing: " .. err, vim.log.levels.ERROR)
+                return
+            end
+
+            local shell = vim.bo[event.buf].filetype == "fish" and "fish" or "bash"
+            local cmd = shell == "fish" and { "fish", "-c", "source $argv[1]", path }
+                or { "bash", "-c", 'source "$1"', "bash", path }
+
+            vim.system(cmd, { text = true }, function(result)
+                vim.schedule(function()
+                    if result.code == 0 then
+                        vim.notify("Sourced " .. vim.fn.fnamemodify(path, ":~:."))
+                        return
+                    end
+
+                    local output = vim.trim((result.stderr or "") .. "\n" .. (result.stdout or ""))
+
+                    if output == "" then
+                        output = shell .. " exited with code " .. result.code
+                    end
+
+                    vim.notify(output, vim.log.levels.ERROR)
+                end)
+            end)
+        end, {
+            buffer = event.buf,
+            desc = "Source Shell File",
+            silent = true,
+        })
+    end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)
         pcall(vim.treesitter.start, args.buf)
     end,
