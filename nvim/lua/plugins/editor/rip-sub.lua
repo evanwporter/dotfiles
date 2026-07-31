@@ -1,7 +1,7 @@
 return {
     {
-        -- "chrisgrieser/nvim-rip-substitute",
-        dir = vim.fn.stdpath("config") .. "/lua/config/plugins/nvim-rip-substitute",
+        "chrisgrieser/nvim-rip-substitute",
+        -- dir = vim.fn.stdpath("config") .. "/lua/config/plugins/nvim-rip-substitute",
         -- cmd = "RipSubstitute",
         opts = {
             prefill = {
@@ -20,7 +20,9 @@ return {
                 callback = function(event)
                     vim.keymap.set("i", "<Tab>", function()
                         local win = vim.fn.bufwinid(event.buf)
-                        if win == -1 then return end
+                        if win == -1 then
+                            return
+                        end
 
                         local cursor = vim.api.nvim_win_get_cursor(win)
                         local next_line = math.min(cursor[1] + 1, vim.api.nvim_buf_line_count(event.buf))

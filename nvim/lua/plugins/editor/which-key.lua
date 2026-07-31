@@ -19,14 +19,25 @@ return {
                     { "<leader>c", group = "Code", icon = "󰅩" },
                     { "<leader>d", group = "Debug", icon = "󰃤" },
                     { "<leader>e", group = "Oil", icon = "󰙅" },
-                    { "<leader>s", group = "Find", icon = "󰈞" },
+                    { "<leader>s", group = "Search", icon = "󰈞" },
+
+                    -- Test
                     { "<leader>t", group = "Test", icon = "󰙨" },
                     { "<leader>tt", group = "Test Summary", icon = "󰙨" },
-                    { "<leader>y", group = "Yazi", icon = "󰇥" },
-                    { "<leader>x", group = "Trouble", icon = "" },
+
+                    -- { "<leader>y", group = "Yazi", icon = "󰇥" },
+                    -- { "<leader>x", group = "Trouble", icon = "" },
+
+                    -- Git
                     { "<leader>g", group = "Git", icon = "" },
                     { "<leader>gh", group = "Hunks" },
                     { "<leader>gg", group = "Lazygit" },
+
+                    -- Surround
+                    { "s", group = "Surround", icon = "󰅪" },
+                    { "sa", desc = "Add surround" },
+                    { "sd", desc = "Delete surround" },
+                    { "sr", desc = "Replace surround" },
 
                     -- Hidden Keys
                     { "<C-w>h", hidden = true },

@@ -10,5 +10,3 @@ vim.lsp.config("pyrefly", {
     },
 })
 vim.lsp.enable("pyrefly")
-
-return {}
