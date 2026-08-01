@@ -7,7 +7,7 @@
 
 	services.displayManager.sddm.enable = true;
 
-	programs.networkmanager = {
+	networking.networkmanager = {
 		enable = true;
 	};
 }

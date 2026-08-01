@@ -3,6 +3,8 @@
 		gh
 		delta
 		lazygit
+		jujutsu
+		blazingjj
 	];
 
 	programs.git = {
