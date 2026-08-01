@@ -9,6 +9,7 @@
 		../../modules/nix.nix
 		../../modules/firefox.nix
 		../../modules/desktop-manager.nix
+		# ../../modules/i3.nix
 		../../modules/games
 	];
 
@@ -157,4 +158,8 @@
 			];
 		};
 	};
+
+	# xresources.properties = {
+	# 	"Xft.dpi" = 144;
+	# };
 }
