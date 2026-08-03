@@ -1,6 +1,74 @@
--- close some filetypes with <q>
 local augroup = require("util.autocmd").augroup
 
+local last_non_floating_win
+
+local function is_floating_window(win)
+    return vim.api.nvim_win_get_config(win).relative ~= ""
+end
+
+local function find_non_floating_window()
+    if
+        last_non_floating_win
+        and vim.api.nvim_win_is_valid(last_non_floating_win)
+        and not is_floating_window(last_non_floating_win)
+    then
+        return last_non_floating_win
+    end
+
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        if vim.api.nvim_win_is_valid(win) and not is_floating_window(win) then
+            return win
+        end
+    end
+end
+
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+    group = augroup("track_non_floating_window"),
+    callback = function()
+        local win = vim.api.nvim_get_current_win()
+
+        if not is_floating_window(win) then
+            last_non_floating_win = win
+        end
+    end,
+})
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+    group = augroup("redirect_file_from_float"),
+    callback = function(event)
+        local float_win = vim.api.nvim_get_current_win()
+
+        if not is_floating_window(float_win) then
+            last_non_floating_win = float_win
+            return
+        end
+
+        if vim.bo[event.buf].buftype ~= "" or vim.api.nvim_buf_get_name(event.buf) == "" then
+            return
+        end
+
+        local target_win = find_non_floating_window()
+
+        if not target_win then
+            return
+        end
+
+        vim.schedule(function()
+            if not vim.api.nvim_buf_is_valid(event.buf) or not vim.api.nvim_win_is_valid(target_win) then
+                return
+            end
+
+            pcall(vim.api.nvim_win_set_buf, target_win, event.buf)
+            pcall(vim.api.nvim_set_current_win, target_win)
+
+            if vim.api.nvim_win_is_valid(float_win) then
+                pcall(vim.api.nvim_win_close, float_win, true)
+            end
+        end)
+    end,
+})
+
+-- Close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("close_with_q"),
     pattern = {
@@ -33,6 +101,7 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = augroup("highlight_yank"),
     callback = function()
@@ -44,6 +113,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+-- Source current shell file with <localleader>s
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("source_shell_file"),
     pattern = { "fish", "sh" },
@@ -91,12 +161,14 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- Enable treesitter
 vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)
         pcall(vim.treesitter.start, args.buf)
     end,
 })
 
+-- Enable inlay hints
 vim.api.nvim_create_autocmd("LspAttach", {
     group = augroup("user_inlay_hints"),
     callback = function(args)
@@ -115,5 +187,45 @@ vim.api.nvim_create_autocmd("LspAttach", {
         then
             vim.lsp.inlay_hint.enable(true, { bufnr = buf })
         end
+    end,
+})
+
+-- Go to last loc when opening a buffer
+vim.api.nvim_create_autocmd("BufReadPost", {
+    group = augroup("last_loc"),
+    callback = function(event)
+        local exclude = { "gitcommit" }
+        local buf = event.buf
+        if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+            return
+        end
+        vim.b[buf].lazyvim_last_loc = true
+        local mark = vim.api.nvim_buf_get_mark(buf, '"')
+        local lcount = vim.api.nvim_buf_line_count(buf)
+        if mark[1] > 0 and mark[1] <= lcount then
+            pcall(vim.api.nvim_win_set_cursor, 0, mark)
+        end
+    end,
+})
+
+-- Check if we need to reload the file when it changed
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+    group = augroup("checktime"),
+    callback = function()
+        if vim.o.buftype ~= "nofile" then
+            vim.cmd("checktime")
+        end
+    end,
+})
+
+-- Auto create dir when saving a file, in case some intermediate directory does not exist
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+    group = augroup("auto_create_dir"),
+    callback = function(event)
+        if event.match:match("^%w%w+:[\\/][\\/]") then
+            return
+        end
+        local file = vim.uv.fs_realpath(event.match) or event.match
+        vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
     end,
 })
