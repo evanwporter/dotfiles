@@ -63,6 +63,7 @@ in {
 			shfmt
 			shellcheck
 			xmlstarlet
+			marksman
 		];
 	};
 }
