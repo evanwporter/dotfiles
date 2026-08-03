@@ -253,6 +253,45 @@ M.readonly = function()
 end
 
 ---@return string
+M.diagnostics = function()
+    local bufnr = statusline_bufnr()
+    local diagnostics = vim.diagnostic.get(bufnr)
+
+    if vim.tbl_isempty(diagnostics) then
+        return ""
+    end
+
+    local counts = {
+        [vim.diagnostic.severity.ERROR] = 0,
+        [vim.diagnostic.severity.WARN] = 0,
+        [vim.diagnostic.severity.INFO] = 0,
+        [vim.diagnostic.severity.HINT] = 0,
+    }
+
+    for _, diagnostic in ipairs(diagnostics) do
+        counts[diagnostic.severity] = counts[diagnostic.severity] + 1
+    end
+
+    local parts = {}
+    local sections = {
+        { severity = vim.diagnostic.severity.ERROR, icon = "", hl = "DiagnosticError" },
+        { severity = vim.diagnostic.severity.WARN, icon = "", hl = "DiagnosticWarn" },
+        { severity = vim.diagnostic.severity.INFO, icon = "", hl = "DiagnosticInfo" },
+        { severity = vim.diagnostic.severity.HINT, icon = "", hl = "DiagnosticHint" },
+    }
+
+    for _, section in ipairs(sections) do
+        local count = counts[section.severity]
+
+        if count > 0 then
+            parts[#parts + 1] = string.format("%%#%s#%s %d%%*", section.hl, section.icon, count)
+        end
+    end
+
+    return " " .. table.concat(parts, " ") .. " "
+end
+
+---@return string
 M.position = function()
     local _, hl = get_mode()
     local winid = vim.g.statusline_winid
@@ -293,6 +332,7 @@ M.render = function()
         M.path_file(),
         M.modified(),
         M.readonly(),
+        M.diagnostics(),
 
         -- Fill the unused remainder with StatusLine.
         "%#StatusLine#%=",
