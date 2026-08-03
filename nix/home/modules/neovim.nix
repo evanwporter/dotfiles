@@ -49,7 +49,7 @@ in {
 			stylua
 			nil
 			alejandra
-			pyright
+			pyrefly
 			rust-analyzer
 			neocmakelsp
 			prettier
@@ -59,6 +59,10 @@ in {
 			llvmPackages_22.clang-tools
 			nodejs
 			tombi
+			bash-language-server
+			shfmt
+			shellcheck
+			xmlstarlet
 		];
 	};
 }
