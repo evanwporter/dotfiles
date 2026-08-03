@@ -26,6 +26,9 @@ return {
                 xml = { "xmlstarlet" },
 
                 jinja = { "djlint" },
+
+                sh = { "shfmt" },
+                bash = { "shfmt" },
             },
 
             formatters = {
