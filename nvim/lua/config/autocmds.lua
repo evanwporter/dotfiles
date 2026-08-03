@@ -33,7 +33,6 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
--- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = augroup("highlight_yank"),
     callback = function()
@@ -95,5 +94,26 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)
         pcall(vim.treesitter.start, args.buf)
+    end,
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+    group = augroup("user_inlay_hints"),
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        local buf = args.buf
+
+        -- Define excluded filetypes here if needed (e.g., { "markdown", "help" })
+        local exclude_filetypes = {}
+
+        if
+            client
+            and client:supports_method("textDocument/inlayHint", { bufnr = buf })
+            and vim.api.nvim_buf_is_valid(buf)
+            and vim.bo[buf].buftype == ""
+            and not vim.tbl_contains(exclude_filetypes, vim.bo[buf].filetype)
+        then
+            vim.lsp.inlay_hint.enable(true, { bufnr = buf })
+        end
     end,
 })
