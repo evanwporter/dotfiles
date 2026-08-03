@@ -1,10 +1,9 @@
 {pkgs, ...}: {
 	home.packages = with pkgs; [
+		git
 		gh
 		delta
 		lazygit
-		jujutsu
-		blazingjj
 	];
 
 	programs.git = {
