@@ -36,6 +36,21 @@
         "type": "github"
       }
     },
+    "mnw": {
+      "locked": {
+        "lastModified": 1784154424,
+        "narHash": "sha256-HRn4O1X2ShYtbq5Egji72/aemyc2cIQicjRZD9hBqM8=",
+        "owner": "Gerg-L",
+        "repo": "mnw",
+        "rev": "0151d9fa87992cbeb67c86616fb9170dcec830b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Gerg-L",
+        "repo": "mnw",
+        "type": "github"
+      }
+    },
     "nixos-wsl": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -90,6 +105,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "mnw": "mnw",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2"
       }
