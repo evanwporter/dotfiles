@@ -76,12 +76,13 @@
 			plugins = {
 				start = with pkgs.vimPlugins; [
 					lazy-nvim
-					gruvbox-material
 				];
 
 				opt = with pkgs.vimPlugins; [
+					nvim-lspconfig
 					blink-cmp
 					blink-pairs
+					blink-lib
 					blink-indent
 					friendly-snippets
 					gitsigns-nvim
@@ -105,7 +106,12 @@
 					nvim-dap-view
 					nvim-treesitter-context
 					nvim-treesitter-textobjects
+					nvim-dap-virtual-text
 					grug-far-nvim
+					SchemaStore-nvim
+					nui-nvim
+					nvim-nio
+					gruvbox-material
 				];
 
 				dev.myconfig = {
