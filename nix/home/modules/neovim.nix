@@ -49,7 +49,7 @@
 		yaml-language-server
 		lua-language-server
 		stylua
-		nil
+		nixd
 		alejandra
 		pyrefly
 		rust-analyzer
