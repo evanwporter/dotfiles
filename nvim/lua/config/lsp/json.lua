@@ -5,7 +5,7 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.lsp.config("jsonls", {
             settings = {
                 json = {
-                    schemas = require("schemastore").json.schemas(),
+                    schemas = require("schemastore.nvim").json.schemas(),
                     validate = { enable = true },
                 },
             },

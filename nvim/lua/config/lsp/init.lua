@@ -1,4 +1,6 @@
 require("config.lsp.cpp")
+require("config.lsp.bash")
+require("config.lsp.fish")
 require("config.lsp.json")
 require("config.lsp.lua")
 require("config.lsp.cmake")
