@@ -1,2 +1,2 @@
-vim.lsp.config("nil_ls", {})
-vim.lsp.enable("nil_ls")
+vim.lsp.config("nixd", {})
+vim.lsp.enable("nixd")
