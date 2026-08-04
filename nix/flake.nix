@@ -4,6 +4,7 @@
 	inputs = {
 		nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 		nixos-wsl.url = "github:nix-community/NixOS-WSL";
+		spotify-nixpkgs.url = "github:NixOS/nixpkgs/9ae611a455b90cf061d8f332b977e387bda8e1ca";
 
 		home-manager = {
 			url = "github:nix-community/home-manager";
