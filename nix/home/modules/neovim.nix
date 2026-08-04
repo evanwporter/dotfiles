@@ -62,6 +62,7 @@
 		nodejs
 		tombi
 		bash-language-server
+		fish-lsp
 		shfmt
 		shellcheck
 		xmlstarlet
