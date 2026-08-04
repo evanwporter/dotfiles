@@ -27,7 +27,7 @@ vim.api.nvim_create_autocmd("FileType", {
                         -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
                         url = "",
                     },
-                    schemas = require("schemastore").yaml.schemas(),
+                    schemas = require("schemastore.nvim").yaml.schemas(),
                 },
             },
         })
