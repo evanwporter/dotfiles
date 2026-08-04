@@ -5,7 +5,13 @@
 	inputs,
 	pkgs,
 	...
-}: {
+}: let
+	spotifyPkgs =
+		import inputs.spotify-nixpkgs {
+			system = pkgs.stdenv.hostPlatform.system;
+			config.allowUnfree = true;
+		};
+in {
 	imports = [
 		# Include the results of the hardware scan.
 		./hardware-configuration.nix
@@ -124,7 +130,7 @@
 		tmux
 		git
 		obsidian
-		spotify
+		spotifyPkgs.spotify
 	];
 
 	# Some programs need SUID wrappers, can be configured further or are
