@@ -41,6 +41,7 @@ end
 
 set -g theme_color_scheme gruvbox
 set -g theme_display_git yes
+set -g theme_display_git_ahead no
 set -g theme_display_git_default_branch yes
 set -g theme_display_git_dirty no
 set -g theme_display_git_untracked no
