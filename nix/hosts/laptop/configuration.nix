@@ -131,6 +131,7 @@ in {
 		git
 		obsidian
 		spotifyPkgs.spotify
+		surfer
 	];
 
 	# Some programs need SUID wrappers, can be configured further or are
