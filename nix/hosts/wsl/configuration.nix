@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+	inputs,
+	pkgs,
+	...
+}: {
 	wsl.enable = true;
 	wsl.defaultUser = "evanw";
 
@@ -19,6 +23,7 @@
 		backupFileExtension = "hm-backup";
 
 		extraSpecialArgs = {
+			inherit inputs;
 			username = "evanw";
 			homeDirectory = "/home/evanw";
 		};
