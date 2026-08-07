@@ -33,6 +33,10 @@
 			include = {
 				path = "./.config/delta/themes.gitconfig";
 			};
+
+			push = {
+				autoSetupRemote = true;
+			};
 		};
 	};
 
