@@ -73,6 +73,11 @@
 		inputs.mnw.lib.wrap pkgs {
 			neovim = pkgs.neovim-unwrapped;
 			luaFiles = [(nvimConfig + "/init.lua")];
+			wrapperArgs = [
+				"--set"
+				"NVIM_TREESITTER_PARSERS"
+				"${treesitterParsers}"
+			];
 
 			plugins = {
 				start = with pkgs.vimPlugins; [
@@ -87,14 +92,12 @@
 					blink-indent
 					friendly-snippets
 					gitsigns-nvim
-					harpoon2
 					image-nvim
 					flash-nvim
 					cmake-tools-nvim
 					render-markdown-nvim
 					mini-icons
 					fzf-lua
-					fff-nvim
 					oil-nvim
 					neotest
 					nvim-rip-substitute
@@ -109,11 +112,16 @@
 					nvim-treesitter-textobjects
 					nvim-dap-virtual-text
 					grug-far-nvim
-					SchemaStore-nvim
 					nui-nvim
 					nvim-nio
 					gruvbox-material
 				];
+
+				optAttrs = {
+					fff = pkgs.vimPlugins.fff-nvim;
+					harpoon = pkgs.vimPlugins.harpoon2;
+					schemastore-nvim = pkgs.vimPlugins.SchemaStore-nvim;
+				};
 
 				dev.myconfig = {
 					pure = nvimConfig;
@@ -136,12 +144,6 @@ in {
 						enable = true;
 						defaultEditor = true;
 						sideloadInitLua = true;
-
-						extraWrapperArgs = [
-							"--set"
-							"NVIM_TREESITTER_PARSERS"
-							"${treesitterParsers}"
-						];
 
 						inherit extraPackages;
 					};
