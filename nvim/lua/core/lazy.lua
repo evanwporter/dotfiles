@@ -36,7 +36,6 @@ if mnw ~= nil then
 
     lazy_opts.performance.reset_packpath = false
     lazy_opts.performance.rtp.reset = false
-
     lazy_opts.install.missing = true
 else
     local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
