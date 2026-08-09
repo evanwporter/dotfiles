@@ -28,6 +28,8 @@ return {
                     -- { "<leader>y", group = "Yazi", icon = "󰇥" },
                     -- { "<leader>x", group = "Trouble", icon = "" },
 
+                    { "gx", desc = "Open with system app" },
+
                     -- Git
                     { "<leader>g", group = "Git", icon = "" },
                     { "<leader>gh", group = "Hunks" },

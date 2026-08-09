@@ -138,3 +138,6 @@ vim.keymap.set("n", "[T", "<cmd>tfirst<cr>", { desc = "First Tag" })
 vim.keymap.set("n", "]T", "<cmd>tlast<cr>", { desc = "Last Tag" })
 vim.keymap.set("n", "[<C-t>", "<cmd>ptprevious<cr>", { desc = "Prev Preview Tag" })
 vim.keymap.set("n", "]<C-t>", "<cmd>ptnext<cr>", { desc = "Next Preview Tag" })
+
+vim.keymap.set("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Below" })
+vim.keymap.set("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
