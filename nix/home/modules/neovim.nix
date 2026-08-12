@@ -115,6 +115,7 @@
 					nui-nvim
 					nvim-nio
 					gruvbox-material
+					lazydev-nvim
 				];
 
 				optAttrs = {
