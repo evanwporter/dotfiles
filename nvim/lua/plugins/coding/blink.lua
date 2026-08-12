@@ -7,7 +7,10 @@ return {
             "rafamadriz/friendly-snippets",
         },
 
+        ---@module 'blink.cmp'
+        ---@type blink.cmp.Config
         opts = {
+
             snippets = {
                 preset = "default",
             },
@@ -24,6 +27,11 @@ return {
             },
 
             completion = {
+                accept = {
+                    auto_brackets = {
+                        enabled = true,
+                    },
+                },
                 list = {
                     selection = {
                         preselect = false,
