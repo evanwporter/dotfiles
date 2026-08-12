@@ -135,8 +135,9 @@ configure_ui_styles() {
     tmux_set clock-mode-colour "$TC"
     tmux_set clock-mode-style 24
 
-    tmux_set message-style "fg=$TC,bg=$G0"
-    tmux_set message-command-style "fg=$TC,bg=$G0"
+    # tmux 3.7+ overlays prompts on the status line unless the style has fill.
+    tmux_set message-style "fg=$TC,bg=$G0,fill=$G0"
+    tmux_set message-command-style "fg=$TC,bg=$G0,fill=$G0"
     tmux_set mode-style "bg=$TC,fg=$G4"
 }
 
