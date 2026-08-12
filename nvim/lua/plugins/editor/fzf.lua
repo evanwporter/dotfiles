@@ -55,6 +55,10 @@ return {
             { "<leader>gs", "<cmd>FzfLua git_status<CR>", desc = "Status" },
             { "<leader>gS", "<cmd>FzfLua git_stash<cr>", desc = "Git Stash" },
         },
+
+        ---@module "fzf-lua"
+        ---@type fzf-lua.Config|{}
+        ---@diagnostic disable: missing-fields
         opts = {
             fzf_opts = {
                 ["--layout"] = "default",
@@ -76,6 +80,7 @@ return {
                 })
             end,
         },
+        ---@diagnostic enable: missing-fields
         config = function(_, opts)
             local fzf = require("fzf-lua")
             fzf.setup(opts)
