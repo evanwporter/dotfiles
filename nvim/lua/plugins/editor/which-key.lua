@@ -11,6 +11,12 @@ return {
             -- refer to the configuration section below
             preset = "helix",
             delay = 100,
+            triggers = {
+                { "<auto>", mode = "nxso" },
+                -- Single-letter builtins are excluded from automatic triggers.
+                -- This trigger replaces Vim's normal-mode `s` with our menu prefix.
+                { "s", mode = "n" },
+            },
             spec = {
                 {
                     mode = { "n", "x" },
