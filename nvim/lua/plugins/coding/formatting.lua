@@ -32,6 +32,9 @@ return {
             },
 
             formatters = {
+                prettier = {
+                    prepend_args = { "--tab-width", "4" },
+                },
                 alejandra = {
                     command = "alejandra",
                     args = {
