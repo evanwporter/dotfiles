@@ -22,6 +22,17 @@ local function find_non_floating_window()
     end
 end
 
+-- nvim-dap-view fixes the width of right/left layouts, which also prevents
+-- resizing the split border with the mouse. Keep its windows user-resizable.
+vim.api.nvim_create_autocmd("FileType", {
+    group = augroup("resizable_dap_view"),
+    pattern = { "dap-view", "dap-view-term" },
+    callback = function()
+        vim.wo.winfixwidth = false
+        vim.wo.winfixheight = false
+    end,
+})
+
 vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
     group = augroup("track_non_floating_window"),
     callback = function()
@@ -89,6 +100,10 @@ vim.api.nvim_create_autocmd("FileType", {
     callback = function(event)
         vim.bo[event.buf].buflisted = false
         vim.schedule(function()
+            if not vim.api.nvim_buf_is_valid(event.buf) then
+                return
+            end
+
             vim.keymap.set("n", "q", function()
                 vim.cmd("close")
                 pcall(vim.api.nvim_buf_delete, event.buf, { force = true })

@@ -134,24 +134,18 @@ return {
                 end)
             end
 
-            local codelldb = vim.fn.exepath("codelldb")
-
-            if codelldb == "" then
-                codelldb = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
-            end
-
             dap.adapters.codelldb = {
                 type = "server",
-                host = "localhost",
                 port = "${port}",
                 executable = {
-                    command = codelldb,
-                    args = {
-                        "--port",
-                        "${port}",
-                    },
+                    command = assert(vim.env.CODELLDB_PATH, "CODELLDB_PATH is not set"),
+                    args = { "--port", "${port}" },
                 },
             }
+
+            if vim.fn.has("win32") == 1 then
+                dap.adapters.codelldb.executable.detached = false
+            end
 
             for _, lang in ipairs({ "c", "cpp", "rust" }) do
                 dap.configurations[lang] = {
@@ -172,6 +166,10 @@ return {
                     },
                 }
             end
+
+            require("dap.ext.vscode").load_launchjs(nil, {
+                codelldb = { "c", "cpp", "rust" },
+            })
 
             -- Python debugging configurations
             -- Note: adapter is automatically configured by mason-nvim-dap
@@ -276,8 +274,8 @@ return {
 
         opts = {
             windows = {
-                size = 0.25,
-                position = "right",
+                size = 0.5,
+                position = "below",
                 terminal = {
                     size = 0.5,
                     position = "left",
