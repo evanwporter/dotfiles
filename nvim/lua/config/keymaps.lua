@@ -18,17 +18,25 @@ vim.api.nvim_create_autocmd("LspAttach", {
             })
         end
 
-        map("gd", vim.lsp.buf.definition, "Go to Definition", "textDocument/definition")
+        map("gd", function()
+            require("fzf-lua").lsp_definitions()
+        end, "Go to Definition", "textDocument/definition")
 
-        map("gD", vim.lsp.buf.declaration, "Go to Declaration", "textDocument/declaration")
+        map("gD", function()
+            require("fzf-lua").lsp_declarations()
+        end, "Go to Declaration", "textDocument/declaration")
 
         map("gr", function()
             require("fzf-lua").lsp_references()
         end, "Go to References", "textDocument/references")
 
-        map("gi", vim.lsp.buf.implementation, "Go to Implementation", "textDocument/implementation")
+        map("gi", function()
+            require("fzf-lua").lsp_implementations()
+        end, "Go to Implementation", "textDocument/implementation")
 
-        map("gy", vim.lsp.buf.type_definition, "Go to T[y]pe Definition")
+        map("gy", function()
+            require("fzf-lua").lsp_typedefs()
+        end, "Go to T[y]pe Definition", "textDocument/typeDefinition")
         -- map("gK", function()
         --     return vim.lsp.buf.signature_help()
         -- end, "Signature Help", "textDocument/signatureHelp")
