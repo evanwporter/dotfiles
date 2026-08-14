@@ -282,3 +282,15 @@ vim.api.nvim_create_autocmd("InsertEnter", {
         end
     end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "c", "cpp" },
+    callback = function()
+        vim.keymap.set(
+            "n",
+            "<localleader>s",
+            "<cmd>ClangdSwitchSourceHeader<CR>",
+            { buffer = true, desc = "Switch Source/Header" }
+        )
+    end,
+})
