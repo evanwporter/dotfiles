@@ -64,8 +64,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
         end, "Search Workspace Symbols", "workspace/symbol")
 
         map("<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
-        map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
-        map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
+
+        -- Navigate to previous diagnostic
+        map("[d", function()
+            vim.diagnostic.jump({ count = -1, float = true })
+        end, "Previous Diagnostic")
+
+        -- Navigate to next diagnostic
+        map("]d", function()
+            vim.diagnostic.jump({ count = 1, float = true })
+        end, "Next Diagnostic")
 
         map("<leader>cx", function()
             require("fzf-lua").diagnostics_document()
@@ -149,3 +157,10 @@ vim.keymap.set("n", "]<C-t>", "<cmd>ptnext<cr>", { desc = "Next Preview Tag" })
 
 vim.keymap.set("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Below" })
 vim.keymap.set("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add Comment Above" })
+
+-------------------------------------------------------------------------------
+-- COPY / PASTE / REGISTERS
+-------------------------------------------------------------------------------
+-- Use x and Del key for black hole register
+vim.keymap.set("x", "<Del>", '"_x', { silent = true, desc = "Delete without yanking" })
+vim.keymap.set("x", "x", '"_x', { silent = true, desc = "Delete without yanking" })

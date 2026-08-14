@@ -20,8 +20,6 @@ return {
                 end,
             })
         end,
-        ---@module "cmake-tools"
-        ---@type cmake-tools.Config
         opts = {
             cmake_command = "cmake",
             ctest_command = "ctest",
