@@ -26,6 +26,8 @@ in {
 	# Bootloader.
 	boot.loader.systemd-boot.enable = true;
 	boot.loader.efi.canTouchEfiVariables = true;
+	# Allow debuggers to attach to other processes owned by the same user.
+	boot.kernel.sysctl."kernel.yama.ptrace_scope" = 0;
 
 	networking.hostName = "laptop"; # Define your hostname.
 	# networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
