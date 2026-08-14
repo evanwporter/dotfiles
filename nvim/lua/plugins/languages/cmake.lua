@@ -61,5 +61,16 @@ return {
                 console = "integratedTerminal",
             },
         },
+        config = function(_, opts)
+            require("cmake-tools").setup(opts)
+
+            require("which-key").add({
+                { "<localleader>c", group = "CMake" },
+            })
+
+            vim.keymap.set("n", "<localleader>cb", "<cmd>CMakeBuild<cr>", { desc = "Build" })
+            vim.keymap.set("n", "<localleader>cc", "<cmd>CMakeSelectConfigurePreset<cr>", { desc = "Configure Preset" })
+            vim.keymap.set("n", "<localleader>cB", "<cmd>CMakeSelectBuildTarget<cr>", { desc = "Build Target" })
+        end,
     },
 }
