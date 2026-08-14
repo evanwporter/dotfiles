@@ -43,7 +43,6 @@
 
 	extraPackages = with pkgs; [
 		tree-sitter
-
 		vscode-extensions.vadimcn.vscode-lldb
 		vscode-langservers-extracted
 		yaml-language-server
@@ -77,6 +76,9 @@
 				"--set"
 				"NVIM_TREESITTER_PARSERS"
 				"${treesitterParsers}"
+				"--set"
+				"CODELLDB_PATH"
+				"${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb"
 			];
 
 			plugins = {
