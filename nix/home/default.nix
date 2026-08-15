@@ -14,5 +14,6 @@
 		./modules/direnv.nix
 		./modules/neovim.nix
 		./modules/git.nix
+		./modules/fish.nix
 	];
 }
