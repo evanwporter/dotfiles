@@ -53,7 +53,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         map("<leader>cr", vim.lsp.buf.rename, "Rename", "textDocument/rename")
 
-        map("<leader>ca", vim.lsp.buf.code_action, "Code Action", "textDocument/codeAction")
+        map("<leader>ca", function()
+            require("fzf-lua").lsp_code_actions()
+        end, "Code Action", "textDocument/codeAction")
 
         map("<leader>sd", function()
             require("fzf-lua").lsp_document_symbols()
@@ -98,8 +100,6 @@ vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" 
 
 vim.keymap.set("v", ">", ">gv", { desc = "Indent and reselect" })
 vim.keymap.set("v", "<", "<gv", { desc = "Outdent and reselect" })
-
-vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
 
 vim.keymap.set("n", "<localleader>a", "ggVG", { desc = "Select All" })
 
