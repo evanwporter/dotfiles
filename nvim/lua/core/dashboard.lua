@@ -157,6 +157,12 @@ local function maybe_open_dashboard()
         return
     end
 
+    -- A session is restored on VimEnter. Avoid rendering a dashboard during
+    -- UIEnter only to immediately replace it with the restored layout.
+    if vim.g.session_restore_pending then
+        return
+    end
+
     if vim.fn.argc() > 0 then
         return
     end
