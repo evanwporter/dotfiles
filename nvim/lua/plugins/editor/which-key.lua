@@ -5,6 +5,9 @@ return {
             "nvim-mini/mini.icons",
         },
         event = "VeryLazy",
+
+        ---@module "which-key"
+        ---@type wk.Config|{}
         opts = {
             -- your configuration comes here
             -- or leave it empty to use the default settings
