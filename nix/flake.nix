@@ -12,6 +12,8 @@
 		};
 
 		mnw.url = "github:Gerg-L/mnw";
+
+		nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 	};
 
 	outputs = inputs @ {
@@ -30,7 +32,7 @@
 			home-manager.lib.homeManagerConfiguration {
 				inherit pkgs;
 				extraSpecialArgs = {inherit inputs username homeDirectory;};
-				modules = [./home/default.nix];
+				modules = [./home/base/default.nix];
 			};
 
 		homeConfigurations = {
@@ -48,9 +50,10 @@
 			program = "${neovimDev}/bin/nvim";
 		};
 
-		devShells.${system}.default = pkgs.mkShell {
-			packages = [neovimDev];
-		};
+		devShells.${system}.default =
+			pkgs.mkShell {
+				packages = [neovimDev];
+			};
 
 		nixosConfigurations = {
 			wsl =
