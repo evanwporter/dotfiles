@@ -1,6 +1,6 @@
 return {
     "stevearc/oil.nvim",
-    dependencies = { { "nvim-mini/mini.icons", opts = {} } },
+    dependencies = { "nvim-mini/mini.icons" },
     opts = {
         skip_confirm_for_simple_edits = true,
         columns = {
