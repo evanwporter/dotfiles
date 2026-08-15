@@ -16,6 +16,8 @@ in {
 		# Include the results of the hardware scan.
 		./hardware-configuration.nix
 
+		# TODO: Instead of using the relative path define a nix var called like ${NIX ROOT DIR}
+		# and use that instead
 		../../modules/nix.nix
 		../../modules/firefox.nix
 		../../modules/desktop-manager.nix
@@ -109,7 +111,10 @@ in {
 			homeDirectory = "/home/evanp";
 		};
 
-		users.evanp = import ../../home/default.nix;
+		users.evanp.imports = [
+			../../home/base/default.nix
+			../../home/optional/vscode.nix
+		];
 	};
 
 	# Fonts configuration

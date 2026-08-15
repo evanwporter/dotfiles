@@ -8,7 +8,7 @@
 	cfg = config.dotfiles.neovim;
 	nvimConfig =
 		builtins.path {
-			path = ../../../nvim;
+			path = ../../../../nvim;
 			name = "nvim-config";
 		};
 
