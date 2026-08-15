@@ -51,13 +51,13 @@ return {
                 end,
                 desc = "Toggle test output panel",
             },
-            -- {
-            --     "<leader>tS",
-            --     function()
-            --         require("neotest").run.stop()
-            --     end,
-            --     desc = "Stop test",
-            -- },
+            {
+                "<leader>ts",
+                function()
+                    require("neotest").run.stop()
+                end,
+                desc = "Stop (Neotest)",
+            },
         },
         config = function()
             local neotest = require("neotest")
