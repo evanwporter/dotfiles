@@ -89,7 +89,7 @@
 				opt = with pkgs.vimPlugins; [
 					nvim-lspconfig
 					blink-cmp
-					blink-pairs
+					# blink-pairs
 					blink-lib
 					blink-indent
 					friendly-snippets
@@ -133,12 +133,22 @@
 			};
 		};
 in {
-	options.dotfiles.neovim.packageManager =
-		lib.mkOption {
-			type = lib.types.enum ["lazy" "nix"];
-			default = "nix";
-			description = "Use normal lazy.nvim bootstrap or an mnw-wrapped Neovim.";
-		};
+	options.dotfiles.neovim = {
+		packageManager =
+			lib.mkOption {
+				type = lib.types.enum ["lazy" "nix"];
+				default = "nix";
+				description = "Use normal lazy.nvim bootstrap or an mnw-wrapped Neovim.";
+			};
+
+		finalPackage =
+			lib.mkOption {
+				type = lib.types.package;
+				readOnly = true;
+				default = nixNeovim;
+				internal = true;
+			};
+	};
 
 	config =
 		lib.mkMerge [
