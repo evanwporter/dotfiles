@@ -75,7 +75,7 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
     end,
 })
 
-vim.keymap.set("n", "<leader>qs", function()
+vim.keymap.set("n", "<leader>Qs", function()
     local session_file = get_session_file()
 
     if vim.fn.filereadable(session_file) == 1 then
@@ -85,7 +85,7 @@ vim.keymap.set("n", "<leader>qs", function()
     end
 end, { desc = "Load session" })
 
-vim.keymap.set("n", "<leader>ql", function()
+vim.keymap.set("n", "<leader>Ql", function()
     local last_session = get_last_session_file()
 
     if vim.fn.filereadable(last_session) == 1 then
@@ -95,7 +95,7 @@ vim.keymap.set("n", "<leader>ql", function()
     end
 end, { desc = "Load last session" })
 
-vim.keymap.set("n", "<leader>qS", function()
+vim.keymap.set("n", "<leader>QS", function()
     local sessions = {}
 
     local session_files = vim.fn.glob(session_dir .. "*.vim", false, true)
@@ -123,7 +123,7 @@ vim.keymap.set("n", "<leader>qS", function()
     end)
 end, { desc = "Select session" })
 
-vim.keymap.set("n", "<leader>qd", function()
+vim.keymap.set("n", "<leader>Qd", function()
     local stop_file = session_dir .. ".stop_saving"
 
     vim.fn.writefile({}, stop_file)

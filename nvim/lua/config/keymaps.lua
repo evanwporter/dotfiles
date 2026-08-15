@@ -164,3 +164,5 @@ vim.keymap.set("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = 
 -- Use x and Del key for black hole register
 vim.keymap.set("x", "<Del>", '"_x', { silent = true, desc = "Delete without yanking" })
 vim.keymap.set("x", "x", '"_x', { silent = true, desc = "Delete without yanking" })
+
+vim.keymap.set("n", "<leader>q", "<cmd>q<cr>", { desc = "Quit" })
