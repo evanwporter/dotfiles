@@ -1,6 +1,7 @@
 return {
     {
         "ThePrimeagen/harpoon",
+        enabled = true,
         branch = "harpoon2",
         opts = {
             menu = {
@@ -35,11 +36,37 @@ return {
             local harpoon = require("harpoon")
             harpoon:setup(opts)
 
-            for i = 1, 9 do
-                vim.keymap.set("n", "<leader>" .. i, function()
-                    require("harpoon"):list():select(i)
-                end, { desc = "which_key_ignore" })
+            -- Which-key discovers these mappings automatically. Only create a
+            -- mapping when its Harpoon slot is populated.
+            local function update_whichkey_harpoon()
+                local items = harpoon:list().items
+
+                for i = 1, 9 do
+                    local key = "<leader>" .. i
+                    local item = items[i]
+
+                    if item and item.value ~= "" then
+                        local index = i
+                        local filename = vim.fs.basename(item.value)
+                        vim.keymap.set("n", key, function()
+                            harpoon:list():select(index)
+                        end, { desc = "harpoon_icon " .. filename })
+                    else
+                        pcall(vim.keymap.del, "n", key)
+                    end
+                end
             end
+
+            -- Harpoon 2 extension callbacks use their event names directly.
+            harpoon:extend({
+                ADD = update_whichkey_harpoon,
+                REMOVE = update_whichkey_harpoon,
+                REPLACE = update_whichkey_harpoon,
+                LIST_CHANGE = update_whichkey_harpoon,
+            })
+
+            -- Initialize on startup
+            update_whichkey_harpoon()
         end,
     },
 }
