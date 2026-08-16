@@ -6,6 +6,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
             return
         end
 
+        -- Remove Neovim's default LSP mappings for this buffer
+        local default_keys = { "grn", "gra", "grr", "gri" }
+        for _, keys in ipairs(default_keys) do
+            pcall(vim.keymap.del, "n", keys, { buffer = event.buf })
+        end
+
         local function map(keys, func, desc, method)
             if method and not client:supports_method(method, event.buf) then
                 return
