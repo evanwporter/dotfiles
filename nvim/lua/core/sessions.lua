@@ -130,3 +130,43 @@ vim.keymap.set("n", "<leader>Qd", function()
 
     print("Session saving disabled")
 end, { desc = "Disable session saving" })
+
+vim.keymap.set("n", "<leader>QD", function()
+    local sessions = {}
+
+    for _, file in ipairs(vim.fn.glob(session_dir .. "*.vim", false, true)) do
+        if file ~= get_last_session_file() then
+            table.insert(sessions, {
+                file = file,
+                name = vim.fn.fnamemodify(file, ":t:r"):gsub("%%", "/"),
+            })
+        end
+    end
+
+    if #sessions == 0 then
+        vim.notify("No sessions found", vim.log.levels.INFO)
+        return
+    end
+
+    vim.ui.select(sessions, {
+        prompt = "Delete session:",
+        format_item = function(session)
+            return session.name
+        end,
+    }, function(session)
+        if not session then
+            return
+        end
+
+        if vim.fn.delete(session.file) ~= 0 then
+            vim.notify("Failed to delete session: " .. session.name, vim.log.levels.ERROR)
+            return
+        end
+
+        if session.file == get_session_file() then
+            vim.fn.writefile({}, session_dir .. ".stop_saving")
+        end
+
+        vim.notify("Deleted session: " .. session.name, vim.log.levels.INFO)
+    end)
+end, { desc = "Delete session" })
