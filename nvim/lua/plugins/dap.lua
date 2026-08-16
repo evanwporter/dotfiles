@@ -1,6 +1,7 @@
 return {
     {
         "mfussenegger/nvim-dap",
+        enabled = false,
         dependencies = {
             "ibhagwan/fzf-lua",
             { "theHamsta/nvim-dap-virtual-text", opts = {} },
@@ -261,6 +262,7 @@ return {
     -- Uncomment this and comment out nvim-dap-ui to use it
     {
         "igorlfs/nvim-dap-view",
+        enabled = false,
         version = "1.*",
         dependencies = {
             "mfussenegger/nvim-dap",

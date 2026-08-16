@@ -1,6 +1,7 @@
 return {
     {
         "saghen/blink.cmp",
+        cond = not vim.g.vscode,
         branch = "v1",
         event = "VeryLazy",
         dependencies = {

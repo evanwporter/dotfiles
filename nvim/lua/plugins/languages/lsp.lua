@@ -16,6 +16,7 @@ return {
     },
     {
         "saghen/blink.cmp",
+        optional = true,
         opts = {
             sources = {
                 per_filetype = {

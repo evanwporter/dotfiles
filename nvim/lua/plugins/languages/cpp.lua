@@ -1,6 +1,7 @@
 return {
     {
         "p00f/clangd_extensions.nvim",
+        cond = not vim.g.vscode,
         ft = { "c", "cpp", "h", "hpp" },
         opts = {
             ast = {

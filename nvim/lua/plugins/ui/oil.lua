@@ -1,5 +1,6 @@
 return {
     "stevearc/oil.nvim",
+    cond = not vim.g.vscode,
     dependencies = { "nvim-mini/mini.icons" },
     opts = {
         skip_confirm_for_simple_edits = true,
