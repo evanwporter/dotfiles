@@ -11,6 +11,8 @@
 		extension.overrideAttrs (old: {
 				meta = old.meta // {license = [];};
 			});
+
+	vsix = inputs.nix-vscode-extensions.extensions.${pkgs.stdenv.hostPlatform.system}.open-vsx-release;
 in {
 	programs.vscodium = {
 		enable = true;
@@ -21,9 +23,12 @@ in {
 		profiles.default.extensions = with marketplace; [
 			(allowUnfreeExtension ms-vscode.cpptools)
 			llvm-vs-code-extensions.vscode-clangd
-			vscodevim.vim
+			asvetliakov.vscode-neovim
 			adam-bender.vscode-oldicons
 			hudson-river-trading.vscode-slang
+			matepek.vscode-catch2-test-adapter
+			# sainnhe.gruvbox-material
+			vsix.snrico-moonlight.gruvbox-material-community
 		];
 	};
 }
