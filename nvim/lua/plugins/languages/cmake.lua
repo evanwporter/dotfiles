@@ -1,6 +1,7 @@
 return {
     {
         "Civitasv/cmake-tools.nvim",
+        cond = not vim.g.vscode,
         lazy = true,
         init = function()
             local loaded = false

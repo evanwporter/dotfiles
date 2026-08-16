@@ -3,6 +3,7 @@ return {
 
     {
         "sainnhe/gruvbox-material",
+        cond = not vim.g.vscode,
         lazy = false,
         priority = 1000,
         config = function()

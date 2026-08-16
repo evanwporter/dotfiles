@@ -2,6 +2,7 @@ return {
     -- Lazy
     {
         "dlyongemallo/diffview-plus.nvim",
+        enabled = false,
         version = "*",
         -- optional: lazy-load on command
         -- cmd = {

@@ -1,6 +1,7 @@
 return {
     {
         "chrisgrieser/nvim-rip-substitute",
+        cond = not vim.g.vscode,
         -- dir = vim.fn.stdpath("config") .. "/lua/config/plugins/nvim-rip-substitute",
         -- cmd = "RipSubstitute",
         opts = {

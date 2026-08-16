@@ -1,6 +1,7 @@
 return {
     {
         "nvim-neotest/neotest",
+        enabled = false,
         dependencies = {
             "mfussenegger/nvim-dap",
             "nvim-lua/plenary.nvim",
@@ -40,9 +41,9 @@ return {
             {
                 "<leader>to",
                 function()
-                    require("neotest").output.open({ enter = true })
+                    require("neotest").output.open({ enter = true, last_run = true })
                 end,
-                desc = "Open test output",
+                desc = "Open last test output",
             },
             {
                 "<leader>tO",
@@ -54,9 +55,16 @@ return {
             {
                 "<leader>ts",
                 function()
-                    require("neotest").run.stop()
+                    local run = require("neotest").run
+                    local position_id, args = run.get_last_run()
+
+                    if position_id then
+                        run.stop({ position_id, adapter = args and args.adapter })
+                    else
+                        run.stop({ interactive = true })
+                    end
                 end,
-                desc = "Stop (Neotest)",
+                desc = "Stop last test",
             },
         },
         config = function()
@@ -88,12 +96,23 @@ return {
                 local results = {}
                 local status = result.code == 0 and "passed" or "failed"
                 for _, node in tree:iter() do
-                    results[node.id] = { status = status }
+                    results[node.id] = {
+                        status = status,
+                        output = result.output,
+                    }
                 end
                 return results
             end
 
             neotest.setup({
+                summary = {
+                    mappings = {
+                        -- <CR> is more natural for opening the selected test;
+                        -- use e to expand and collapse summary nodes.
+                        expand = { "e", "<2-LeftMouse>" },
+                        jumpto = { "<CR>", "i" },
+                    },
+                },
                 adapters = {
                     ctest,
                     require("neotest-python")({

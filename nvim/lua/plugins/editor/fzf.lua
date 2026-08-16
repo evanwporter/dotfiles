@@ -3,6 +3,7 @@ local selection = require("util.selection")
 return {
     {
         "ibhagwan/fzf-lua",
+        cond = not vim.g.vscode,
         keys = {
             {
                 "<leader>bb",
