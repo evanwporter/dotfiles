@@ -118,6 +118,8 @@
 					nvim-nio
 					gruvbox-material
 					lazydev-nvim
+					copilot-lua
+					blink-copilot
 				];
 
 				optAttrs = {
