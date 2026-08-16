@@ -14,6 +14,28 @@ return {
             -- refer to the configuration section below
             preset = "helix",
             delay = 100,
+            icons = {
+                rules = {
+                    {
+                        pattern = "harpoon_icon",
+                        icon = "󰛢",
+                        color = "azure",
+                    },
+                },
+            },
+            replace = {
+                desc = {
+                    { "^harpoon_icon%s+", "" },
+                    { "<Plug>%(?(.*)%)?", "%1" },
+                    { "^%+", "" },
+                    { "<[cC]md>", "" },
+                    { "<[cC][rR]>", "" },
+                    { "<[sS]ilent>", "" },
+                    { "^lua%s+", "" },
+                    { "^call%s+", "" },
+                    { "^:%s*", "" },
+                },
+            },
             triggers = {
                 { "<auto>", mode = "nxso" },
                 -- Single-letter builtins are excluded from automatic triggers.
@@ -29,6 +51,7 @@ return {
                     { "<leader>d", group = "Debug", icon = "󰃤" },
                     { "<leader>e", group = "Oil", icon = "󰙅" },
                     { "<leader>s", group = "Search", icon = "󰈞" },
+                    { "<leader>q", group = "Sessions" },
 
                     -- Test
                     { "<leader>t", group = "Test", icon = "󰙨" },
