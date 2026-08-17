@@ -104,7 +104,8 @@
 					neotest
 					nvim-rip-substitute
 					conform-nvim
-					nvim-surround
+					mini-surround
+					yazi-nvim
 					which-key-nvim
 					hardtime-nvim
 					diffview-plus-nvim
