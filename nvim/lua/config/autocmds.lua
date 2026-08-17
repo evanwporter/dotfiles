@@ -1,5 +1,8 @@
 local augroup = require("util.autocmd").augroup
 
+-------------------------------------------------------------------------------
+-- FLOATING WINDOW TRACKING
+-------------------------------------------------------------------------------
 local last_non_floating_win
 
 local function is_floating_window(win)
@@ -22,6 +25,9 @@ local function find_non_floating_window()
     end
 end
 
+-------------------------------------------------------------------------------
+-- DAP WINDOW CONFIGURATION
+-------------------------------------------------------------------------------
 -- nvim-dap-view fixes the width of right/left layouts, which also prevents
 -- resizing the split border with the mouse. Keep its windows user-resizable.
 vim.api.nvim_create_autocmd("FileType", {
@@ -33,6 +39,9 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- WINDOW TRACKING
+-------------------------------------------------------------------------------
 vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
     group = augroup("track_non_floating_window"),
     callback = function()
@@ -44,6 +53,9 @@ vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- FILE REDIRECTION FROM FLOATING WINDOWS
+-------------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("BufWinEnter", {
     group = augroup("redirect_file_from_float"),
     callback = function(event)
@@ -79,6 +91,9 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- CLOSE WITH Q
+-------------------------------------------------------------------------------
 -- Close some filetypes with <q>
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("close_with_q"),
@@ -116,7 +131,9 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
--- Highlight on yank
+-------------------------------------------------------------------------------
+-- HIGHLIGHT ON YANK
+-------------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = augroup("highlight_yank"),
     callback = function()
@@ -128,6 +145,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- SOURCE SHELL FILES
+-------------------------------------------------------------------------------
 -- Source current shell file with <localleader>s
 vim.api.nvim_create_autocmd("FileType", {
     group = augroup("source_shell_file"),
@@ -176,6 +196,9 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- TREESITTER
+-------------------------------------------------------------------------------
 -- Enable treesitter
 vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)
@@ -183,6 +206,9 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- INLAY HINTS
+-------------------------------------------------------------------------------
 -- Enable inlay hints
 vim.api.nvim_create_autocmd("LspAttach", {
     group = augroup("user_inlay_hints"),
@@ -205,6 +231,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- RESTORE CURSOR POSITION
+-------------------------------------------------------------------------------
 -- Go to last loc when opening a buffer
 vim.api.nvim_create_autocmd("BufReadPost", {
     group = augroup("last_loc"),
@@ -223,6 +252,9 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- FILE CHANGE DETECTION
+-------------------------------------------------------------------------------
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
     group = augroup("checktime"),
@@ -233,6 +265,9 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
     end,
 })
 
+-------------------------------------------------------------------------------
+-- AUTO CREATE DIRECTORIES
+-------------------------------------------------------------------------------
 -- Auto create dir when saving a file, in case some intermediate directory does not exist
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     group = augroup("auto_create_dir"),
@@ -245,52 +280,13 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     end,
 })
 
--- neocmakelsp `signature_help` hack
--- check is there an ) after this character in the current line and there are only spaces between them
-local function check_condition()
-    local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-    local line = vim.api.nvim_get_current_line()
-    local i = col + 1
-    while i <= #line do
-        local c = line:sub(i, i)
-        if c == ")" then
-            return true
-        elseif c:match("%s") then
-            i = i + 1
-        else
-            return false
-        end
-    end
-    return false
-end
--- check whether send signature_help request when inserting new text
-vim.api.nvim_create_autocmd("InsertCharPre", {
-    pattern = { "CMakeLists.txt", "*.cmake" },
-    callback = function()
-        local char = vim.v.char
-        if (char == " " or char == "\n") and check_condition() then
-            vim.defer_fn(vim.lsp.buf.signature_help, 20)
-        end
-    end,
-})
--- check whether send signature_help request when enter insert mode
-vim.api.nvim_create_autocmd("InsertEnter", {
-    pattern = { "CMakeLists.txt", "*.cmake" },
-    callback = function()
-        if check_condition() then
-            vim.defer_fn(vim.lsp.buf.signature_help, 30)
-        end
-    end,
-})
-
+-------------------------------------------------------------------------------
+-- DISABLE DIAGNOSTICS IN SPECIAL BUFFERS
+-------------------------------------------------------------------------------
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "c", "cpp" },
-    callback = function()
-        vim.keymap.set(
-            "n",
-            "<localleader>s",
-            "<cmd>ClangdSwitchSourceHeader<CR>",
-            { buffer = true, desc = "Switch Source/Header" }
-        )
+    group = augroup("disable_diagnostics_special_buffers"),
+    pattern = { "lazy", "mason", "help", "lspinfo" },
+    callback = function(event)
+        vim.diagnostic.enable(false, { bufnr = event.buf })
     end,
 })

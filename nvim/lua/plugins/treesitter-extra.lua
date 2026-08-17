@@ -139,8 +139,8 @@ return {
     {
         "nvim-treesitter/nvim-treesitter-context",
         lazy = true,
+        enabled = false,
         event = { "BufReadPost", "BufNewFile" },
-        cmd = { "TSContextEnable", "TSContextDisable", "TSContextToggle" },
         keys = {
             {
                 "[C",

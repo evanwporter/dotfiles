@@ -1,41 +1,25 @@
 local M = {}
 
-local defaults = {
-    enabled = true,
-
+local config = {
     left = { "mark", "sign" },
     number = true,
-
-    -- Insert / replace mode: absolute numbers
-    -- Normal / visual mode: relative numbers, current line absolute
     smart_number = true,
-
     right = { "fold", "git" },
-
     folds = {
         open = false,
         git_hl = false,
     },
-
     git = {
         patterns = { "GitSign", "MiniDiffSign" },
     },
-
     refresh = 50,
 }
-
-local config = vim.deepcopy(defaults)
 
 local C
 
 local sign_cache = {}
 local cache = {}
 local icon_cache = {}
-
-local did_setup = false
-
--- Keep the libuv timer referenced so it does not get garbage-collected.
-M._timer = nil
 
 local function _ffi()
     if not C then
@@ -92,25 +76,6 @@ function M.buf_signs(buf, wanted)
     local signs = {}
 
     if wanted.git or wanted.sign then
-        if vim.fn.has("nvim-0.10") == 0 then
-            local placed = vim.fn.sign_getplaced(buf, { group = "*" })
-
-            for _, sign in ipairs(placed[1].signs or {}) do
-                local defined = vim.fn.sign_getdefined(sign.name)[1]
-
-                if defined then
-                    defined.priority = sign.priority
-                    defined.type = M.is_git_sign(sign.name) and "git" or "sign"
-
-                    signs[sign.lnum] = signs[sign.lnum] or {}
-
-                    if wanted[defined.type] then
-                        table.insert(signs[sign.lnum], defined)
-                    end
-                end
-            end
-        end
-
         local extmarks = vim.api.nvim_buf_get_extmarks(buf, -1, 0, -1, { details = true, type = "sign" })
 
         for _, extmark in pairs(extmarks) do
@@ -383,70 +348,31 @@ function M.click_fold()
     end)
 end
 
-function M.setup(opts)
-    if did_setup then
-        return
-    end
-
-    did_setup = true
-
-    config = vim.tbl_deep_extend("force", defaults, opts or {})
-
-    if not config.enabled then
-        return
-    end
-
-    vim.api.nvim_set_hl(0, "StatusColumnMark", {
-        link = "DiagnosticHint",
-        default = true,
-    })
-
-    vim.o.statuscolumn = "%!v:lua.require'core.statuscolumn'.get()"
-
-    if config.smart_number then
-        vim.api.nvim_create_autocmd({ "ModeChanged", "InsertEnter", "InsertLeave" }, {
-            group = vim.api.nvim_create_augroup("StatusColumnSmartNumber", { clear = true }),
-            callback = function()
-                cache = {}
-
-                vim.schedule(function()
-                    vim.cmd("redraw!")
-                end)
-            end,
-        })
-    end
-
-    M._timer = assert((vim.uv or vim.loop).new_timer())
-
-    M._timer:start(
-        config.refresh,
-        config.refresh,
-        vim.schedule_wrap(function()
-            sign_cache = {}
-            cache = {}
-        end)
-    )
-end
-
-M.setup({
-    enabled = true,
-
-    left = { "mark", "sign" },
-    number = true,
-    smart_number = true,
-
-    right = { "fold", "git" },
-
-    folds = {
-        open = false,
-        git_hl = false,
-    },
-
-    git = {
-        patterns = { "GitSign", "MiniDiffSign" },
-    },
-
-    refresh = 50,
+vim.api.nvim_set_hl(0, "StatusColumnMark", {
+    link = "DiagnosticHint",
+    default = true,
 })
+
+vim.o.statuscolumn = "%!v:lua.require'core.statuscolumn'.get()"
+
+vim.api.nvim_create_autocmd({ "ModeChanged", "InsertEnter", "InsertLeave" }, {
+    group = vim.api.nvim_create_augroup("StatusColumnSmartNumber", { clear = true }),
+    callback = function()
+        cache = {}
+        vim.schedule(function()
+            vim.cmd("redraw!")
+        end)
+    end,
+})
+
+local timer = assert((vim.uv or vim.loop).new_timer())
+timer:start(
+    config.refresh,
+    config.refresh,
+    vim.schedule_wrap(function()
+        sign_cache = {}
+        cache = {}
+    end)
+)
 
 return M

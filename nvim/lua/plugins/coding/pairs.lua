@@ -1,17 +1,17 @@
 return {
     {
-        "evanwporter/blink.pairs",
+        "saghen/blink.pairs",
         version = "*",
         event = "VeryLazy",
         dependencies = {
             "saghen/blink.lib",
         },
-        -- build = function()
-        --     require("blink.pairs").download():pwait(60000)
-        -- end,
         build = function()
-            require("blink.pairs").build():pwait(60000)
+            require("blink.pairs").download():pwait(60000)
         end,
+        -- build = function()
+        --     require("blink.pairs").build():pwait(60000)
+        -- end,
 
         --- @module 'blink.pairs'
         --- @type blink.pairs.Config
