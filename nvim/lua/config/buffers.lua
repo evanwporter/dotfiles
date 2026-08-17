@@ -61,3 +61,9 @@ vim.keymap.set("n", "<leader>ba", function()
 end, {
     desc = "Delete All Buffers",
 })
+
+-------------------------------------------------------------------------------
+-- BUFFER NAVIGATION
+-------------------------------------------------------------------------------
+vim.keymap.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
+vim.keymap.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })

@@ -1,5 +1,10 @@
 return {
     {
+        "MunifTanjim/nui.nvim",
+        optional = true,
+        opts = {},
+    },
+    {
         "m4xshen/hardtime.nvim",
         enabled = false,
         event = "VeryLazy",
