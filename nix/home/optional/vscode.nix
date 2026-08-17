@@ -31,20 +31,20 @@ in {
 			vsix.snrico-moonlight.gruvbox-material-community
 		];
 
-		profiles.default.settings = {
-			"workbench.colorTheme" = "Gruvbox Material Dark";
-			"workbench.iconTheme" = "vscode-oldicons";
-			# "editor.fontFamily" = "Fira Code";
-			# "editor.fontLigatures" = true;
-			# "editor.fontSize" = 14;
-			# "editor.lineHeight" = 22;
-			# "editor.tabSize" = 4;
-			# "editor.detectIndentation" = false;
-			# "editor.renderWhitespace" = "all";
-			# "editor.renderControlCharacters" = true;
-			# "editor.minimap.enabled" = false;
-			# "editor.cursorBlinking" = "smooth";
-			# "editor.cursorSmoothCaretAnimation" = true;
-		};
+		# profiles.default.settings = {
+		# 	"workbench.colorTheme" = "Gruvbox Material Dark";
+		# 	"workbench.iconTheme" = "vscode-oldicons";
+		# 	# "editor.fontFamily" = "Fira Code";
+		# 	# "editor.fontLigatures" = true;
+		# 	# "editor.fontSize" = 14;
+		# 	# "editor.lineHeight" = 22;
+		# 	# "editor.tabSize" = 4;
+		# 	# "editor.detectIndentation" = false;
+		# 	# "editor.renderWhitespace" = "all";
+		# 	# "editor.renderControlCharacters" = true;
+		# 	# "editor.minimap.enabled" = false;
+		# 	# "editor.cursorBlinking" = "smooth";
+		# 	# "editor.cursorSmoothCaretAnimation" = true;
+		# };
 	};
 }
