@@ -52,7 +52,7 @@ return {
                     { "<leader>d", group = "Debug", icon = "󰃤" },
                     { "<leader>e", group = "Oil", icon = "󰙅" },
                     { "<leader>s", group = "Search", icon = "󰈞" },
-                    { "<leader>q", group = "Sessions" },
+                    { "<leader>Q", group = "Sessions" },
 
                     -- Test
                     { "<leader>t", group = "Test", icon = "󰙨" },
