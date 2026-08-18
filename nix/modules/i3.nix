@@ -1,4 +1,8 @@
-{
+{pkgs, ...}: {
+	environment.systemPackages = with pkgs; [
+		polybar
+	];
+
 	services.xserver = {
 		enable = true;
 
