@@ -8,11 +8,14 @@ default_floating_border none
 
 # Match the previous high-DPI X11 setup.
 output * scale 2
+output * bg ./tf2.jpg fill
 
 input type:touchpad {
     tap enabled
     natural_scroll enabled
 }
+
+seat * xcursor_theme Adwaita 128
 
 # Start desktop-session services and applications.
 exec --no-startup-id dex --autostart --environment sway
