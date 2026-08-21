@@ -30,4 +30,4 @@ vim.opt.fillchars = {
     foldsep = " ",
 }
 
--- vim.cmd.syntax("manual")
+vim.opt.mouse = ""
