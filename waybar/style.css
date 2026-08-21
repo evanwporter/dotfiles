@@ -1,0 +1,68 @@
+@define-color background rgba(48, 52, 70, 0.93);
+@define-color background-alt #414559;
+@define-color foreground #c6d0f5;
+@define-color muted #838ba7;
+@define-color red #e78284;
+@define-color green #a6d189;
+@define-color yellow #e5c890;
+@define-color blue #8caaee;
+@define-color pink #f4b8e4;
+@define-color teal #81c8be;
+
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 16px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: @background;
+  color: @foreground;
+  border-radius: 10px;
+}
+
+#workspaces button {
+  color: @muted;
+  padding: 0 12px;
+}
+
+#workspaces button.visible,
+#workspaces button.focused {
+  background: @background-alt;
+  color: @blue;
+  border-bottom: 3px solid @blue;
+}
+
+#workspaces button.urgent {
+  background: @red;
+  color: @background;
+}
+
+#window {
+  color: @foreground;
+}
+
+#disk,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#backlight,
+#battery,
+#clock,
+#tray {
+  padding: 0 6px;
+}
+
+#disk { color: @teal; }
+#cpu, #backlight { color: @yellow; }
+#memory { color: @pink; }
+#network { color: @green; }
+#network.disconnected { color: @red; }
+#pulseaudio, #clock { color: @blue; }
+#pulseaudio.muted { color: @muted; }
+#battery.charging, #battery.full { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) { color: @red; }
