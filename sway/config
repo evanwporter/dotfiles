@@ -39,7 +39,6 @@ floating_modifier $mod
 
 bindsym $mod+Return exec kitty
 bindsym $mod+Shift+q kill
-bindsym $mod+d exec --no-startup-id fuzzel
 
 # Change focus.
 bindsym $mod+h focus left
