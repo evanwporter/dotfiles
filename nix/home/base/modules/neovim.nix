@@ -124,6 +124,7 @@
 					lazydev-nvim
 					copilot-lua
 					blink-copilot
+					rustaceanvim
 				];
 
 				optAttrs = {
