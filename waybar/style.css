@@ -1,4 +1,4 @@
-@define-color background rgba(48, 52, 70, 0.93);
+@define-color background #303446;
 @define-color background-alt #414559;
 @define-color foreground #c6d0f5;
 @define-color muted #838ba7;
@@ -44,9 +44,6 @@ window#waybar {
   color: @foreground;
 }
 
-#disk,
-#cpu,
-#memory,
 #network,
 #pulseaudio,
 #backlight,
@@ -56,9 +53,7 @@ window#waybar {
   padding: 0 6px;
 }
 
-#disk { color: @teal; }
-#cpu, #backlight { color: @yellow; }
-#memory { color: @pink; }
+#backlight { color: @yellow; }
 #network { color: @green; }
 #network.disconnected { color: @red; }
 #pulseaudio, #clock { color: @blue; }

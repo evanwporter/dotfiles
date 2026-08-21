@@ -1,62 +1,69 @@
 {
-  "layer": "top",
-  "position": "bottom",
-  "height": 48,
-  "spacing": 12,
-  "modules-left": ["sway/workspaces"],
-  "modules-center": ["sway/window"],
-  "modules-right": ["disk", "cpu", "memory", "network", "pulseaudio", "backlight", "battery", "clock", "tray"],
+    "layer": "top",
+    "position": "bottom",
+    "height": 48,
+    "spacing": 12,
+    "modules-left": ["sway/workspaces"],
+    "modules-center": [],
+    "modules-right": [
+        "network",
+        "pulseaudio",
+        "backlight",
+        "battery",
+        "clock",
+        "tray"
+    ],
 
-  "sway/workspaces": {
-    "disable-scroll": false,
-    "all-outputs": false
-  },
-  "sway/window": {
-    "max-length": 60,
-    "rewrite": { "": "Desktop" }
-  },
-  "disk": {
-    "interval": 30,
-    "path": "/",
-    "format": " {percentage_used}%"
-  },
-  "cpu": {
-    "interval": 2,
-    "format": " {usage}%"
-  },
-  "memory": {
-    "interval": 2,
-    "format": " {percentage}%"
-  },
-  "network": {
-    "interval": 3,
-    "format-wifi": " {essid}",
-    "format-ethernet": "󰈀 {ifname}",
-    "format-disconnected": " offline"
-  },
-  "pulseaudio": {
-    "format": " {volume}%",
-    "format-muted": "󰝟 muted",
-    "on-click-right": "pavucontrol"
-  },
-  "backlight": {
-    "format": " {percent}%",
-    "on-scroll-up": "brightnessctl set +5%",
-    "on-scroll-down": "brightnessctl set 5%-"
-  },
-  "battery": {
-    "interval": 5,
-    "states": { "warning": 30, "critical": 15 },
-    "format": " {capacity}%",
-    "format-charging": " {capacity}%",
-    "format-full": " {capacity}%"
-  },
-  "clock": {
-    "interval": 1,
-    "format": " {:%a %b %d  %I:%M %p}",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
-  },
-  "tray": {
-    "spacing": 8
-  }
+    "sway/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": false
+    },
+    "sway/window": {
+        "max-length": 60,
+        "rewrite": { "": "Desktop" }
+    },
+    // "disk": {
+    //   "interval": 30,
+    //   "path": "/",
+    //   "format": " {percentage_used}%"
+    // },
+    // "cpu": {
+    //   "interval": 2,
+    //   "format": " {usage}%"
+    // },
+    // "memory": {
+    //   "interval": 2,
+    //   "format": " {percentage}%"
+    // },
+    "network": {
+        "interval": 3,
+        "format-wifi": " {essid}",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": " offline"
+    },
+    "pulseaudio": {
+        "format": " {volume}%",
+        "format-muted": "󰝟 muted",
+        "on-click-right": "pavucontrol"
+    },
+    "backlight": {
+        "format": " {percent}%",
+        "on-scroll-up": "brightnessctl set +5%",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+    "battery": {
+        "interval": 5,
+        "states": { "warning": 30, "critical": 15 },
+        "format": " {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-full": " {capacity}%"
+    },
+    "clock": {
+        "interval": 1,
+        "format": " {:%a %b %d  %I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "tray": {
+        "spacing": 8
+    }
 }
