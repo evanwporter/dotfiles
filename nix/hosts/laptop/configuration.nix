@@ -20,8 +20,8 @@ in {
 		# and use that instead
 		../../modules/nix.nix
 		../../modules/firefox.nix
-		../../modules/desktop-manager.nix
-		# ../../modules/i3.nix
+		# ../../modules/desktop-manager.nix
+		../../modules/sway.nix
 		../../modules/games
 	];
 
@@ -139,6 +139,7 @@ in {
 		obsidian
 		spotifyPkgs.spotify
 		surfer
+		spotatui
 	];
 
 	# Some programs need SUID wrappers, can be configured further or are
@@ -177,8 +178,4 @@ in {
 			];
 		};
 	};
-
-	# xresources.properties = {
-	# 	"Xft.dpi" = 144;
-	# };
 }
