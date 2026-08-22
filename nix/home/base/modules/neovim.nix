@@ -108,7 +108,6 @@
 					yazi-nvim
 					clangd_extensions-nvim
 					cmake-tools-nvim
-					plenary-nvim
 					which-key-nvim
 					hardtime-nvim
 					diffview-plus-nvim
