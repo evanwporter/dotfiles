@@ -1,0 +1,52 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "height": 48,
+    "spacing": 12,
+    "modules-left": ["sway/workspaces"],
+    "modules-center": [],
+    "modules-right": [
+        "network",
+        "pulseaudio",
+        "backlight",
+        "battery",
+        "clock",
+        "tray"
+    ],
+
+    "sway/workspaces": {
+        "disable-scroll": false,
+        "all-outputs": false
+    },
+    "network": {
+        "interval": 3,
+        "format-wifi": " {essid}",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": " offline"
+    },
+    "pulseaudio": {
+        "format": " {volume}%",
+        "format-muted": "󰝟 muted",
+        "on-click-right": "pavucontrol"
+    },
+    "backlight": {
+        "format": " {percent}%",
+        "on-scroll-up": "brightnessctl set +5%",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+    "battery": {
+        "interval": 5,
+        "states": { "warning": 30, "critical": 15 },
+        "format": " {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-full": " {capacity}%"
+    },
+    "clock": {
+        "interval": 1,
+        "format": " {:%a %b %d  %I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "tray": {
+        "spacing": 8
+    }
+}

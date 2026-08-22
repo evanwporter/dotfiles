@@ -21,7 +21,7 @@ in {
 		../../modules/nix.nix
 		../../modules/firefox.nix
 		# ../../modules/desktop-manager.nix
-		../../modules/sway
+		../../modules/niri.nix
 		../../modules/games
 	];
 
@@ -114,6 +114,7 @@ in {
 
 		users.evanp.imports = [
 			../../home/base/default.nix
+			../../home/optional/niri
 			# ../../home/optional/hyprland.nix
 			# ../../home/optional/noctalia.nix
 			../../home/optional/vscode.nix
