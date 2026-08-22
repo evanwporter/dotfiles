@@ -1,7 +1,7 @@
 {
 	pkgs,
-	config,
 	lib,
+	dotfilesRoot,
 	...
 }: {
 	programs.fish = {
@@ -17,6 +17,6 @@
 	# Use the repository's config.fish instead of Home Manager's generated one.
 	xdg.configFile."fish/config.fish" = {
 		force = true;
-		source = lib.mkForce "${config.home.homeDirectory}/dotfiles/fish/config.fish";
+		source = lib.mkForce (dotfilesRoot + "/fish/config.fish");
 	};
 }
