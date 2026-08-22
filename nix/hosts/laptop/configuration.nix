@@ -21,7 +21,7 @@ in {
 		../../modules/nix.nix
 		../../modules/firefox.nix
 		# ../../modules/desktop-manager.nix
-		../../modules/sway.nix
+		../../modules/sway
 		../../modules/games
 	];
 
