@@ -15,5 +15,8 @@
 		./modules/neovim.nix
 		./modules/git.nix
 		./modules/fish.nix
+		./modules/i3
+		./modules/sway
+		./modules/niri
 	];
 }

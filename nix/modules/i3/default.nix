@@ -1,9 +1,16 @@
 {pkgs, ...}: {
+	imports = [
+		../ly
+		../polkit.nix
+	];
+
 	environment.systemPackages = with pkgs; [
 		polybar
 		pavucontrol
 		libinput-gestures
 	];
+
+	environment.etc."i3/config.d/system".source = ./system.config;
 
 	services.xserver = {
 		enable = true;
@@ -17,8 +24,6 @@
 		enable = true;
 		touchpad.naturalScrolling = false;
 	};
-
-	services.displayManager.sddm.enable = true;
 
 	networking.networkmanager = {
 		enable = true;

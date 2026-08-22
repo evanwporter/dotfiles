@@ -1,0 +1,3 @@
+include "/etc/niri/config.kdl"
+
+spawn-at-startup "sh" "-c" "exec swaybg -i \"$HOME/.config/niri/tf2.jpg\" -m fill"

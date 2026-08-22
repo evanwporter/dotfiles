@@ -34,9 +34,8 @@ layout {
 prefer-no-csd
 
 spawn-at-startup "xwayland-satellite"
-spawn-at-startup "sh" "-c" "exec waybar -c \"$HOME/.config/waybar/niri.jsonc\""
+spawn-at-startup "waybar"
 spawn-at-startup "mako"
-spawn-at-startup "sh" "-c" "exec swaybg -i \"$HOME/.config/niri/tf2.jpg\" -m fill"
 
 binds {
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "--limit" "1.0" "@DEFAULT_AUDIO_SINK@" "5%+"; }

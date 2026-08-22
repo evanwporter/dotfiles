@@ -1,7 +1,8 @@
 {pkgs, ...}: {
 	imports = [
-		./ly
-		./polkit.nix
+		../ly
+		../polkit.nix
+		../waybar
 	];
 
 	programs.sway = {
@@ -16,14 +17,10 @@
 			pavucontrol
 			swayidle
 			swaylock
-			waybar
 		];
 	};
 
-	# services.displayManager.sddm = {
-	# 	enable = true;
-	# 	wayland.enable = true;
-	# };
+	environment.etc."sway/config.d/system".source = ./sway.config;
 
 	networking.networkmanager.enable = true;
 }
