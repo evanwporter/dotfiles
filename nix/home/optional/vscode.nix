@@ -47,4 +47,6 @@ in {
 		# 	# "editor.cursorSmoothCaretAnimation" = true;
 		# };
 	};
+
+	xdg.dataFile."icons/hicolor/512x512/apps/vscodium.png".source = "${pkgs.vscodium}/share/icons/hicolor/1024x1024/apps/vscodium.png";
 }
