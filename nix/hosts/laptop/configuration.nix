@@ -4,6 +4,9 @@
 {
 	inputs,
 	pkgs,
+	username,
+	homeDirectory,
+	dotfilesRoot,
 	...
 }: let
 	spotifyPkgs =
@@ -89,7 +92,7 @@ in {
 	# services.xserver.libinput.enable = true;
 
 	# Define a user account. Don't forget to set a password with ‘passwd’.
-	users.users.evanp = {
+	users.users.${username} = {
 		isNormalUser = true;
 		description = "Evan Porter";
 		extraGroups = ["networkmanager" "wheel"];
@@ -107,12 +110,10 @@ in {
 		backupFileExtension = "hm-backup";
 
 		extraSpecialArgs = {
-			inherit inputs;
-			username = "evanp";
-			homeDirectory = "/home/evanp";
+			inherit inputs username homeDirectory dotfilesRoot;
 		};
 
-		users.evanp.imports = [
+		users.${username}.imports = [
 			../../home/base/default.nix
 			../../home/optional/niri
 			# ../../home/optional/hyprland.nix
