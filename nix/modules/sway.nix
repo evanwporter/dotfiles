@@ -1,5 +1,8 @@
 {pkgs, ...}: {
-	imports = [./ly.nix];
+	imports = [
+		./ly
+		./polkit.nix
+	];
 
 	programs.sway = {
 		enable = true;
