@@ -63,6 +63,7 @@ in {
 	services.xserver.xkb = {
 		layout = "us";
 		variant = "";
+		options = "caps:escape";
 	};
 
 	# Enable CUPS to print documents.
@@ -113,6 +114,8 @@ in {
 
 		users.evanp.imports = [
 			../../home/base/default.nix
+			# ../../home/optional/hyprland.nix
+			# ../../home/optional/noctalia.nix
 			../../home/optional/vscode.nix
 		];
 	};
@@ -120,6 +123,7 @@ in {
 	# Fonts configuration
 	fonts.packages = with pkgs; [
 		nerd-fonts.jetbrains-mono
+		nerd-fonts.monaspace
 	];
 
 	programs.fish.enable = true;
@@ -134,6 +138,7 @@ in {
 		wget
 		neovim
 		kitty
+		thunar
 		tmux
 		git
 		obsidian
