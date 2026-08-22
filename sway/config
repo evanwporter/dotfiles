@@ -1,7 +1,10 @@
 # Sway configuration (i3-compatible Wayland compositor).
 
 set $mod Mod4
+set $menu bemenu-run --binding vim --fn "JetBrainsMono Nerd Font 13" --line-height 26 --tb "#303446dc" --tf "#8caaeeff" --fb "#303446dc" --ff "#c6d0f5ff" --cb "#81c8beff" --cf "#303446ff" --nb "#303446dc" --nf "#c6d0f5ff" --hb "#8caaeeff" --hf "#303446ff" --sb "#f4b8e4ff" --sf "#303446ff"
 font pango:monospace 16
+
+exec mako
 
 default_border none
 default_floating_border none
@@ -39,6 +42,7 @@ floating_modifier $mod
 
 bindsym $mod+Return exec kitty
 bindsym $mod+Shift+q kill
+bindsym $mod+d exec --no-startup-id $menu
 
 # Change focus.
 bindsym $mod+h focus left

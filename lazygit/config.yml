@@ -1,5 +1,14 @@
 gui:
   skipDiscardChangeWarning: true
 git:
+  # Avoid expensive topology walks in very large histories such as nixpkgs.
+  log:
+    order: default
+  # The branch detail panes do not need an ASCII commit graph.
+  branchLogCmd: git log --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --
+  allBranchesLogCmds:
+    - git log --all --color=always --abbrev-commit --decorate --date=relative --pretty=medium
+  # Fast-forward inactive local branches when their upstream moves forward.
+  autoForwardBranches: allBranches
   diffRenderers:
     - command: delta --paging=never
