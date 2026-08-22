@@ -125,6 +125,7 @@
 					copilot-lua
 					blink-copilot
 					rustaceanvim
+					trouble-nvim
 				];
 
 				optAttrs = {
