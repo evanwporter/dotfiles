@@ -1,5 +1,5 @@
 vim.lsp.config("nixd", {
-    cmd = { "nixd" },
+    cmd = { vim.fn.expand("~/nixd/local/install/bin/nixd") },
     filetypes = { "nix" },
     root_markers = { "flake.nix", ".git" },
     settings = {
@@ -21,13 +21,13 @@ vim.lsp.config("nixd", {
                     expr = "(builtins.getFlake (toString ./.)).nixosConfigurations.laptop.options.home-manager.users.type.getSubOptions []",
                 },
             },
-            formatting = {
-                command = {
-                    "alejandra",
-                    "--experimental-config",
-                    vim.fn.expand("~/.config/alejandra/alejandra.toml"),
-                },
-            },
+            -- formatting = {
+            --     command = {
+            --         "alejandra",
+            --         "--experimental-config",
+            --         vim.fn.expand("~/.config/alejandra/alejandra.toml"),
+            --     },
+            -- },
         },
     },
 })

@@ -53,6 +53,22 @@ vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
     end,
 })
 
+-- A compositor focus change can briefly resize the terminal to only a few
+-- rows. Neovim then keeps the resulting window-local 'scroll' value, making
+-- <C-u> and <C-d> move only a couple of lines after the full size is restored.
+vim.api.nvim_create_autocmd({ "FocusGained", "VimResized" }, {
+    group = augroup("reset_window_scroll"),
+    callback = function()
+        vim.schedule(function()
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                if vim.api.nvim_win_is_valid(win) then
+                    vim.api.nvim_set_option_value("scroll", 0, { win = win })
+                end
+            end
+        end)
+    end,
+})
+
 -------------------------------------------------------------------------------
 -- FILE REDIRECTION FROM FLOATING WINDOWS
 -------------------------------------------------------------------------------
