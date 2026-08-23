@@ -15,16 +15,21 @@ vim.api.nvim_create_autocmd("LspAttach", {
             pcall(vim.keymap.del, "n", keys, { buffer = event.buf })
         end
 
-        local function map(keys, func, desc, method)
+        local function map(keys, func, desc, method, opts)
             if method and not client:supports_method(method, event.buf) then
                 return
             end
 
-            vim.keymap.set("n", keys, func, {
-                buffer = event.buf,
-                desc = desc,
-                silent = true,
-            })
+            vim.keymap.set(
+                "n",
+                keys,
+                func,
+                vim.tbl_extend("force", {
+                    buffer = event.buf,
+                    desc = desc,
+                    silent = true,
+                }, opts or {})
+            )
         end
 
         map("gd", function()
@@ -37,7 +42,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         map("gr", function()
             require("fzf-lua").lsp_references()
-        end, "Go to References", "textDocument/references")
+        end, "Go to References", "textDocument/references", { nowait = true })
 
         map("gi", function()
             require("fzf-lua").lsp_implementations()
