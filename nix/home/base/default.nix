@@ -9,6 +9,7 @@
 	};
 
 	imports = [
+		./modules/dotfiles.nix
 		./modules/cli.nix
 		./modules/dev.nix
 		./modules/direnv.nix
