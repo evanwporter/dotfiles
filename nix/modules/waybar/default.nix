@@ -4,9 +4,7 @@
 	pkgs,
 	...
 }: {
-	environment.systemPackages = [pkgs.waybar];
-
-	environment.etc =
+	environment.etc = lib.mkIf config.programs.waybar.enable (
 		lib.mkMerge [
 			(lib.mkIf config.programs.niri.enable {
 					"xdg/waybar/config".source = ./niri.jsonc;
@@ -17,5 +15,6 @@
 			{
 				"xdg/waybar/style.css".source = ./style.css;
 			}
-		];
+		]
+	);
 }

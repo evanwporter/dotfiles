@@ -10,6 +10,7 @@
 
 	imports = [
 		./modules/dotfiles.nix
+		./modules/cursor.nix
 		./modules/cli.nix
 		./modules/dev.nix
 		./modules/direnv.nix
@@ -19,5 +20,6 @@
 		./modules/i3
 		./modules/sway
 		./modules/niri
+		./modules/noctalia
 	];
 }
