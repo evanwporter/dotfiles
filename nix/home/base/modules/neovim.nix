@@ -98,6 +98,7 @@
 					flash-nvim
 					cmake-tools-nvim
 					render-markdown-nvim
+					vim-matchup
 					mini-icons
 					fzf-lua
 					oil-nvim
