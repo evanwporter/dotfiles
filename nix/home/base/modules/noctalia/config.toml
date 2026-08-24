@@ -355,7 +355,7 @@ capsule            = false
 
 start  = ["workspaces"]
 center = ["clock"]
-end    = ["media", "tray", "notifications", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+end    = ["media", "tray", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
 
 # Commands for the bar margin outside widget sections (dead zone):
 # [bar.main.dead_zone.actions]
@@ -456,20 +456,16 @@ enabled = false
 # ── Control Center ────────────────────────────────────────────────────────────
 
 # Shortcut buttons shown on the right side of the dashboard (up to 6).
-# [[control_center.shortcuts]]
-# type = "wifi"
-# [[control_center.shortcuts]]
-# type = "bluetooth"
-# [[control_center.shortcuts]]
-# type = "nightlight"
-# [[control_center.shortcuts]]
-# type = "notification"
-# [[control_center.shortcuts]]
-# type = "wallpaper"
-# [[control_center.shortcuts]]
-# type = "screen_recorder"
-# [[control_center.shortcuts]]
-# type = "session"
+[[control_center.shortcuts]]
+type = "wifi"
+[[control_center.shortcuts]]
+type = "bluetooth"
+[[control_center.shortcuts]]
+type = "caffeine"
+[[control_center.shortcuts]]
+type = "nightlight"
+[[control_center.shortcuts]]
+type = "power_profile"
 
 # ── Hooks ─────────────────────────────────────────────────────────────────────
 
