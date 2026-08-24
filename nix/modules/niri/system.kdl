@@ -1,10 +1,4 @@
 input {
-    keyboard {
-        xkb {
-            options "caps:escape"
-        }
-    }
-
     touchpad {
         tap
         natural-scroll
