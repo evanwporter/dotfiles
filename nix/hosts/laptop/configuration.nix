@@ -14,19 +14,20 @@
 			system = pkgs.stdenv.hostPlatform.system;
 			config.allowUnfree = true;
 		};
-	capsToSuperConfig = pkgs.writeText "caps-to-super.yaml" (builtins.toJSON {
-		TIMING = {
-			TAP_MILLISEC = 200;
-			DOUBLE_TAP_MILLISEC = 150;
-		};
-		MAPPINGS = [
-			{
-				KEY = "KEY_CAPSLOCK";
-				TAP = "KEY_LEFTMETA";
-				HOLD = "KEY_LEFTMETA";
-			}
-		];
-	});
+	capsToSuperConfig =
+		pkgs.writeText "caps-to-super.yaml" (builtins.toJSON {
+				TIMING = {
+					TAP_MILLISEC = 200;
+					DOUBLE_TAP_MILLISEC = 150;
+				};
+				MAPPINGS = [
+					{
+						KEY = "KEY_CAPSLOCK";
+						TAP = "KEY_LEFTMETA";
+						HOLD = "KEY_LEFTMETA";
+					}
+				];
+			});
 in {
 	imports = [
 		# Include the results of the hardware scan.
@@ -86,12 +87,13 @@ in {
 	services.interception-tools = {
 		enable = true;
 		plugins = [pkgs.interception-tools-plugins.dual-function-keys];
-		udevmonConfig = builtins.toJSON [
-			{
-				JOB = "intercept -g $DEVNODE | dual-function-keys -c ${capsToSuperConfig} | uinput -d $DEVNODE";
-				DEVICE.EVENTS.EV_KEY = ["KEY_CAPSLOCK"];
-			}
-		];
+		udevmonConfig =
+			builtins.toJSON [
+				{
+					JOB = "intercept -g $DEVNODE | dual-function-keys -c ${capsToSuperConfig} | uinput -d $DEVNODE";
+					DEVICE.EVENTS.EV_KEY = ["KEY_CAPSLOCK"];
+				}
+			];
 	};
 
 	# Enable CUPS to print documents.
@@ -153,6 +155,7 @@ in {
 	];
 
 	programs.fish.enable = true;
+	dotfiles.sway.fileManager = "thunar";
 
 	# Allow unfree packages
 	nixpkgs.config.allowUnfree = true;
@@ -164,7 +167,6 @@ in {
 		wget
 		neovim
 		kitty
-		thunar
 		tmux
 		git
 		obsidian
