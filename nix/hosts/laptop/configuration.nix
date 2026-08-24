@@ -24,7 +24,8 @@ in {
 		../../modules/nix.nix
 		../../modules/firefox.nix
 		# ../../modules/desktop-manager.nix
-		../../modules/niri
+		../../modules/sway
+		# ../../modules/niri
 		../../modules/games
 	];
 
