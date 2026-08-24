@@ -1,0 +1,14 @@
+diff --git a/functions/fish_prompt.fish b/functions/fish_prompt.fish
+index fdd7a09..773cd0b 100644
+--- a/functions/fish_prompt.fish
++++ b/functions/fish_prompt.fish
+@@ -249,6 +249,9 @@ function __bobthefish_project_pwd -S -a project_root_dir -a real_pwd -d 'Print
+ end
+ 
+ function __bobthefish_git_ahead -S -d 'Print the ahead/behind state for the current branch'
++    [ "$theme_display_git_ahead" = 'no' ]
++    and return
++
+     if [ "$theme_display_git_ahead_verbose" = 'yes' ]
+         __bobthefish_git_ahead_verbose
+         return

@@ -9,7 +9,11 @@
 		plugins = with pkgs.fishPlugins; [
 			{
 				name = "bobthefish";
-				src = bobthefish.src;
+				src = pkgs.applyPatches {
+					name = "theme-bobthefish-patched";
+					src = bobthefish.src;
+					patches = [./bobthefish-large-history.patch];
+				};
 			}
 		];
 	};
