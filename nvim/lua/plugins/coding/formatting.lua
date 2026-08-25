@@ -36,7 +36,7 @@ return {
                     return { is_nixpkgs(bufnr) and "nixfmt" or "alejandra" }
                 end,
 
-                cmake = { "cmake_format" },
+                -- cmake = { "cmake_format" },
 
                 xml = { "xmlstarlet" },
 
