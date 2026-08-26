@@ -37,6 +37,7 @@
 
 		mkSystem = {
 			hostname,
+			# Pass primary user to the system configuration
 			username,
 			homeDirectory ? "/home/${username}",
 			extraModules ? [],
