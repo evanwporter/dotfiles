@@ -126,6 +126,7 @@
 					trouble-nvim
 					vim-matchup
 					slang-server-nvim
+					nvim-lint
 				];
 
 				optAttrs = {

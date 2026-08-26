@@ -15,6 +15,8 @@ vim.opt.confirm = true
 
 vim.opt.clipboard = "unnamedplus"
 
+vim.o.exrc = true
+
 vim.env.PATH = vim.fn.expand("~/.local/share/nvim/tools/bin") .. ":" .. vim.env.PATH
 
 vim.opt.foldmethod = "expr"
