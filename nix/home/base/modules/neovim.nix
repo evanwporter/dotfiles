@@ -96,7 +96,6 @@
 					gitsigns-nvim
 					image-nvim
 					flash-nvim
-					cmake-tools-nvim
 					render-markdown-nvim
 					vim-matchup
 					mini-icons
@@ -108,7 +107,6 @@
 					nvim-surround
 					yazi-nvim
 					clangd_extensions-nvim
-					cmake-tools-nvim
 					which-key-nvim
 					hardtime-nvim
 					diffview-plus-nvim
@@ -126,6 +124,8 @@
 					blink-copilot
 					rustaceanvim
 					trouble-nvim
+					vim-matchup
+					slang-server-nvim
 				];
 
 				optAttrs = {
