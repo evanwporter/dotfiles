@@ -33,6 +33,7 @@
 			import nixpkgs {
 				inherit system;
 				config.allowUnfree = true;
+				overlays = [inputs.neovim-nightly-overlay.overlays.default];
 			};
 
 		mkSystem = {
@@ -51,6 +52,7 @@
 
 				modules =
 					[
+						{nixpkgs.overlays = [inputs.neovim-nightly-overlay.overlays.default];}
 						home-manager.nixosModules.home-manager
 						./hosts/${hostname}/configuration.nix
 					]
