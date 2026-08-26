@@ -3,12 +3,13 @@
 	lib,
 	pkgs,
 	inputs,
+	dotfilesRoot,
 	...
 }: let
 	cfg = config.dotfiles.neovim;
 	nvimConfig =
 		builtins.path {
-			path = ../../../../nvim;
+			path = dotfilesRoot + "/nvim";
 			name = "nvim-config";
 		};
 
