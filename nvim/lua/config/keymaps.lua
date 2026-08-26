@@ -91,13 +91,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
             vim.diagnostic.jump({ count = 1, float = true })
         end, "Next Diagnostic")
 
-        map("<leader>cx", function()
-            require("fzf-lua").diagnostics_document()
-        end, "Diagnostics Document")
-
-        map("<leader>cX", function()
-            require("fzf-lua").diagnostics_workspace()
-        end, "Diagnostics Workspace")
+        -- map("<leader>cx", function()
+        --     require("fzf-lua").diagnostics_document()
+        -- end, "Diagnostics Document")
+        --
+        -- map("<leader>cX", function()
+        --     require("fzf-lua").diagnostics_workspace()
+        -- end, "Diagnostics Workspace")
     end,
 })
 
