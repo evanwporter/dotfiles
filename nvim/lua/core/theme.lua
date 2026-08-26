@@ -1,5 +1,6 @@
 vim.o.termguicolors = true
 
+vim.g.gruvbox_material_diagnostic_virtual_text = "highlighted"
 vim.cmd.colorscheme("gruvbox-material")
 
 -- Define BlinkPairs highlight groups for rainbow highlights
