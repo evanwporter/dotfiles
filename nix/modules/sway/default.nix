@@ -11,7 +11,6 @@
 in {
 	imports = [
 		../ly
-		../noctalia.nix
 		../waybar
 	];
 

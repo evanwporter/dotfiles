@@ -3,7 +3,10 @@
 
 	inputs = {
 		nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+		nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
+
 		nixos-wsl.url = "github:nix-community/NixOS-WSL";
+
 		spotify-nixpkgs.url = "github:NixOS/nixpkgs/9ae611a455b90cf061d8f332b977e387bda8e1ca";
 
 		home-manager = {
@@ -13,12 +16,9 @@
 
 		mnw.url = "github:Gerg-L/mnw";
 
-		noctalia = {
-			url = "github:noctalia-dev/noctalia";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-
 		nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+
+		neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 	};
 
 	outputs = inputs @ {
