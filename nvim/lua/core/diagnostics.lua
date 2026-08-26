@@ -226,10 +226,14 @@ local function hide(namespace, bufnr)
 end
 
 local function render_current_line(diagnostics, namespace, bufnr)
+    if bufnr ~= vim.api.nvim_get_current_buf() then
+        render(namespace, bufnr, {})
+        return
+    end
+
     local current_line = vim.api.nvim_win_get_cursor(0)[1] - 1
     local filtered = vim.tbl_filter(function(diagnostic)
-        return diagnostic.end_lnum and current_line >= diagnostic.lnum and current_line <= diagnostic.end_lnum
-            or current_line == diagnostic.lnum
+        return diagnostic.lnum == current_line
     end, diagnostics)
     render(namespace, bufnr, filtered)
 end
@@ -259,9 +263,14 @@ vim.diagnostic.handlers.virtual_text = {
             current_line = vim.api.nvim_win_get_cursor(0)[1] - 1
         end
 
-        default_virtual_text.show(namespace, bufnr, vim.tbl_filter(function(diagnostic)
-            return diagnostic.lnum ~= current_line
-        end, diagnostics), opts)
+        default_virtual_text.show(
+            namespace,
+            bufnr,
+            vim.tbl_filter(function(diagnostic)
+                return diagnostic.lnum ~= current_line
+            end, diagnostics),
+            opts
+        )
     end,
     hide = default_virtual_text.hide,
 }
@@ -291,13 +300,6 @@ vim.diagnostic.config({
         focus = false,
     },
 })
-
-vim.keymap.set("n", "<leader>xl", function()
-    local current = vim.diagnostic.config().virtual_lines
-    vim.diagnostic.config({
-        virtual_lines = current and false or VIRTUAL_LINES,
-    })
-end, { desc = "Toggle diagnostic lines" })
 
 vim.api.nvim_create_autocmd({ "CursorMoved", "DiagnosticChanged", "ModeChanged", "WinResized" }, {
     group = vim.api.nvim_create_augroup("diagnostic_redraw", { clear = true }),
