@@ -4,6 +4,6 @@ return {
         cond = not vim.g.vscode,
         -- ft = { "verilog", "systemverilog" },
         cmd = { "SlangServer" },
-        dependences = { "MunifTanjim/nui.nvim" },
+        -- dependencies = { "MunifTanjim/nui.nvim" },
     },
 }
