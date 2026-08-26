@@ -19,6 +19,7 @@
 		./modules/fish
 		./modules/i3
 		./modules/sway
+		./modules/swayidle.nix
 		./modules/niri
 		./modules/noctalia
 	];
