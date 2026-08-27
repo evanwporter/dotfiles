@@ -9,6 +9,7 @@
 	};
 
 	imports = [
+		./modules/rofi
 		./modules/dotfiles.nix
 		./modules/cursor.nix
 		./modules/cli.nix

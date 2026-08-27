@@ -19,10 +19,10 @@ in {
 			lib.mkOption {
 				type = lib.types.enum ["classic" "noctalia"];
 				default = "noctalia";
-				description = ''
+					description = ''
 					Desktop shell used by Sway. "noctalia" uses Noctalia's bar,
 					notifications, launcher, network UI, volume UI, and lock screen.
-					"classic" uses Waybar, Mako, Fuzzel, nm-applet, Pavucontrol,
+					"classic" uses Waybar, SwayNotificationCenter, Rofi, NetworkManager's editor, Pavucontrol,
 					and Swaylock.
 				'';
 			};
@@ -64,11 +64,12 @@ in {
 						flameshot
 					])
 				++ lib.optionals (cfg.desktopShell == "classic") (with pkgs; [
-						mako
-						fuzzel
+						acpi
+						rofi
 						networkmanagerapplet
 						pavucontrol
 						swaylock
+						swaynotificationcenter
 					]);
 		};
 

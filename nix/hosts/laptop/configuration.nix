@@ -155,6 +155,7 @@ in {
 	];
 
 	programs.fish.enable = true;
+	dotfiles.sway.desktopShell = "classic";
 	dotfiles.sway.fileManager = "thunar";
 
 	# Allow unfree packages
@@ -170,8 +171,8 @@ in {
 		git
 		obsidian
 		spotifyPkgs.spotify
-		surfer
 		spotatui
+		btop
 	];
 
 	# Some programs need SUID wrappers, can be configured further or are
