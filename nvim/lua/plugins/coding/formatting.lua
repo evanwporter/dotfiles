@@ -44,6 +44,8 @@ return {
 
                 sh = { "shfmt" },
                 bash = { "shfmt" },
+
+                toml = { "tombi" },
             },
 
             formatters = {
