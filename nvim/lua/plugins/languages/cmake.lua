@@ -4,6 +4,7 @@ local config_dir = vim.fs.normalize(spec_dir .. "/../../..")
 return {
     {
         name = "cmake-tools",
+        ft = "cmake",
         dir = config_dir .. "/plugins/cmake-tools",
         cond = not vim.g.vscode,
         dependencies = { "ibhagwan/fzf-lua" },
