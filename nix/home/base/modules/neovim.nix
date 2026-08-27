@@ -67,6 +67,7 @@
 		shellcheck
 		xmlstarlet
 		marksman
+		slang-server
 	];
 
 	nixNeovim =
