@@ -37,8 +37,11 @@ in {
 		# and use that instead
 		../../modules/nix.nix
 		../../modules/firefox.nix
-		# ../../modules/desktop-manager.nix
-		../../modules/sway
+
+		# Desktop session: import exactly one of these modules.
+		../../modules/dwm
+		# ../../modules/sway
+
 		# ../../modules/niri
 		../../modules/games
 	];
@@ -150,14 +153,13 @@ in {
 
 	# Fonts configuration
 	fonts.packages = with pkgs; [
+		# Includes the JetBrainsMonoNL Nerd Font family used by dwm and dmenu.
 		nerd-fonts.jetbrains-mono
 		nerd-fonts.monaspace
 	];
+	fonts.fontconfig.defaultFonts.monospace = ["JetBrainsMonoNL Nerd Font"];
 
 	programs.fish.enable = true;
-	dotfiles.sway.desktopShell = "classic";
-	dotfiles.sway.fileManager = "thunar";
-
 	# Allow unfree packages
 	nixpkgs.config.allowUnfree = true;
 

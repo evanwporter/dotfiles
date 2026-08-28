@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+	xresources.properties."Xft.dpi" = 192;
+
 	home.pointerCursor = {
 		enable = true;
 		name = "Adwaita";
