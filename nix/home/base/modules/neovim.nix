@@ -86,6 +86,7 @@
 			plugins = {
 				start = with pkgs.vimPlugins; [
 					lazy-nvim
+					nui-nvim
 				];
 
 				opt = with pkgs.vimPlugins; [
@@ -118,7 +119,7 @@
 					nvim-treesitter-textobjects
 					nvim-dap-virtual-text
 					grug-far-nvim
-					nui-nvim
+					# nui-nvim
 					nvim-nio
 					gruvbox-material
 					lazydev-nvim
@@ -129,6 +130,7 @@
 					vim-matchup
 					slang-server-nvim
 					nvim-lint
+					vim-tmux-navigator
 				];
 
 				optAttrs = {
