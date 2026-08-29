@@ -37,6 +37,7 @@ in {
 		# and use that instead
 		../../modules/nix.nix
 		../../modules/firefox.nix
+		../../modules/st
 
 		# Desktop session: import exactly one of these modules.
 		../../modules/dwm
@@ -168,7 +169,6 @@ in {
 	environment.systemPackages = with pkgs; [
 		#  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
 		wget
-		kitty
 		tmux
 		git
 		obsidian
@@ -204,13 +204,5 @@ in {
 	# (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
 	system.stateVersion = "26.05"; # Did you read the comment?
 
-	environment.variables.TERMINAL = "kitty";
-	xdg.terminal-exec = {
-		enable = true;
-		settings = {
-			default = [
-				"kitty.desktop"
-			];
-		};
-	};
+	dotfiles.defaultTerminal = "st";
 }
