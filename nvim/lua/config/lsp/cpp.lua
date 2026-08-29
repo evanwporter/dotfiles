@@ -4,7 +4,7 @@ vim.lsp.config("clangd", {
         "--clang-tidy",
         "--completion-style=detailed",
         "--header-insertion=iwyu",
-        "--query-driver=/run/current-system/sw/bin/clang++,/run/current-system/sw/bin/g++,/nix/store/*/bin/clang++,/nix/store/*/bin/g++,/nix/store/*devkitARM*/opt/devkitpro/devkitARM/bin/arm-none-eabi-*",
+        "--query-driver=/run/current-system/sw/bin/clang,/run/current-system/sw/bin/clang++,/run/current-system/sw/bin/gcc,/run/current-system/sw/bin/g++,/nix/store/*/bin/clang,/nix/store/*/bin/clang++,/nix/store/*/bin/gcc,/nix/store/*/bin/g++,/nix/store/*devkitARM*/opt/devkitpro/devkitARM/bin/arm-none-eabi-*",
     },
     capabilities = {
         offsetEncoding = { "utf-16" },
