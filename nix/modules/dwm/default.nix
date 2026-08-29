@@ -6,8 +6,9 @@
 	wallpaper = ../resources/wallpaper/wp.png;
 
 	dwm =
-		pkgs.dwm.overrideAttrs (_: {
+		pkgs.dwm.overrideAttrs (old: {
 				src = ./dwm;
+				buildInputs = (old.buildInputs or []) ++ [pkgs.libxcb];
 			});
 	dwmblocks =
 		pkgs.dwmblocks.overrideAttrs (_: {
@@ -47,7 +48,6 @@ in {
 		feh
 		flameshot
 		font-awesome
-		kitty
 		pulseaudio
 		xidlehook
 	];

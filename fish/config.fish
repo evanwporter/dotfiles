@@ -49,6 +49,5 @@ set -g theme_nerd_fonts yes
 
 set -gx EDITOR nvim
 set -gx VISUAL nvim
-set -gx TERMINAL kitty
 
 direnv hook fish | source

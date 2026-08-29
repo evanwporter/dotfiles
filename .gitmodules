@@ -4,3 +4,6 @@
 [submodule "nix/modules/dwm/dwm"]
 	path = nix/modules/dwm/dwm
 	url = https://github.com/evanwporter/dwm
+[submodule "nix/modules/st/st"]
+	path = nix/modules/st/st
+	url = https://github.com/evanwporter/st
