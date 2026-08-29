@@ -5,26 +5,13 @@
 }: let
 	wallpaper = ../resources/wallpaper/wp.png;
 
-	dwm-gruvbox =
-		pkgs.dwm.overrideAttrs (old: {
-				version = "6.5-gruvbox";
-				src =
-					pkgs.fetchzip {
-						url = "https://dl.suckless.org/dwm/dwm-6.5.tar.gz";
-						hash = "sha256-Cc4B8evvuRxOjbeOhg3oAs3Nxi/msxWg950/eiq536w=";
-					};
-				patches = (old.patches or []) ++ [./patches/dwm.patch];
+	dwm =
+		pkgs.dwm.overrideAttrs (_: {
+				src = ./dwm;
 			});
-
-	dwmblocks-gruvbox =
-		(pkgs.dwmblocks.override {
-				patches = [./patches/dwmblocks.patch];
-			}).overrideAttrs (old: {
-				postPatch =
-					old.postPatch
-					+ ''
-						cp ${./blocks.h} blocks.def.h
-					'';
+	dwmblocks =
+		pkgs.dwmblocks.overrideAttrs (_: {
+				src = ./dwmblocks;
 			});
 in {
 	imports = [../ly];
@@ -43,10 +30,10 @@ in {
 		xkb.layout = "us";
 		windowManager.dwm = {
 			enable = true;
-			package = dwm-gruvbox;
+			package = dwm;
 			extraSessionCommands = ''
 				${pkgs.feh}/bin/feh --no-fehbg --bg-scale ${wallpaper} &
-				${dwmblocks-gruvbox}/bin/dwmblocks &
+				${dwmblocks}/bin/dwmblocks &
 				${pkgs.xidlehook}/bin/xidlehook --not-when-fullscreen --not-when-audio \
 					--timer 1800 '${pkgs.systemd}/bin/systemctl suspend' "" &
 			'';
@@ -56,7 +43,7 @@ in {
 	environment.systemPackages = with pkgs; [
 		brightnessctl
 		dmenu
-		dwmblocks-gruvbox
+		dwmblocks
 		feh
 		flameshot
 		font-awesome

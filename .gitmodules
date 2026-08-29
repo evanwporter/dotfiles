@@ -1,0 +1,6 @@
+[submodule "nix/modules/dwm/dwmblocks"]
+	path = nix/modules/dwm/dwmblocks
+	url = https://github.com/evanwporter/dwmblocks
+[submodule "nix/modules/dwm/dwm"]
+	path = nix/modules/dwm/dwm
+	url = https://github.com/evanwporter/dwm
