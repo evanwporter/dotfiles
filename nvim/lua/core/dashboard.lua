@@ -93,7 +93,7 @@ local function has_real_buffers()
     return false
 end
 
-vim.api.nvim_create_autocmd({ "VimEnter", "UIEnter" }, {
+vim.api.nvim_create_autocmd("VimEnter", {
     once = true,
     callback = function()
         if vim.fn.argc() == 0 and not vim.g.session_restore_pending then
