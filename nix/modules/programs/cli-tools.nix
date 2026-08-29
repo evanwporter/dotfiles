@@ -1,0 +1,32 @@
+{...}: {
+	flake.modules.homeManager.cli = {pkgs, ...}: {
+		home.packages = with pkgs; [
+			# terminal tools
+			ripgrep
+			fd
+			fzf
+			curl
+			wget
+			unzip
+			zip
+			tree
+			fish
+			tmux
+			bat
+			eza
+			dust
+			yazi
+			zoxide
+			file
+			glow
+			erdtree
+
+			codex
+			opencode
+
+			# useful libs/tools
+			openssl
+			zlib
+		];
+	};
+}

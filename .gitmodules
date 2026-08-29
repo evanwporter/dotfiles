@@ -1,9 +1,9 @@
-[submodule "nix/modules/dwm/dwmblocks"]
-	path = nix/modules/dwm/dwmblocks
+[submodule "nix/packages/dwmblocks"]
+	path = nix/packages/dwmblocks
 	url = https://github.com/evanwporter/dwmblocks
-[submodule "nix/modules/dwm/dwm"]
-	path = nix/modules/dwm/dwm
+[submodule "nix/packages/dwm"]
+	path = nix/packages/dwm
 	url = https://github.com/evanwporter/dwm
-[submodule "nix/modules/st/st"]
-	path = nix/modules/st/st
+[submodule "nix/packages/st"]
+	path = nix/packages/st
 	url = https://github.com/evanwporter/st
