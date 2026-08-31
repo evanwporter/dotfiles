@@ -1,13 +1,14 @@
-@define-color background #303446;
-@define-color background-alt #414559;
-@define-color foreground #c6d0f5;
-@define-color muted #838ba7;
-@define-color red #e78284;
-@define-color green #a6d189;
-@define-color yellow #e5c890;
-@define-color blue #8caaee;
-@define-color pink #f4b8e4;
-@define-color teal #81c8be;
+@define-color background #282828;
+@define-color background-alt #3c3836;
+@define-color foreground #ebdbb2;
+@define-color muted #a89984;
+@define-color red #ea6962;
+@define-color green #a9b665;
+@define-color yellow #d8a657;
+@define-color blue #7daea3;
+@define-color pink #d3869b;
+@define-color teal #89b482;
+@define-color orange #d65d0e;
 
 * {
   border: none;
@@ -20,7 +21,6 @@
 window#waybar {
   background: @background;
   color: @foreground;
-  border-radius: 10px;
 }
 
 #workspaces button {
@@ -31,8 +31,8 @@ window#waybar {
 #workspaces button.visible,
 #workspaces button.focused {
   background: @background-alt;
-  color: @blue;
-  border-bottom: 3px solid @blue;
+  color: @orange;
+  border-bottom: 3px solid @orange;
 }
 
 #workspaces button.urgent {
