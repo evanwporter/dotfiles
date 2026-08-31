@@ -33,6 +33,7 @@
 			"fish"
 			"systemverilog"
 			"rst"
+			"comment"
 		];
 
 		treesitterWithParsers =
@@ -75,7 +76,14 @@
 
 		nixNeovim =
 			inputs.mnw.lib.wrap pkgs {
-				neovim = pkgs.neovim-unwrapped;
+				neovim =
+					pkgs.neovim-unwrapped.overrideAttrs (oldAttrs: {
+							patches =
+								(oldAttrs.patches or [])
+								++ [
+									./dashboard.patch
+								];
+						});
 				luaFiles = [(nvimConfig + "/init.lua")];
 				wrapperArgs = [
 					"--set"
