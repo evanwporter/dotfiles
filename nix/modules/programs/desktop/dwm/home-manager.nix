@@ -1,6 +1,6 @@
 {inputs, ...}: {
 	flake.modules.homeManager.dwm = {pkgs, ...}: {
-		imports = [inputs.self.modules.homeManager.cursor];
+		imports = with inputs.self.modules.homeManager; [cursor dunst];
 
 		xdg.configFile."libinput-gestures.conf".source = ./libinput-gestures.conf;
 
@@ -16,13 +16,18 @@
 			Install.WantedBy = ["graphical-session.target"];
 		};
 
-		# https://github.com/nix-community/home-manager/issues/9201#issuecomment-4457618997
-		# services.flameshot = {
-		# 	enable = true;
-		# 	settings = {
-		# 		General.useX11LegacyScreenshot = true; # necessary to avoid "portal" issues on XMonad
-		# 	};
-		# };
-		# xdg.configFile."flameshot/flameshot.ini".force = true;
+		# Flameshot v14 defaults to the desktop portal even on X11.  Minimal
+		# window managers have no screenshot-capable portal backend, so use its
+		# built-in X11 capture implementation instead.
+		# Replace the empty configuration file left by Flameshot itself.  This does
+		# not start the tray daemon; the Print-key binding launches `flameshot gui`
+		# only when a screenshot is requested.
+		xdg.configFile."flameshot/flameshot.ini" = {
+			force = true;
+			text = ''
+				[General]
+				useX11LegacyScreenshot=true
+			'';
+		};
 	};
 }

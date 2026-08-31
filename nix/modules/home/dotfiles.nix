@@ -25,7 +25,6 @@
 			alejandra = linkWhen (hasPackage pkgs.alejandra) "alejandra";
 			bat = linkWhen (hasPackage pkgs.bat) "bat";
 			delta = linkWhen (config.programs.delta.enable || hasPackage pkgs.delta) "delta";
-			dunst = linkWhen (hasPackage pkgs.dunst) "dunst";
 			erdtree = linkWhen (hasPackage pkgs.erdtree) "erdtree";
 			kitty = linkWhen (hasPackage pkgs.kitty) "kitty";
 			lazygit = linkWhen (hasPackage pkgs.lazygit) "lazygit";
