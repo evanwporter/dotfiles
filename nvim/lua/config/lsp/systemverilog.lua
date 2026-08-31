@@ -41,7 +41,7 @@ local function inactive_regions_handler(err, params, _, _)
 end
 
 vim.lsp.config("slang_server", {
-    -- cmd = { vim.fn.expand("~/slang-server/build/debug/bin/slang-server") },
+    cmd = { vim.fn.expand("~/slang-server/build/debug/bin/slang-server") },
     filetypes = { "systemverilog", "verilog" },
     root_markers = { ".git", ".slang" },
     capabilities = {
