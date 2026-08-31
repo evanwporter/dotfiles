@@ -19,8 +19,8 @@
 		options.host = {
 			personality =
 				lib.mkOption {
-					type = lib.types.enum ["dwm" "sway" "niri"];
-					default = "dwm";
+				type = lib.types.enum ["dwm" "dusk" "sway" "niri"];
+				default = "dusk";
 					description = "Desktop environment personality for this host.";
 				};
 		};
