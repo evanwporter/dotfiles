@@ -3,7 +3,7 @@ return {
         "andymass/vim-matchup",
         -- This plugin allows me to match begin ... end
         ft = { "systemverilog", "verilog" },
-        -- enabled = false,
+        enabled = false,
         init = function()
             -- Keep matchup's motions and text objects, but do not highlight
             -- matching delimiters or words under the cursor.
