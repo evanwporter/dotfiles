@@ -9,7 +9,7 @@
 in {
 	options.hosts.laptop.personality =
 		lib.mkOption {
-			type = lib.types.enum ["dwm" "kde"];
+			type = lib.types.enum ["dwm" "dusk" "kde" "sway"];
 			description = "Desktop personality used by the laptop.";
 		};
 
