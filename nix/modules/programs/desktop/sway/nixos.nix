@@ -34,7 +34,7 @@
 
 			fileManager =
 				lib.mkOption {
-					type = lib.types.enum ["thunar" "dolphin"];
+					type = lib.types.enum ["thunar" "dolphin" "nautilus"];
 					default = "thunar";
 					description = "File manager installed by Sway and opened with Super+E.";
 				};
