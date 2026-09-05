@@ -6,13 +6,13 @@
 monitor = 1
 origin = top-right
 offset = (15, 25)
-width = 300
+width = 330
 height = 100
 gap_size = 5
 notification_limit = 5
 
 # Appearance
-font = "Mononoki Nerd Font 11"
+font = "Mononoki Nerd Font 10"
 frame_width = 1
 separator_color = frame
 corner_radius = 12
