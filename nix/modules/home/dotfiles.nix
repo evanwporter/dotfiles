@@ -22,7 +22,7 @@
 			};
 	in {
 		xdg.configFile = {
-			alejandra = linkWhen (hasPackage pkgs.alejandra) "alejandra";
+			alejandra = linkWhen true "alejandra";
 			bat = linkWhen (hasPackage pkgs.bat) "bat";
 			delta = linkWhen (config.programs.delta.enable || hasPackage pkgs.delta) "delta";
 			erdtree = linkWhen (hasPackage pkgs.erdtree) "erdtree";
