@@ -32,4 +32,4 @@ vim.opt.fillchars = {
     foldsep = " ",
 }
 
-vim.opt.mouse = ""
+-- vim.opt.mouse = ""
