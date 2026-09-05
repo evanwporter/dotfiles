@@ -102,6 +102,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 -------------------------------------------------------------------------------
+-- MULTICURSORS
+-------------------------------------------------------------------------------
+vim.keymap.set("n", "q", "Q", { desc = "Multicursors" })
+vim.keymap.set("n", "<C-g>", function()
+    vim.api.nvim_buf_clear_namespace(0, vim.api.nvim_create_namespace("nvim.multicursor"), 0, -1)
+end, { desc = "Clear multicursors" })
+
+-------------------------------------------------------------------------------
 -- WINDOW NAVIGATION
 -------------------------------------------------------------------------------
 vim.keymap.set("n", "<C-h>", "<cmd>TmuxNavigateLeft<cr>", { desc = "Go to Left Window" })
@@ -115,12 +123,6 @@ vim.keymap.set("n", "<C-\\>", "<cmd>TmuxNavigatePrevious<cr>", { desc = "Go to P
 -------------------------------------------------------------------------------
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down" })
-
--------------------------------------------------------------------------------
--- MACROS
--------------------------------------------------------------------------------
-vim.keymap.set("n", "Q", "q", { desc = "Start/stop macro recording" })
-vim.keymap.set("n", "q", "<Nop>", { desc = "Disable accidental macro recording" })
 
 -------------------------------------------------------------------------------
 -- INDENTATION
