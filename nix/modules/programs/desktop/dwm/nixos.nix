@@ -8,6 +8,18 @@
 		...
 	}: let
 		wallpaper = ../resources/wallpaper/wp.png;
+		lockscreenBackground = ../resources/wallpaper/quentinmarsollier-unexplored.png;
+
+		slock =
+			pkgs.slock.overrideAttrs (old: {
+				src = packagesDir + "/slock";
+				buildInputs = (old.buildInputs or []) ++ [pkgs.imlib2];
+				postPatch = (old.postPatch or "") + ''
+					substituteInPlace config.def.h \\
+						--replace-fail 'static const char *background_image = "";' \\
+						'static const char *background_image = "${lockscreenBackground}";'
+				'';
+			});
 
 		dwm =
 			pkgs.dwm.overrideAttrs (old: {
@@ -30,7 +42,10 @@
 			backend = "glx";
 			vSync = true;
 		};
-		programs.slock.enable = true;
+		programs.slock = {
+			enable = true;
+			package = slock;
+		};
 		services.xserver = {
 			enable = true;
 			# Scale X11 applications and dwm's Xft-rendered bar for the laptop's
