@@ -30,6 +30,7 @@
 			backend = "glx";
 			vSync = true;
 		};
+		programs.slock.enable = true;
 		services.xserver = {
 			enable = true;
 			# Scale X11 applications and dwm's Xft-rendered bar for the laptop's
@@ -44,6 +45,7 @@
 					${dwmblocks}/bin/dwmblocks &
 					${pkgs.dunst}/bin/dunst &
 					${pkgs.xidlehook}/bin/xidlehook --not-when-fullscreen --not-when-audio \
+						--timer 600 '/run/wrappers/bin/slock' "" \
 						--timer 1800 '${pkgs.systemd}/bin/systemctl suspend' "" &
 				'';
 			};
