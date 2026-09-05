@@ -1,5 +1,4 @@
 {
-	inputs,
 	packagesDir,
 	...
 }: {
@@ -9,10 +8,6 @@
 		...
 	}: let
 		wallpaper = ../resources/wallpaper/wp.png;
-		kittyDwm =
-			pkgs.writeShellScriptBin "kitty-dwm" ''
-				exec ${pkgs.kitty}/bin/kitty --override font_size=26.0 "$@"
-			'';
 
 		dwm =
 			pkgs.dwm.overrideAttrs (old: {
@@ -84,7 +79,7 @@
 			libx11
 			libXcursor
 			libxcb
-			kittyDwm
+            nautilus
 		];
 	};
 }
