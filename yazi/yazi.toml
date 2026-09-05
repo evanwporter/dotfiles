@@ -3,7 +3,7 @@ edit = [{ run = '''
 if [ -d "$1" ]; then
   cd "$1" && nvim
 else
-  cd "$(dirname "$1")" && nvim "$@"
+  cd "$(dirname "$1")" && nvim "$(basename "$1")"
 fi
 ''', block = true, for = "unix" }]
 
