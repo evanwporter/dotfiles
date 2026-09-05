@@ -4,7 +4,7 @@
 [submodule "nix/packages/dwm"]
 	path = nix/packages/dwm
 	url = https://github.com/evanwporter/dwm
-[submodule "nix/packages/st"]
+[submodule "nix/packages/st-flexipatch"]
 	path = nix/packages/st-flexipatch
 	url = https://github.com/evanwporter/st-flexipatch
 [submodule "nix/packages/dwm-flexipatch"]
@@ -13,3 +13,6 @@
 [submodule "nix/packages/slock"]
 	path = nix/packages/slock
 	url = https://github.com/evanwporter/slock
+[submodule "nix/packages/st"]
+	path = nix/packages/st
+	url = https://github.com/evanwporter/st
