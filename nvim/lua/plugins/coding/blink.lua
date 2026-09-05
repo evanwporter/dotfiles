@@ -6,7 +6,7 @@ return {
         event = "VeryLazy",
         dependencies = {
             "rafamadriz/friendly-snippets",
-            "fang2hou/blink-copilot",
+            -- "fang2hou/blink-copilot",
         },
 
         ---@module 'blink.cmp'
@@ -25,16 +25,16 @@ return {
                     "path",
                     "snippets",
                     "buffer",
-                    "copilot",
+                    -- "copilot",
                 },
 
                 providers = {
-                    copilot = {
-                        name = "copilot",
-                        module = "blink-copilot",
-                        score_offset = 100,
-                        async = true,
-                    },
+                    -- copilot = {
+                    --     name = "copilot",
+                    --     module = "blink-copilot",
+                    --     score_offset = 100,
+                    --     async = true,
+                    -- },
                 },
             },
 
