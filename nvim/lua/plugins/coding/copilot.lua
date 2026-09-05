@@ -4,6 +4,7 @@ return {
             "zbirenbaum/copilot.lua",
             cond = not vim.g.vscode,
             cmd = "Copilot",
+            enabled = false,
             build = ":Copilot auth",
             event = "BufReadPost",
             opts = {
