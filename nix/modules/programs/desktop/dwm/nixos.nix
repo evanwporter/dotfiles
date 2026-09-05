@@ -14,11 +14,6 @@
 			pkgs.slock.overrideAttrs (old: {
 				src = packagesDir + "/slock";
 				buildInputs = (old.buildInputs or []) ++ [pkgs.imlib2];
-				postPatch = (old.postPatch or "") + ''
-					substituteInPlace config.def.h \\
-						--replace-fail 'static const char *background_image = "";' \\
-						'static const char *background_image = "${lockscreenBackground}";'
-				'';
 			});
 
 		dwm =
@@ -79,6 +74,8 @@
 			# An additional forced multiplier makes Qt clients such as Flameshot huge.
 			XCURSOR_SIZE = "60";
 		};
+
+		environment.etc."slock/bg.png".source = lockscreenBackground;
 
 		environment.systemPackages = with pkgs; [
 			brightnessctl
