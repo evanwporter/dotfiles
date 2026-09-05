@@ -39,9 +39,9 @@ return {
             },
             triggers = {
                 { "<auto>", mode = "nxso" },
-                -- Single-letter builtins are excluded from automatic triggers.
-                -- This trigger replaces Vim's normal-mode `s` with our menu prefix.
-                { "s", mode = "n" },
+                -- -- Single-letter builtins are excluded from automatic triggers.
+                -- -- This trigger replaces Vim's normal-mode `s` with our menu prefix.
+                -- { "s", mode = "n" },
             },
             spec = {
                 {
@@ -68,11 +68,11 @@ return {
                     { "<leader>gh", group = "Hunks" },
                     { "<leader>gg", group = "Lazygit" },
 
-                    -- Surround
-                    { "s", group = "Surround", icon = "󰅪" },
-                    { "sa", desc = "Add surround" },
-                    { "sd", desc = "Delete surround" },
-                    { "sr", desc = "Replace surround" },
+                    -- -- Surround
+                    -- { "s", group = "Surround", icon = "󰅪" },
+                    -- { "sa", desc = "Add surround" },
+                    -- { "sd", desc = "Delete surround" },
+                    -- { "sr", desc = "Replace surround" },
 
                     -- Hidden Keys
                     { "<C-w>h", hidden = true },

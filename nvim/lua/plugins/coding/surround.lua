@@ -1,6 +1,7 @@
 return {
     {
         "kylechui/nvim-surround",
+        enabled = false,
         init = function()
             -- Disable default keymaps
             vim.g.nvim_surround_no_mappings = true

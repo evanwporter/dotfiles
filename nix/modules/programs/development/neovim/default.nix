@@ -77,7 +77,7 @@
 		nixNeovim =
 			inputs.mnw.lib.wrap pkgs {
 				neovim =
-					pkgs.neovim-unwrapped.overrideAttrs (oldAttrs: {
+					inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (oldAttrs: {
 							patches =
 								(oldAttrs.patches or [])
 								++ [
@@ -86,12 +86,17 @@
 						});
 				luaFiles = [(nvimConfig + "/init.lua")];
 				wrapperArgs = [
+					# Available only to Neovim and processes it launches.
+					"--prefix"
+					"PATH"
+					":"
+					"${lib.makeBinPath extraPackages}"
 					"--set"
 					"NVIM_TREESITTER_PARSERS"
 					"${treesitterParsers}"
-					"--set"
-					"CODELLDB_PATH"
-					"${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb"
+					# "--set"
+					# "CODELLDB_PATH"
+					# "${pkgs.vscode-extensions.vadimcn.vscode-lldb}/share/vscode/extensions/vadimcn.vscode-lldb/adapter/codelldb"
 				];
 
 				plugins = {
@@ -182,12 +187,14 @@
 							defaultEditor = true;
 							sideloadInitLua = true;
 
+                            # inherit here is shorthand for
+                            # extraPackages = extraPackages;
 							inherit extraPackages;
 						};
 					})
 
 				(lib.mkIf (cfg.packageManager == "nix") {
-						home.packages = [nixNeovim] ++ extraPackages;
+						home.packages = [nixNeovim];
 						home.sessionVariables.NVIM_TREESITTER_PARSERS = "${treesitterParsers}";
 					})
 			];
