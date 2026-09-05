@@ -3,10 +3,12 @@
 		st =
 			pkgs.st.overrideAttrs (oldAttrs: {
 					src = packagesDir + "/st";
-					buildInputs = (oldAttrs.buildInputs or []) ++ [
-						pkgs.harfbuzz
-						pkgs.libXcursor
-					];
+					buildInputs =
+						(oldAttrs.buildInputs or [])
+						++ [
+							pkgs.harfbuzz
+							pkgs.libXcursor
+						];
 				});
 	in {
 		environment.systemPackages = [
