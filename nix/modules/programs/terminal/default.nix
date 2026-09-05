@@ -9,7 +9,7 @@
 		options.terminal.default =
 			lib.mkOption {
 				type = lib.types.enum ["kitty" "st"];
-				default = "kitty";
+				default = "st";
 				description = "Terminal emulator installed and used by default.";
 			};
 
