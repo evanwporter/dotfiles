@@ -22,7 +22,9 @@
 			erdtree
 
 			codex
-			opencode
+			# opencode
+			# pi-coding-agent
+			rtk
 
 			# useful libs/tools
 			openssl
