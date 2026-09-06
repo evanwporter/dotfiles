@@ -1,0 +1,111 @@
+{
+    "version": 1,
+    "servers": [
+        {
+            "id": "pyrefly",
+            "enabled": true,
+            "include": ["**/*.py", "**/*.pyi"],
+            "rootMarkers": [
+                "pyproject.toml",
+                "pyrefly.toml",
+                ".pyrefly",
+                "setup.py",
+                "setup.cfg",
+                "requirements.txt",
+                ".git"
+            ],
+            "bin": "pyrefly",
+            "args": ["lsp"],
+            "cwd": "{root}",
+            "languageIdByExtension": {
+                ".py": "python",
+                ".pyi": "python"
+            },
+            "startupTimeoutMs": 45000,
+            "diagnosticsWaitMs": 2000,
+            "initializationOptions": {},
+            "settings": {}
+        },
+        {
+            "id": "slang-server",
+            "enabled": true,
+            "include": ["**/*.sv", "**/*.svh", "**/*.v", "**/*.vh"],
+            "rootMarkers": [
+                ".slang",
+                "slang-server.json",
+                "server.json",
+                ".git"
+            ],
+            "bin": "slang-server",
+            "args": [],
+            "cwd": "{root}",
+            "languageIdByExtension": {
+                ".sv": "systemverilog",
+                ".svh": "systemverilog",
+                ".v": "verilog",
+                ".vh": "verilog"
+            },
+            "startupTimeoutMs": 45000,
+            "diagnosticsWaitMs": 2000,
+            "initializationOptions": {},
+            "settings": {}
+        },
+        {
+            "id": "clangd",
+            "enabled": true,
+            "include": [
+                "**/*.c",
+                "**/*.h",
+                "**/*.cc",
+                "**/*.cp",
+                "**/*.cpp",
+                "**/*.cxx",
+                "**/*.c++",
+                "**/*.hh",
+                "**/*.hp",
+                "**/*.hpp",
+                "**/*.hxx",
+                "**/*.h++",
+                "**/*.m",
+                "**/*.mm"
+            ],
+            "rootMarkers": [
+                "compile_commands.json",
+                "compile_flags.txt",
+                ".clangd",
+                "CMakeLists.txt",
+                "meson.build",
+                "Makefile",
+                ".git"
+            ],
+            "bin": "clangd",
+            "args": [
+                "--clang-tidy",
+                "--completion-style=detailed",
+                "--header-insertion=iwyu",
+                "--query-driver=cc,/run/current-system/sw/bin/cc,/run/current-system/sw/bin/clang,/run/current-system/sw/bin/clang++,/run/current-system/sw/bin/gcc,/run/current-system/sw/bin/g++,/nix/store/*/bin/cc,/nix/store/*/bin/clang,/nix/store/*/bin/clang++,/nix/store/*/bin/gcc,/nix/store/*/bin/g++,/nix/store/*devkitARM*/opt/devkitpro/devkitARM/bin/arm-none-eabi-*"
+            ],
+            "cwd": "{root}",
+            "languageIdByExtension": {
+                ".c": "c",
+                ".h": "cpp",
+                ".cc": "cpp",
+                ".cp": "cpp",
+                ".cpp": "cpp",
+                ".cxx": "cpp",
+                ".c++": "cpp",
+                ".hh": "cpp",
+                ".hp": "cpp",
+                ".hpp": "cpp",
+                ".hxx": "cpp",
+                ".h++": "cpp",
+                ".m": "objective-c",
+                ".mm": "objective-cpp"
+            },
+            "startupTimeoutMs": 45000,
+            "diagnosticsWaitMs": 2000,
+            "initializationOptions": {},
+            "settings": {}
+        }
+    ]
+}

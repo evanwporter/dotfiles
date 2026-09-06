@@ -1,14 +1,3 @@
-# Pi runtime state and credentials
-*
-!.gitignore
-!README.md
-
-# Keep only portable, intentional configuration.
-!agent/
-agent/*
-!agent/settings.json
-!agent/extensions/
-agent/extensions/*
-!agent/extensions/guardrails.json
-!agent/extensions/pi-rtk-optimizer/
-!agent/extensions/pi-rtk-optimizer/config.json
+agent/auth.json
+agent/models-store.json
+agent/state/

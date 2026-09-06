@@ -1,15 +1,15 @@
 {
-  "lastChangelogVersion": "0.84.2",
-  "theme": "ansi-dark",
-  "packages": [
-    "npm:@aliou/pi-guardrails@0.17.1",
-    "npm:pi-undo-redo@0.1.1",
-    "npm:pi-lsp@0.1.7",
-    "git:github.com/leblancfg/pi-ansi-themes@210afa65d06a59a70e61e9479003afd5abcd4fa6",
-    "npm:pi-rtk-optimizer@0.9.0",
-    "npm:pi-observational-memory@3.0.4",
-    "git:github.com/jonjonrankin/pi-caveman@8d326c4e562eeb0cdac41700348c6183efc05189"
-  ],
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-terra"
+    "lastChangelogVersion": "0.84.2",
+    "theme": "ansi-dark",
+    "packages": [
+        "npm:@aliou/pi-guardrails@0.17.1",
+        "npm:pi-undo-redo@0.1.1",
+        "npm:pi-lsp@0.1.7",
+        "git:github.com/leblancfg/pi-ansi-themes@210afa65d06a59a70e61e9479003afd5abcd4fa6",
+        "npm:pi-rtk-optimizer@0.9.0",
+        "npm:pi-observational-memory@3.0.4",
+        "git:github.com/jonjonrankin/pi-caveman@8d326c4e562eeb0cdac41700348c6183efc05189"
+    ],
+    "defaultProvider": "openai-codex",
+    "defaultModel": "gpt-5.6-terra"
 }
