@@ -1,7 +1,7 @@
 {inputs, ...}: {
 	flake.modules.nixos.wsl = {pkgs, ...}: {
 		imports = with inputs.self.modules.nixos; [
-			personality-minimal
+			system-cli
 			evanw
 			inputs.nixos-wsl.nixosModules.default
 		];
