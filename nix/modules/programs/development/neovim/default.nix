@@ -34,6 +34,7 @@
 			"systemverilog"
 			"rst"
 			"comment"
+			"haskell"
 		];
 
 		treesitterWithParsers =
@@ -72,6 +73,9 @@
 			xmlstarlet
 			marksman
 			slang-server
+			checkmake
+			haskell-language-server
+			fourmolu
 		];
 
 		nixNeovim =
@@ -144,9 +148,10 @@
 						rustaceanvim
 						trouble-nvim
 						vim-matchup
-						slang-server-nvim
+						# slang-server-nvim
 						nvim-lint
 						vim-tmux-navigator
+						haskell-tools-nvim
 					];
 
 					optAttrs = {
@@ -187,8 +192,8 @@
 							defaultEditor = true;
 							sideloadInitLua = true;
 
-                            # inherit here is shorthand for
-                            # extraPackages = extraPackages;
+							# inherit here is shorthand for
+							# extraPackages = extraPackages;
 							inherit extraPackages;
 						};
 					})

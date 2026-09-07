@@ -1,15 +1,3 @@
-local function is_nixpkgs(bufnr)
-    local filename = vim.api.nvim_buf_get_name(bufnr)
-    local root = vim.fs.root(filename, {
-        "pkgs/top-level/all-packages.nix",
-        "maintainers/maintainer-list.nix",
-    })
-
-    return root ~= nil
-        and vim.uv.fs_stat(root .. "/pkgs/top-level/all-packages.nix") ~= nil
-        and vim.uv.fs_stat(root .. "/maintainers/maintainer-list.nix") ~= nil
-end
-
 return {
     {
         "stevearc/conform.nvim",
@@ -32,9 +20,7 @@ return {
                 json5 = { "prettier" },
                 yaml = { "prettier" },
 
-                nix = function(bufnr)
-                    return { is_nixpkgs(bufnr) and "nixfmt" or "alejandra" }
-                end,
+                nix = { "alejandra" },
 
                 -- cmake = { "cmake_format" },
 
@@ -46,6 +32,8 @@ return {
                 bash = { "shfmt" },
 
                 toml = { "tombi" },
+
+                haskell = { "fourmolu" },
             },
 
             formatters = {
