@@ -112,7 +112,7 @@
 					opt = with pkgs.vimPlugins; [
 						nvim-lspconfig
 						blink-cmp
-						# blink-pairs
+						blink-pairs
 						blink-lib
 						blink-indent
 						friendly-snippets

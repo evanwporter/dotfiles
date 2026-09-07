@@ -121,28 +121,20 @@ in {
 
 			# Fonts configuration
 			fonts.packages = with pkgs; [
-				# Includes the JetBrainsMonoNL Nerd Font family used by dwm and dmenu.
 				nerd-fonts.jetbrains-mono
 				nerd-fonts.monaspace
 			];
+
 			fonts.fontconfig.defaultFonts.monospace = ["JetBrainsMonoNL Nerd Font"];
 
 			programs.fish.enable = true;
-			# Allow unfree packages
-			nixpkgs.config.allowUnfree = true;
-
 			# List packages installed in system profile. To search, run:
 			# $ nix search wget
-			environment.systemPackages = with pkgs; [
-				#  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-				wget
-				tmux
-				git
-				obsidian
-				spotifyPkgs.spotify
-				spotatui
-				btop
-			];
+			# environment.systemPackages = with pkgs; [
+			# 	#  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+			# 	# spotifyPkgs.spotify
+			# 	# spotatui
+			# ];
 
 			# Some programs need SUID wrappers, can be configured further or are
 			# started in user sessions.

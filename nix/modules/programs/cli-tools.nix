@@ -10,7 +10,6 @@
 			unzip
 			zip
 			tree
-			fish
 			tmux
 			bat
 			eza
