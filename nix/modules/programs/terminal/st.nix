@@ -8,6 +8,7 @@
 						++ [
 							pkgs.harfbuzz
 							pkgs.libXcursor
+							pkgs.libnotify
 						];
 				});
 	in {
