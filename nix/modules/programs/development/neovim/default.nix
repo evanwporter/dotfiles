@@ -152,6 +152,8 @@
 						nvim-lint
 						vim-tmux-navigator
 						haskell-tools-nvim
+						visual-surround-nvim
+						cmake-tools-nvim
 					];
 
 					optAttrs = {
