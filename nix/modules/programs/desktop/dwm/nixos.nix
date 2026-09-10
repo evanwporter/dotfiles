@@ -1,7 +1,4 @@
-{
-	packagesDir,
-	...
-}: {
+{packagesDir, ...}: {
 	flake.modules.nixos.dwm = {
 		lib,
 		pkgs,
@@ -12,9 +9,9 @@
 
 		slock =
 			pkgs.slock.overrideAttrs (old: {
-				src = packagesDir + "/slock";
-				buildInputs = (old.buildInputs or []) ++ [pkgs.imlib2];
-			});
+					src = packagesDir + "/slock";
+					buildInputs = (old.buildInputs or []) ++ [pkgs.imlib2];
+				});
 
 		dwm =
 			pkgs.dwm.overrideAttrs (old: {
@@ -68,8 +65,8 @@
 
 		environment.sessionVariables = {
 			# GTK 3/4: 2× UI, while avoiding 4× text with the 192-DPI X server.
-			# GDK_SCALE = "2";
-			# GDK_DPI_SCALE = "0.5";
+			GDK_SCALE = "2";
+			GDK_DPI_SCALE = "0.5";
 			# Qt already derives the appropriate scale from the X server's 192 DPI.
 			# An additional forced multiplier makes Qt clients such as Flameshot huge.
 			XCURSOR_SIZE = "60";
@@ -93,7 +90,8 @@
 			libx11
 			libXcursor
 			libxcb
-            nautilus
+			nautilus
+			pavucontrol
 		];
 	};
 }
