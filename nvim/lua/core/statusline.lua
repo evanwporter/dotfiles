@@ -308,6 +308,24 @@ M.filetype = function()
 end
 
 ---@return string
+M.lsp = function()
+    local bufnr = statusline_bufnr()
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
+
+    if vim.tbl_isempty(clients) then
+        return ""
+    end
+
+    local names = {}
+
+    for _, client in ipairs(clients) do
+        names[#names + 1] = client.name
+    end
+
+    return string.format("%%#StatusLineFiletype# %s %%*", table.concat(names, ", "))
+end
+
+---@return string
 M.render = function()
     return table.concat({
         M.mode(),
@@ -317,9 +335,10 @@ M.render = function()
         M.readonly(),
         M.diagnostics(),
 
-        -- Fill the unused remainder with StatusLine.
+        -- Everything after this is right-aligned.
         "%#StatusLine#%=",
 
+        M.lsp(),
         M.filetype(),
         M.position(),
     })
