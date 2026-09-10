@@ -1,8 +1,0 @@
-*.o
-dusk
-duskc
-config.*
-!config.h
-!config.mk
-*.txt
-*.sh
