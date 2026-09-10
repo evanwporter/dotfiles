@@ -2,7 +2,7 @@
 	flake.modules.nixos.st = {pkgs, ...}: let
 		st =
 			pkgs.st.overrideAttrs (oldAttrs: {
-					src = packagesDir + "/st-flexipatch";
+					src = packagesDir + "/st";
 					buildInputs =
 						(oldAttrs.buildInputs or [])
 						++ [
