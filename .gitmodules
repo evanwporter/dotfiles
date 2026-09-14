@@ -16,3 +16,6 @@
 [submodule "nix/packages/st"]
 	path = nix/packages/st
 	url = https://github.com/evanwporter/st
+[submodule "nix/packages/dmenu"]
+	path = nix/packages/dmenu
+	url = https://github.com/evanwporter/dmenu
