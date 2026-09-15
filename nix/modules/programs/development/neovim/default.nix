@@ -113,7 +113,7 @@
 						nvim-lspconfig
 						blink-cmp
 						blink-pairs
-						blink-lib
+						# blink-lib
 						blink-indent
 						friendly-snippets
 						gitsigns-nvim
