@@ -7,6 +7,8 @@
 		wallpaper = ../resources/wallpaper/wp.png;
 		lockscreenBackground = ../resources/wallpaper/quentinmarsollier-unexplored.png;
 
+		# TODO: create a central gruvbox palette library I can use in every program here
+
 		slock =
 			pkgs.slock.overrideAttrs (old: {
 					src = packagesDir + "/slock";
@@ -33,6 +35,9 @@
 		dwmblocks =
 			pkgs.dwmblocks.overrideAttrs (_: {
 					src = packagesDir + "/dwmblocks";
+					# Our dwmblocks fork already uses termhandler(int signum),
+					# unlike the upstream source targeted by nixpkgs' postPatch.
+					postPatch = "";
 				});
 	in {
 		services.displayManager.ly.x11Support = lib.mkForce true;

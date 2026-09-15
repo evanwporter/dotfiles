@@ -10,6 +10,9 @@
 		dwmblocks =
 			pkgs.dwmblocks.overrideAttrs (_: {
 					src = packagesDir + "/dwmblocks";
+					# Our dwmblocks fork already uses termhandler(int signum),
+					# unlike the upstream source targeted by nixpkgs' postPatch.
+					postPatch = "";
 				});
 		dusk =
 			pkgs.stdenv.mkDerivation {
