@@ -50,15 +50,15 @@ set_defaults() {
 resolve_theme_colors() {
     TC="$theme"
     case $TC in
-        gold)       TC='#ffb86c' ;;
-        redwine)    TC='#b34a47' ;;
-        moon)       TC='#00abab' ;;
-        forest)     TC='#228b22' ;;
-        violet)     TC='#9370db' ;;
-        snow)       TC='#fffafa' ;;
-        coral)      TC='#ff7f50' ;;
-        sky)        TC='#87ceeb' ;;
-        everforest) TC='#a7c080' ;;
+    gold) TC='#ffb86c' ;;
+    redwine) TC='#b34a47' ;;
+    moon) TC='#00abab' ;;
+    forest) TC='#228b22' ;;
+    violet) TC='#9370db' ;;
+    snow) TC='#fffafa' ;;
+    coral) TC='#ff7f50' ;;
+    sky) TC='#87ceeb' ;;
+    everforest) TC='#a7c080' ;;
     esac
 
     G0="$g0"
@@ -117,13 +117,13 @@ build_right_status() {
 # Window, pane, and message styles
 
 configure_ui_styles() {
-    tmux_set window-status-format         "#[fg=$G0,bg=$G2]$right_arrow_icon#[fg=#d4be98,bg=$G2] #I:#W#F #[fg=$G2,bg=$G0]$right_arrow_icon"
+    tmux_set window-status-format "#[fg=$G0,bg=$G2]$right_arrow_icon#[fg=#d4be98,bg=$G2] #I:#W#F #[fg=$G2,bg=$G0]$right_arrow_icon"
     tmux_set window-status-current-format "#[fg=#282828,bg=#7daea3]$right_arrow_icon#[fg=#282828,bg=#7daea3,$window_current_style] #I:#W#F #[fg=#7daea3,bg=#282828,none]$right_arrow_icon"
 
-    tmux_set window-status-style          "fg=$TC,bg=$G0,none"
-    tmux_set window-status-last-style     "fg=$TC,bg=$G0,$window_last_style"
+    tmux_set window-status-style "fg=$TC,bg=$G0,none"
+    tmux_set window-status-last-style "fg=$TC,bg=$G0,$window_last_style"
     tmux_set window-status-activity-style "fg=$TC,bg=$G0,$window_activity_style"
-    tmux_set window-status-bell-style     "fg=$TC,bg=$G0,$window_bell_style"
+    tmux_set window-status-bell-style "fg=$TC,bg=$G0,$window_bell_style"
     tmux_set window-status-separator ""
 
     tmux_set pane-border-style "fg=$G3,bg=default"
