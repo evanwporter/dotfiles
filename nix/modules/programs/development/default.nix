@@ -7,6 +7,7 @@
 			inputs.self.modules.homeManager.neovim
 			inputs.self.modules.homeManager.pi
 			inputs.self.modules.homeManager.vscode
+			inputs.self.modules.homeManager.zed
 		];
 	};
 
