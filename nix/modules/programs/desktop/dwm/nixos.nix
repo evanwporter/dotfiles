@@ -1,24 +1,10 @@
-{packagesDir, ...}: {
-	flake.modules.nixos.dwm = {
-		lib,
-		pkgs,
-		...
-	}: let
+{
+	inputs,
+	packagesDir,
+	...
+}: {
+	flake.modules.nixos.dwm = {pkgs, ...}: let
 		wallpaper = ../resources/wallpaper/wp.png;
-		lockscreenBackground = ../resources/wallpaper/quentinmarsollier-unexplored.png;
-
-		# TODO: create a central gruvbox palette library I can use in every program here
-
-		slock =
-			pkgs.slock.overrideAttrs (old: {
-					src = packagesDir + "/slock";
-					buildInputs = (old.buildInputs or []) ++ [pkgs.imlib2];
-				});
-
-		dmenu =
-			pkgs.dmenu.overrideAttrs (old: {
-					src = packagesDir + "/dmenu";
-				});
 
 		dwm =
 			pkgs.dwm.overrideAttrs (old: {
@@ -40,26 +26,9 @@
 					postPatch = "";
 				});
 	in {
-		services.displayManager.ly.x11Support = lib.mkForce true;
-
-		services.picom = {
-			enable = true;
-			backend = "glx";
-			vSync = true;
-		};
-
-		programs.slock = {
-			enable = true;
-			package = slock;
-		};
+		# imports = [inputs.self.modules.nixos.x11];
 
 		services.xserver = {
-			enable = true;
-			# Scale X11 applications and dwm's Xft-rendered bar for the laptop's
-			# HiDPI display. Firefox and kitty both honor the X server DPI.
-			# TODO: Put this in the laptop config file
-			dpi = 192;
-			xkb.layout = "us";
 			windowManager.dwm = {
 				enable = true;
 				package = dwm;
@@ -73,43 +42,5 @@
 				'';
 			};
 		};
-
-		services.libinput = {
-			enable = true;
-			touchpad.naturalScrolling = true;
-		};
-
-		environment.sessionVariables = {
-			# GTK 3/4: 2× UI, while avoiding 4× text with the 192-DPI X server.
-			# GDK_SCALE = "2";
-			# GDK_DPI_SCALE = "0.5";
-			# Qt already derives the appropriate scale from the X server's 192 DPI.
-			# An additional forced multiplier makes Qt clients such as Flameshot huge.
-			XCURSOR_SIZE = "60";
-		};
-
-		environment.etc."slock/bg.png".source = lockscreenBackground;
-
-		# TODO: Attach these to the dwm runtime / PATH
-		environment.systemPackages = with pkgs; [
-			brightnessctl
-			dmenu
-			dunst
-			feh
-			networkmanagerapplet
-			libinput-gestures
-			dwmblocks
-			flameshot
-			font-awesome
-			pulseaudio
-			xidlehook
-			xdotool
-			libx11
-			libXcursor
-			libxcb
-			nautilus
-			pavucontrol
-			j4-dmenu-desktop
-		];
 	};
 }
