@@ -1,8 +1,4 @@
-{
-	inputs,
-	packagesDir,
-	...
-}: {
+{packagesDir, ...}: {
 	flake.modules.nixos.dwm = {pkgs, ...}: let
 		wallpaper = ../resources/wallpaper/wp.png;
 
