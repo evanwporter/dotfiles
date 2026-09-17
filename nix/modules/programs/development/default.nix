@@ -19,6 +19,6 @@
 			type = "app";
 			program = "${neovimDev}/bin/nvim";
 		};
-		devShells.default = pkgs.mkShell {packages = [neovimDev];};
+		devShells.default = pkgs.mkShell {packages = [neovimDev pkgs.ghc];};
 	};
 }
