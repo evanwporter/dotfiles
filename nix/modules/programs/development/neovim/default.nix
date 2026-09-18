@@ -74,7 +74,7 @@
 			marksman
 			slang-server
 			checkmake
-			haskell-language-server
+			# haskell-language-server
 			fourmolu
 		];
 

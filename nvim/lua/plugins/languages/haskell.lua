@@ -1,6 +1,7 @@
 return {
     {
         "mrcjkb/haskell-tools.nvim",
+        enabled = false,
         version = false,
         ft = { "haskell", "lhaskell", "cabal", "cabalproject" },
         keys = {
