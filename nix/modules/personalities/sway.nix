@@ -10,7 +10,6 @@
 	};
 
 	flake.modules.homeManager.personality-sway = {
-		# imports = with inputs.self.modules.homeManager; [];
-		development.vscode.enable = true;
+		imports = with inputs.self.modules.homeManager; [vscode];
 	};
 }

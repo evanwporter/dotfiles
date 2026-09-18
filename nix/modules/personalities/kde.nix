@@ -7,6 +7,6 @@
 
 	flake.modules.homeManager.personality-kde = {
 		# imports = with inputs.self.modules.homeManager; [i3 rofi];
-		development.vscode.enable = true;
+		imports = with inputs.self.modules.homeManager; [vscode];
 	};
 }
