@@ -19,6 +19,10 @@
 		mnw.url = "github:Gerg-L/mnw";
 		neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 		nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+		duskwm = {
+			url = "github:evanwporter/dusk";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
 	outputs = inputs:

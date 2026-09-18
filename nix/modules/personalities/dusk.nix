@@ -1,8 +1,7 @@
 {inputs, ...}: {
 	flake.modules.nixos.personality-dusk = {
-		imports = with inputs.self.modules.nixos; [system-desktop terminal dusk ly browser];
+		imports = with inputs.self.modules.nixos; [system-desktop terminal x11 dusk ly browser];
 		terminal.default = "kitty";
-		services.xserver.windowManager.dusk.enable = true;
 		home-manager.sharedModules = [inputs.self.modules.homeManager.personality-dusk];
 	};
 

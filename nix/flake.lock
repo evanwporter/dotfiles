@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "duskwm": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789709824,
+        "narHash": "sha256-RVwlmUmtZrbZr7x3iPqxp3RxqcZHp1Cb5Fdy9ftYpYs=",
+        "owner": "evanwporter",
+        "repo": "dusk",
+        "rev": "282cfd57e123e5bdf633eda149845e8cfe1ae319",
+        "type": "github"
+      },
+      "original": {
+        "owner": "evanwporter",
+        "repo": "dusk",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -262,6 +282,7 @@
     },
     "root": {
       "inputs": {
+        "duskwm": "duskwm",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
