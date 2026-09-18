@@ -2,6 +2,7 @@ return {
     {
         "ThePrimeagen/harpoon",
         enabled = true,
+        event = "VeryLazy",
         branch = "harpoon2",
         opts = {
             menu = {
@@ -27,6 +28,20 @@ return {
                         harpoon.ui:toggle_quick_menu(harpoon:list())
                     end,
                     desc = "Harpoon Menu",
+                },
+                {
+                    "<leader>n",
+                    function()
+                        require("harpoon"):list():next()
+                    end,
+                    desc = "Next Harpoon",
+                },
+                {
+                    "<leader>p",
+                    function()
+                        require("harpoon"):list():prev()
+                    end,
+                    desc = "Previous Harpoon",
                 },
             }
 
