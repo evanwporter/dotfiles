@@ -1,4 +1,8 @@
-{inputs, packagesDir, ...}: {
+{
+	inputs,
+	packagesDir,
+	...
+}: {
 	flake.modules.nixos.x11 = {
 		lib,
 		pkgs,
@@ -17,15 +21,9 @@
 					src = packagesDir + "/dmenu";
 				});
 	in {
-		imports = [inputs.self.modules.nixos.powermenu];
+		imports = with inputs.self.modules.nixos; [powermenu picom];
 
 		services.displayManager.ly.x11Support = lib.mkForce true;
-
-		services.picom = {
-			enable = true;
-			backend = "glx";
-			vSync = true;
-		};
 
 		programs.slock = {
 			enable = true;

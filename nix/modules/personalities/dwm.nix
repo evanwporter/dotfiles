@@ -6,6 +6,10 @@
 	};
 
 	flake.modules.homeManager.personality-dwm = {
-		imports = with inputs.self.modules.homeManager; [dwm eww];
+		imports = with inputs.self.modules.homeManager; [
+			dwm
+			eww
+			# picom
+		];
 	};
 }
