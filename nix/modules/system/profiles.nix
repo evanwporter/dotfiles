@@ -1,8 +1,4 @@
-{
-	inputs,
-	lib,
-	...
-}: {
+{inputs, ...}: {
 	flake.modules.nixos.system-default = {
 		imports = [inputs.self.modules.nixos.nix-settings];
 	};
@@ -16,14 +12,6 @@
 	# Graphical Desktop Interface
 	flake.modules.nixos.system-desktop = {
 		imports = with inputs.self.modules.nixos; [system-cli];
-		options.host = {
-			personality =
-				lib.mkOption {
-				type = lib.types.enum ["dwm" "dusk" "sway" "niri"];
-				default = "dusk";
-					description = "Desktop environment personality for this host.";
-				};
-		};
 		config = {
 			services.printing.enable = true;
 			services.pulseaudio.enable = false;
