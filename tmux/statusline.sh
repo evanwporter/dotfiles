@@ -102,10 +102,15 @@ build_left_status() {
 
 build_right_status() {
     local RS
-    # RS="#[fg=#7daea3]CPU #(awk '{print $1}' /proc/loadavg) "
-    # RS+="#[fg=#a89984]|"
-    RS+="#[fg=#7daea3]#(whoami)#[fg=#a89984]@#[fg=#d8a657]#H "
-    RS+="#[fg=#a89984]| #[fg=#a9b665]%B %-d #[fg=#d8a657]#(TZ='America/Los_Angeles' date +'%-I:%M %p') "
+
+    # Wide:   user@host | Sep 18 6:01 PM
+    # Medium: Sep 18 6:01 PM
+    # Narrow: 6:01 PM
+    RS="#{?#{e|<|:#{client_width},70},\
+#[fg=#d8a657]#(TZ='America/Los_Angeles' date +'%-I:%M %p'),\
+#{?#{e|<|:#{client_width},100},\
+#[fg=#a9b665]%b %-d #[fg=#d8a657]#(TZ='America/Los_Angeles' date +'%-I:%M %p'),\
+#[fg=#7daea3]#(whoami)#[fg=#a89984]@#[fg=#d8a657]#H #[fg=#a89984]| #[fg=#a9b665]%b %-d #[fg=#d8a657]#(TZ='America/Los_Angeles' date +'%-I:%M %p')}}"
 
     if [[ $prefix_highlight_pos == 'R' || $prefix_highlight_pos == 'LR' ]]; then
         RS="#{prefix_highlight}$RS"
