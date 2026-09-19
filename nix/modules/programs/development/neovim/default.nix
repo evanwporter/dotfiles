@@ -154,6 +154,7 @@
 						haskell-tools-nvim
 						visual-surround-nvim
 						cmake-tools-nvim
+						yuck-vim
 					];
 
 					optAttrs = {
