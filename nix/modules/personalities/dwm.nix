@@ -1,6 +1,15 @@
 {inputs, ...}: {
 	flake.modules.nixos.personality-dwm = {
-		imports = with inputs.self.modules.nixos; [system-desktop terminal x11 dwm ly browser xmonad];
+		imports = with inputs.self.modules.nixos; [
+			system-desktop
+			terminal
+			x11
+			dwm
+			ly
+			browser
+			# xmonad
+			# bspwm
+		];
 		terminal.default = "st";
 		home-manager.sharedModules = [inputs.self.modules.homeManager.personality-dwm];
 	};
