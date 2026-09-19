@@ -9,7 +9,7 @@
 in {
 	options.hosts.laptop.personality =
 		lib.mkOption {
-			type = lib.types.enum ["dwm" "dusk" "kde" "sway"];
+			type = lib.types.enum ["driftwm" "dwm" "dusk" "kde" "sway"];
 			description = "Desktop personality used by the laptop.";
 		};
 
@@ -20,13 +20,16 @@ in {
 			home-manager.users.evanp.imports = with inputs.self.modules.homeManager; [
 				graphical
 				btop
+				vscode
+				helix
+				zed
 			];
 
-			imports = [
+			imports = with inputs.self.modules.nixos; [
 				./_hardware.nix
 				inputs.self.modules.nixos."personality-${personality}"
-				inputs.self.modules.nixos.gaming
-				inputs.self.modules.nixos.evanp
+				gaming
+				evanp
 			];
 		};
 

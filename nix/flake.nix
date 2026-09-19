@@ -23,6 +23,10 @@
 			url = "github:evanwporter/dusk";
 			inputs.nixpkgs.follows = "nixpkgs";
 		};
+		driftwm = {
+			url = "github:malbiruk/driftwm";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 	};
 
 	outputs = inputs:
