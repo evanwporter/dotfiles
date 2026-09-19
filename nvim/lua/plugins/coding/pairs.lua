@@ -82,6 +82,10 @@ return {
                         {
                             ">",
                             when = function(ctx)
+                                if vim.bo.filetype == "haskell" then
+                                    return false
+                                end
+
                                 local next_char = ctx:text_after_cursor(1)
                                 return not next_char:match("%w")
                             end,
