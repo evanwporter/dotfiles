@@ -56,7 +56,8 @@
 			programs.thunar.enable = cfg.fileManager == "thunar";
 			home-manager.sharedModules =
 				lib.optionals (cfg.launcher == "bemenu") [inputs.self.modules.homeManager.bemenu]
-				++ lib.optionals (cfg.launcher == "rofi") [inputs.self.modules.homeManager.rofi];
+				++ lib.optionals (cfg.launcher == "rofi") [inputs.self.modules.homeManager.rofi]
+				++ lib.optionals (cfg.desktopShell == "noctalia") [inputs.self.modules.homeManager.noctalia];
 			environment.systemPackages =
 				lib.optionals (cfg.fileManager == "dolphin") [pkgs.kdePackages.dolphin]
 				++ lib.optionals (cfg.launcher == "bemenu") [pkgs.j4-dmenu-desktop]

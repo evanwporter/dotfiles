@@ -6,6 +6,6 @@
 	};
 
 	flake.modules.homeManager.personality-dwm = {
-		imports = with inputs.self.modules.homeManager; [dwm eww vscode zed helix];
+		imports = with inputs.self.modules.homeManager; [dwm eww];
 	};
 }
