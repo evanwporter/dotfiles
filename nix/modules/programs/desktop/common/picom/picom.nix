@@ -1,7 +1,13 @@
-{
-	flake.modules.nixos.picom = {
+{packagesDir, ...}: {
+	flake.modules.nixos.picom = {pkgs, ...}: let
+		picom =
+			pkgs.picom.overrideAttrs (old: {
+					src = packagesDir + "/picom";
+				});
+	in {
 		services.picom = {
 			enable = true;
+			package = picom;
 			backend = "glx";
 			vSync = true;
 		};

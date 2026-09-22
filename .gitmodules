@@ -16,3 +16,6 @@
 [submodule "nix/packages/dwl"]
 	path = nix/packages/dwl
 	url = https://github.com/evanwporter/dwl/
+[submodule "nix/packages/picom"]
+	path = nix/packages/picom
+	url = https://github.com/evanwporter/picom
