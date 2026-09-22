@@ -35,6 +35,7 @@
 			"rst"
 			"comment"
 			"haskell"
+			"zig"
 		];
 
 		treesitterWithParsers =
@@ -76,6 +77,7 @@
 			checkmake
 			# haskell-language-server
 			fourmolu
+			zig
 		];
 
 		nixNeovim =
