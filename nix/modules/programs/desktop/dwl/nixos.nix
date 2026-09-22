@@ -7,6 +7,7 @@
 		dwl =
 			pkgs.stdenv.mkDerivation {
 				pname = "dwl";
+				version = "local";
 				src = packagesDir + "/dwl";
 				nativeBuildInputs = with pkgs; [gnumake pkg-config wayland-scanner];
 				buildInputs = with pkgs; [libinput libdrm fcft libxkbcommon wayland wayland-protocols wlroots_0_19 pixman];
@@ -14,23 +15,23 @@
 				installPhase = "make install PREFIX=$out";
 			};
 
-		someblocks =
-			pkgs.stdenv.mkDerivation {
-				pname = "someblocks";
-				version = "local";
-				src = /home/evanp/someblocks;
-				buildPhase = ''
-					cp blocks.def.h blocks.h
-					# Newer GCC correctly requires signal callbacks to accept the
-					# delivered signal number.  Keep the local source unmodified.
-					sed -i \
-						-e 's/void termhandler()/void termhandler(int signum)/' \
-						-e 's/void sigpipehandler()/void sigpipehandler(int signum)/' \
-						someblocks.c
-					$CC someblocks.c -o someblocks
-				'';
-				installPhase = "install -Dm755 someblocks $out/bin/someblocks";
-			};
+		# someblocks =
+		# 	pkgs.stdenv.mkDerivation {
+		# 		pname = "someblocks";
+		# 		version = "local";
+		# 		src = /home/evanp/someblocks;
+		# 		buildPhase = ''
+		# 			cp blocks.def.h blocks.h
+		# 			# Newer GCC correctly requires signal callbacks to accept the
+		# 			# delivered signal number.  Keep the local source unmodified.
+		# 			sed -i \
+		# 				-e 's/void termhandler()/void termhandler(int signum)/' \
+		# 				-e 's/void sigpipehandler()/void sigpipehandler(int signum)/' \
+		# 				someblocks.c
+		# 			$CC someblocks.c -o someblocks
+		# 		'';
+		# 		installPhase = "install -Dm755 someblocks $out/bin/someblocks";
+		# 	};
 
 		dwlSessionPackage =
 			pkgs.writeShellApplication {
@@ -67,7 +68,10 @@
 				swaylock
 				wl-clipboard
 			]
-			++ [dwl someblocks];
+			++ [
+				dwl
+				# someblocks
+			];
 
 		programs.dwl = {
 			enable = true;
