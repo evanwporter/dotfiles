@@ -9,12 +9,12 @@
 in {
 	options.hosts.laptop.personality =
 		lib.mkOption {
-			type = lib.types.enum ["driftwm" "dwm" "dusk" "kde" "sway"];
+			type = lib.types.enum ["driftwm" "dwl" "dwm" "dusk" "kde" "sway"];
 			description = "Desktop personality used by the laptop.";
 		};
 
 	config = {
-		hosts.laptop.personality = lib.mkDefault "dwm";
+		hosts.laptop.personality = lib.mkDefault "dwl";
 
 		flake.modules.nixos.laptop = {
 			home-manager.users.evanp.imports = with inputs.self.modules.homeManager; [
@@ -30,6 +30,7 @@ in {
 				inputs.self.modules.nixos."personality-${personality}"
 				gaming
 				evanp
+				browser
 			];
 		};
 

@@ -13,3 +13,6 @@
 [submodule "nix/packages/dmenu"]
 	path = nix/packages/dmenu
 	url = https://github.com/evanwporter/dmenu
+[submodule "nix/packages/dwl"]
+	path = nix/packages/dwl
+	url = https://github.com/evanwporter/dwl/
