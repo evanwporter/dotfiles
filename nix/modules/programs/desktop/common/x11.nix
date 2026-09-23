@@ -20,6 +20,8 @@
 			pkgs.dmenu.overrideAttrs (_: {
 					src = packagesDir + "/dmenu";
 				});
+
+		xhidecursor = pkgs.callPackage (packagesDir + "/xhidecursor/package.nix") {};
 	in {
 		imports = with inputs.self.modules.nixos; [powermenu picom];
 
@@ -73,6 +75,7 @@
 			nautilus
 			pavucontrol
 			j4-dmenu-desktop
+			xhidecursor
 		];
 	};
 }
