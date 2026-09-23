@@ -14,12 +14,13 @@ in {
 		};
 
 	config = {
-		hosts.laptop.personality = lib.mkDefault "dwl";
+		hosts.laptop.personality = lib.mkDefault "dwm";
 
 		flake.modules.nixos.laptop = {
 			home-manager.users.evanp.imports = with inputs.self.modules.homeManager; [
 				graphical
 				btop
+				yazi
 				vscode
 				helix
 				zed

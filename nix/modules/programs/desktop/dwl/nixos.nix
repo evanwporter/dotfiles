@@ -4,6 +4,8 @@
 	...
 }: {
 	flake.modules.nixos.dwl = {pkgs, ...}: let
+		wallpaper = ../resources/wallpaper/wp.png;
+
 		dwl =
 			pkgs.stdenv.mkDerivation {
 				pname = "dwl";
@@ -77,9 +79,9 @@
 			enable = true;
 			package = dwlSessionPackage;
 
-			# extraSessionCommands = ''
-			# 	${someblocks}/bin/someblocks &
-			# '';
+			extraSessionCommands = ''
+				swaybg -i ${wallpaper}
+			'';
 		};
 
 		xdg.portal = {
