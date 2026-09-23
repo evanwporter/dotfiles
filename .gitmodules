@@ -19,3 +19,6 @@
 [submodule "nix/packages/picom"]
 	path = nix/packages/picom
 	url = https://github.com/evanwporter/picom
+[submodule "nix/packages/ewm"]
+	path = nix/packages/ewm
+	url = https://github.com/evanwporter/ewm
