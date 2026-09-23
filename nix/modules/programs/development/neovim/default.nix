@@ -78,7 +78,7 @@
 			checkmake
 			# haskell-language-server
 			fourmolu
-			zig
+			zls
 		];
 
 		nixNeovim =
