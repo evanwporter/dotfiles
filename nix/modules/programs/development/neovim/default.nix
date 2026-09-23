@@ -22,6 +22,7 @@
 			"cmake"
 			"cpp"
 			"json"
+			"xml"
 			"toml"
 			"nix"
 			"make"
