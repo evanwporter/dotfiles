@@ -7,8 +7,8 @@
 			dwm
 			ly
 			browser
-			dwl
-			ewm
+			# dwl
+			# ewm
 			# xmonad
 			# bspwm
 		];
