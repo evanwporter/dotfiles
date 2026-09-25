@@ -6,11 +6,6 @@ in {
 		# your system.  Help is available in the configuration.nix(5) man page
 		# and in the NixOS manual (accessible by running ‘nixos-help’).
 		{pkgs, ...}: let
-			spotifyPkgs =
-				import inputs.spotify-nixpkgs {
-					system = pkgs.stdenv.hostPlatform.system;
-					config.allowUnfree = true;
-				};
 			capsToSuperConfig =
 				pkgs.writeText "caps-to-super.yaml" (builtins.toJSON {
 						TIMING = {
