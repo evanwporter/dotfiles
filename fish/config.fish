@@ -51,3 +51,28 @@ set -gx EDITOR nvim
 set -gx VISUAL nvim
 
 direnv hook fish | source
+
+# TTY Colors
+if test "$TERM" = linux
+    # Gruvbox Material Dark Medium
+
+    printf '\e]P0282828' # black
+    printf '\e]P1EA6962' # red
+    printf '\e]P2A9B665' # green
+    printf '\e]P3D8A657' # yellow
+    printf '\e]P47DAEA3' # blue
+    printf '\e]P5D3869B' # magenta
+    printf '\e]P689B482' # cyan
+    printf '\e]P7D4BE98' # white
+
+    printf '\e]P8665C54' # bright black / gray
+    printf '\e]P9EA6962' # bright red
+    printf '\e]PAA9B665' # bright green
+    printf '\e]PBD8A657' # bright yellow
+    printf '\e]PC7DAEA3' # bright blue
+    printf '\e]PDD3869B' # bright magenta
+    printf '\e]PE89B482' # bright cyan
+    printf '\e]PFDDC7A1' # bright white
+
+    clear
+end
