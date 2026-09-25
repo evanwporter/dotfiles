@@ -8,7 +8,7 @@
 		pkgs,
 		...
 	}: let
-		lockscreenBackground = ../resources/wallpaper/quentinmarsollier-unexplored.png;
+		lockscreenBackground = ../../resources/wallpaper/quentinmarsollier-unexplored.png;
 
 		slock =
 			pkgs.slock.overrideAttrs (old: {
@@ -56,6 +56,11 @@
 		};
 
 		environment.etc."slock/bg.png".source = lockscreenBackground;
+
+		home-manager.sharedModules = with inputs.self.modules.homeManager; [
+			cursor
+			x11
+		];
 
 		environment.systemPackages = with pkgs; [
 			brightnessctl
