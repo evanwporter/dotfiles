@@ -20,6 +20,8 @@ in {
 				evanp
 				browser
 			];
+
+			dotfiles.steam.desktopUIScaling = "2";
 		};
 
 		flake.nixosConfigurations.laptop =
