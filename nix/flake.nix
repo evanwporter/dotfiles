@@ -1,5 +1,5 @@
 {
-	description = "Evan's dendritic Nix configuration";
+	description = "NixFig";
 
 	inputs = {
 		self.submodules = true;
