@@ -6,6 +6,8 @@ if status is-interactive
     alias la "eza -A --icons"
     alias l "eza -CF --icons"
 
+    alias emacs="doom emacs"
+
     function y
         set tmp (mktemp -t "yazi-cwd.XXXXXX")
         command yazi $argv --cwd-file="$tmp"
@@ -26,6 +28,8 @@ end
 if type -q vcpkg
     set -gx VCPKG_ROOT (dirname (dirname (which vcpkg)))
 end
+
+fish_add_path ~/.config/emacs/bin
 
 # -----------------------------
 # Fish Prompt
