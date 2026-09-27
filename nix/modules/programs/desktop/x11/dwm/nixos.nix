@@ -21,6 +21,8 @@
 					# unlike the upstream source targeted by nixpkgs' postPatch.
 					postPatch = "";
 				});
+
+		xhidecursor = pkgs.callPackage (packagesDir + "/xhidecursor/package.nix") {};
 	in {
 		# imports = [inputs.self.modules.nixos.x11];
 
@@ -35,6 +37,7 @@
 					${pkgs.xidlehook}/bin/xidlehook --not-when-fullscreen --not-when-audio \
 						--timer 600 '/run/wrappers/bin/slock' "" \
 						--timer 1800 '${pkgs.systemd}/bin/systemctl suspend' "" &
+					${xhidecursor}/bin/xhidecursor &
 				'';
 			};
 		};
