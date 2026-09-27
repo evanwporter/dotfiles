@@ -11,6 +11,7 @@ in {
 				vscode
 				helix
 				zed
+				emacs
 			];
 
 			imports = with inputs.self.modules.nixos; [
