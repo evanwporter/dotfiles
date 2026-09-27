@@ -48,6 +48,7 @@ link_file "$DOTFILES_DIR/tmux" "$HOME/.config/tmux"
 # link_file "$DOTFILES_DIR/glow" "$HOME/.config/glow"
 # link_file "$DOTFILES_DIR/i3" "$HOME/.config/i3"
 link_file "$DOTFILES_DIR/pi" "$HOME/.pi"
+link_file "$DOTFILES_DIR/doom" "$HOME/.config/doom"
 
 echo
 echo "Done."

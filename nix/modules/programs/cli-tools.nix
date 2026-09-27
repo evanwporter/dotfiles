@@ -26,6 +26,8 @@
 			rtk
 
 			# useful libs/tools
+			cmake
+			gcc
 			openssl
 			zlib
 		];
