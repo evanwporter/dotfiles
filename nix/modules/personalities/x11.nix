@@ -7,6 +7,8 @@
 			dwm
 			ly
 			browser
+			mango
+			niri
 			# dwl
 			# ewm
 			# xmonad
