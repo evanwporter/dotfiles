@@ -20,6 +20,7 @@ in {
 				gaming
 				evanp
 				browser
+				nx
 			];
 
 			dotfiles.steam.desktopUIScaling = "2";
