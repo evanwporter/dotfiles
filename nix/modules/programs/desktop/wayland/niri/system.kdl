@@ -14,14 +14,17 @@ layout {
     gaps 0
     center-focused-column "never"
 
-    default-column-width { proportion 1.0; }
+    default-column-width { proportion 0.33; }
 
     focus-ring {
         off
     }
 
     border {
-        off
+        width 2
+
+        active-color "#89b482"
+        inactive-color "#282828"
     }
 }
 
@@ -96,7 +99,24 @@ binds {
     Mod+Shift+8 { move-column-to-workspace 8; }
     Mod+Shift+9 { move-column-to-workspace 9; }
 
+    // Pull the window immediately to the right into the current column.
+    Mod+Comma { consume-window-into-column; }
+
+    // Remove the bottom window from the current column.
+    Mod+Period { expel-window-from-column; }
+
+    // Resize column horizontally
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+
+    // Resize a window vertically when multiple windows are stacked
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // Reset window height back to automatic
+    Mod+Ctrl+R { reset-window-height; }
+
     Print { screenshot; }
-    // Mod+Shift+C { spawn "niri" "msg" "action" "load-config-file"; }
+    Mod+Shift+C { spawn "niri" "msg" "action" "load-config-file"; }
     Mod+Shift+E { quit; }
 }
