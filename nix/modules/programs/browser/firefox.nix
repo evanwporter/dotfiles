@@ -68,6 +68,7 @@
 						installation_mode = "normal_installed";
 						install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
 					};
+					# TODO: Install trydactyl here
 				};
 
 				Preferences = {
