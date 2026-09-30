@@ -31,8 +31,14 @@
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+;; `load-theme' function.
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "straight/repos/doom-gruvbox-material-theme/"
+                               doom-local-dir))
+(setq doom-gruvbox-material-background "medium"
+      doom-gruvbox-material-palette "material"
+      doom-theme 'doom-gruvbox-material)
+
 ;; Specify both a dark and light theme, like so and Doom will choose which one
 ;; to load based on your system light/dark setting:
 ;;
@@ -44,6 +50,19 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
+
+;; Quit immediately, and restore the latest session without asking first.
+(setq confirm-kill-emacs nil)
+(defun my/doom-quickload-session-without-confirmation (fn &rest _args)
+  "Restore Doom's latest session without a confirmation prompt."
+  (funcall fn t))
+(advice-add #'doom/quickload-session :around
+            #'my/doom-quickload-session-without-confirmation)
+
+;; The :lang cc +lsp module starts Eglot automatically for C-family buffers.
+;; Use clangd explicitly, including project-wide background indexing.
+(with-eval-after-load 'cc-mode
+  (set-eglot-client! 'cc-mode '("clangd" "--background-index")))
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -110,6 +129,22 @@
 ;; Toggle a project terminal from the leader key.
 (map! :leader
       "/" #'+vterm/toggle)
+
+;; `C-/` is commonly reported as `C-_` in terminal Emacs.
+(map! :g "C-/" #'+vterm/toggle
+      :g "C-_" #'+vterm/toggle)
+
+;; Use Dirvish for Dired buffers and open it from the file-explorer leader key.
+(use-package! dirvish
+  :after dired
+  :config
+  (setq dirvish-attributes
+        '(vc-state subtree-state nerd-icons collapse git-msg file-time file-size))
+  (dirvish-override-dired-mode))
+
+(map! :leader
+      :desc "Dirvish"
+      "e" #'dirvish)
 
 ; Source - https://stackoverflow.com/a/62824543
 ; Posted by fossegrim

@@ -18,6 +18,13 @@
 ;; flash.nvim-style labeled jumps, including an Evil motion.
 (package! flash)
 
+;; Gruvbox Material port for Doom, with material/mix/original palettes.
+(package! doom-gruvbox-material-theme
+  :recipe (:host github :repo "Cardoso1994/doom-gruvbox-material-theme"))
+
+;; A polished, feature-rich interface built on top of Dired.
+(package! dirvish)
+
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/radian-software/straight.el#the-recipe-format
