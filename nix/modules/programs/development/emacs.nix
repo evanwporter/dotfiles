@@ -2,8 +2,8 @@
 	flake.modules.homeManager.emacs = {pkgs, ...}: {
 		programs.emacs = {
 			enable = true;
-			package = pkgs.emacs; # replace with pkgs.emacs-gtk, or a version provided by the community overlay if desired.
-			extraPackages = epkgs: [ epkgs.vterm ];
+			package = pkgs.emacs;
+			extraPackages = epkgs: [epkgs.vterm];
 			extraConfig = ''
 				(setq standard-indent 2)
 			'';

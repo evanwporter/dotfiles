@@ -17,7 +17,7 @@ stdenv.mkDerivation {
 			repo = "xhidecursor";
 			rev = "master";
 			hash = "sha256-RYabrv/PLN66HL10j0TjUue+rcH5dP7OgTHdsmSQpyc=";
-	};
+		};
 
 	nativeBuildInputs = [
 		pkg-config
