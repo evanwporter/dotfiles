@@ -12,6 +12,7 @@ in {
 				helix
 				zed
 				emacs
+				colortest
 			];
 
 			imports = with inputs.self.modules.nixos; [
