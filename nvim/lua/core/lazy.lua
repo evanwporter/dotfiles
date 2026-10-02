@@ -14,7 +14,7 @@ local lazy_opts = {
     },
 
     install = { colorscheme = { "habamax" } },
-    checker = { enabled = true },
+    checker = { enabled = false },
 
     change_detection = {
         notify = false,
