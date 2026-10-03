@@ -158,6 +158,7 @@
 						visual-surround-nvim
 						cmake-tools-nvim
 						yuck-vim
+						transparent-nvim
 					];
 
 					optAttrs = {
