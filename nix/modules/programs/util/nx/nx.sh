@@ -265,6 +265,17 @@ version)
     echo "dotfiles ($branch) $commit"
     ;;
 
+shell)
+    shift
+
+    if (($# == 0)); then
+        echo "Usage: nx shell <package> [package...]"
+        exit 1
+    fi
+
+    nix-shell -p "$@"
+    ;;
+
 *)
     echo "Usage: nx <command>"
     echo
@@ -277,6 +288,7 @@ version)
     echo "  clean              Keep last 5 generations and clean Nix store"
     echo "  rollback           Switch back to the previous NixOS generation"
     echo "  review <pr>        Run nixpkgs-review GitHub Action for a PR"
+    echo "  shell <package...> Run a temporary shell with package(s)"
     echo "  version            Show dotfiles Git commit"
     exit 1
     ;;
