@@ -14,7 +14,7 @@ layout {
     gaps 0
     center-focused-column "never"
 
-    default-column-width { proportion 0.33; }
+    default-column-width { proportion 0.5; }
 
     focus-ring {
         off
@@ -44,7 +44,7 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
 
     Mod+Return { spawn "kitty"; }
-    Mod+Space { spawn "wmenu"; }
+    Mod+Space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     // Mod+E { spawn "thunar"; }
     Mod+Ctrl+L { spawn "swaylock" "-f" "-c" "000000"; }
 
