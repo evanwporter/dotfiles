@@ -36,3 +36,5 @@ vim.opt.fillchars = {
 vim.opt.swapfile = false
 
 -- vim.opt.mouse = ""
+
+vim.lsp.codelens.enable(true)

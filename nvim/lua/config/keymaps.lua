@@ -71,6 +71,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
             require("fzf-lua").lsp_code_actions()
         end, "Code Action", "textDocument/codeAction")
 
+        map("<leader>cl", vim.lsp.codelens.run, "Run CodeLens", "textDocument/codeLens")
+
         map("<leader>sd", function()
             require("fzf-lua").lsp_document_symbols()
         end, "Search Document Symbols", "textDocument/documentSymbol")
