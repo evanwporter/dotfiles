@@ -159,6 +159,7 @@
 						cmake-tools-nvim
 						yuck-vim
 						transparent-nvim
+						todo-comments-nvim
 					];
 
 					optAttrs = {
