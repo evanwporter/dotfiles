@@ -37,6 +37,7 @@
 			"comment"
 			"haskell"
 			"zig"
+			"latex"
 		];
 
 		treesitterWithParsers =
