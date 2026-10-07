@@ -7,7 +7,7 @@
 			dwm
 			ly
 			browser
-			mango
+			# mango
 			niri
 			# dwl
 			# ewm
