@@ -6,10 +6,6 @@
 
 		environment.etc."niri/config.kdl".source = ./system.kdl;
 
-		home-manager.sharedModules = with inputs.self.modules.homeManager; [
-			mango
-		];
-
 		environment.systemPackages = with pkgs; [
 			brightnessctl
 			fuzzel
