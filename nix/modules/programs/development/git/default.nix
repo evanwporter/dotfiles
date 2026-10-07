@@ -1,10 +1,14 @@
-{...}: {
+{inputs, ...}: {
 	flake.modules.homeManager.git = {pkgs, ...}: {
 		home.packages = with pkgs; [
 			git
 			gh
 			delta
 			lazygit
+		];
+
+		imports = [
+			inputs.self.modules.homeManager.stack-pr
 		];
 
 		programs.git = {
