@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Loosely based off of
+# https://github.com/hlissner/dotfiles/blob/fa72377393680f953fcb9efaa30994ea91eba233/bin/hey
+
 set -e
 
 FLAKE="/home/evanp/dotfiles/nix"
@@ -277,6 +280,8 @@ shell)
     ;;
 
 *)
+    echo "A tool for managing my NixFig."
+    echo
     echo "Usage: nx <command>"
     echo
     echo "Commands:"
