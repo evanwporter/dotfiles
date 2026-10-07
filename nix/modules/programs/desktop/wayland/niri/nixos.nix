@@ -1,6 +1,6 @@
 {inputs, ...}: {
 	flake.modules.nixos.niri = {pkgs, ...}: {
-		imports = with inputs.self.modules.nixos; [polkit];
+		imports = with inputs.self.modules.nixos; [polkit noctalia];
 
 		programs.niri.enable = true;
 
