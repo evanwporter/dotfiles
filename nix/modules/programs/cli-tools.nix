@@ -21,6 +21,7 @@
 			erdtree
 
 			codex
+			omp
 			# opencode
 			# pi-coding-agent
 			rtk
