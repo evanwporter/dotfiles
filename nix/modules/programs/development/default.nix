@@ -6,6 +6,7 @@
 			inputs.self.modules.homeManager.git
 			inputs.self.modules.homeManager.neovim
 			inputs.self.modules.homeManager.pi
+			inputs.self.modules.homeManager.omp
 		];
 	};
 
@@ -17,8 +18,9 @@
 			type = "app";
 			program = "${neovimDev}/bin/nvim";
 		};
-		devShells.default = pkgs.mkShell {
-			packages = [neovimDev pkgs.ghc pkgs.gcc pkgs.cmake];
-		};
+		devShells.default =
+			pkgs.mkShell {
+				packages = [neovimDev pkgs.ghc pkgs.gcc pkgs.cmake];
+			};
 	};
 }
