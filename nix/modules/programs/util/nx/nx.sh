@@ -271,12 +271,38 @@ version)
 shell)
     shift
 
-    if (($# == 0)); then
-        echo "Usage: nx shell <package> [package...]"
+    packages=()
+    command=()
+    found_separator=false
+
+    for arg in "$@"; do
+        if [[ "$arg" == "--" && "$found_separator" == false ]]; then
+            found_separator=true
+            continue
+        fi
+
+        if [[ "$found_separator" == true ]]; then
+            command+=("$arg")
+        else
+            packages+=("$arg")
+        fi
+    done
+
+    if ((${#packages[@]} == 0)); then
+        echo "Usage: nx shell <package...> [-- command...]"
         exit 1
     fi
 
-    nix-shell -p "$@"
+    if [[ "$found_separator" == true ]]; then
+        if ((${#command[@]} == 0)); then
+            command=("${packages[0]}")
+        fi
+
+        printf -v cmd '%q ' "${command[@]}"
+        nix-shell -p "${packages[@]}" --run "$cmd"
+    else
+        nix-shell -p "${packages[@]}"
+    fi
     ;;
 
 *)
