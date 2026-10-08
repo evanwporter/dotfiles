@@ -166,6 +166,61 @@ rebuild)
         --impure
     ;;
 
+init)
+    language="${2:-}"
+    template_dir="$HOME/dotfiles/nix/modules/programs/util/nx/_templates/"
+
+    if [[ -z "$language" ]]; then
+        echo "Usage: nx init <language>"
+        echo
+        echo "Available languages:"
+
+        for template in "$template_dir"/*/; do
+            [[ -d "$template" ]] || continue
+            echo "  $(basename "$template")"
+        done
+
+        exit 1
+    fi
+
+    source="$template_dir/$language/flake.nix"
+
+    if [[ ! -f "$source" ]]; then
+        echo "Unknown language: $language"
+        exit 1
+    fi
+
+    if [[ -e flake.nix ]]; then
+        echo "Error: flake.nix already exists."
+        exit 1
+    fi
+
+    cp "$source" ./flake.nix
+    echo "Created flake.nix"
+
+    # Configure direnv.
+    if [[ ! -e .envrc ]]; then
+        printf 'use flake\n' >.envrc
+        echo "Created .envrc"
+    elif ! grep -Fxq 'use flake' .envrc; then
+        printf '\nuse flake\n' >>.envrc
+        echo "Updated .envrc"
+    fi
+
+    # Ignore direnv's generated files.
+    if [[ ! -e .gitignore ]]; then
+        printf '.direnv/\n' >.gitignore
+        echo "Created .gitignore"
+    elif ! grep -Fxq '.direnv/' .gitignore; then
+        printf '\n.direnv/\n' >>.gitignore
+        echo "Updated .gitignore"
+    fi
+
+    echo
+    echo "Initialized $language development environment."
+    echo "Run 'direnv allow' to activate."
+    ;;
+
 clean)
     echo "Keeping the newest 5 NixOS system generations..."
 
