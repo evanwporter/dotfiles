@@ -12,6 +12,8 @@ in {
 	};
 
 	flake.modules.homeManager.evanp = {
+		# evanp could be multiple users on multiple systems so we only import the stuff
+		# we know that we want availalable on every system for every user named evanp
 		imports = with inputs.self.modules.homeManager; [home-default shell development];
 		home = {inherit username homeDirectory;};
 	};

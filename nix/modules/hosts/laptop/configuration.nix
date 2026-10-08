@@ -1,4 +1,4 @@
-{inputs, ...}: let
+let
 	username = "evanp";
 in {
 	flake.modules.nixos.laptop =
