@@ -8,6 +8,10 @@ if status is-interactive
 
     alias emacs="doom emacs"
 
+    if type -q atuin
+        atuin init fish | source
+    end
+
     function y
         set tmp (mktemp -t "yazi-cwd.XXXXXX")
         command yazi $argv --cwd-file="$tmp"
