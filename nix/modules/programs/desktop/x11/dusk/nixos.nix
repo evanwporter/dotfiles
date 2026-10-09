@@ -3,12 +3,8 @@
 	packagesDir,
 	...
 }: {
-	flake.modules.nixos.dusk = {
-		lib,
-		pkgs,
-		...
-	}: let
-		wallpaper = ../resources/wallpaper/wp.png;
+	flake.modules.nixos.dusk = {pkgs, ...}: let
+		wallpaper = ../../resources/wallpaper/wp.png;
 		dwmblocks =
 			pkgs.dwmblocks.overrideAttrs (_: {
 					src = packagesDir + "/dwmblocks";
@@ -16,28 +12,30 @@
 					# unlike the upstream source targeted by nixpkgs' postPatch.
 					postPatch = "";
 				});
-		dusk = inputs.duskwm.packages.${pkgs.system}.default;
+		ewpPkgs = inputs.ewppkgs-stable.legacyPackages.${pkgs.system};
 	in {
-		config = {
-			services.xserver.windowManager.session =
-				lib.singleton {
-					name = "dusk";
-					start = ''
-						${pkgs.feh}/bin/feh --no-fehbg --bg-scale ${wallpaper} &
-						${dwmblocks}/bin/dwmblocks &
-						${pkgs.dunst}/bin/dunst &
-						${pkgs.xidlehook}/bin/xidlehook --not-when-fullscreen --not-when-audio \\
-							--timer 1800 '${pkgs.systemd}/bin/systemctl suspend' "" &
+		imports = [
+			(inputs.ewppkgs-stable + "/nixos/modules/services/x11/window-managers/dusk.nix")
+		];
 
-						export _JAVA_AWT_WM_NONREPARENTING=1
-						exec ${dusk}/bin/dusk
-					'';
-				};
+		services.xserver = {
+			displayManager.sessionCommands = ''
+				${pkgs.feh}/bin/feh --no-fehbg --bg-scale ${wallpaper} &
+				${dwmblocks}/bin/dwmblocks &
+				${pkgs.dunst}/bin/dunst &
+				${pkgs.xidlehook}/bin/xidlehook --not-when-fullscreen --not-when-audio \
+					--timer 600 '/run/wrappers/bin/slock' "" \
+					--timer 1800 '${pkgs.systemd}/bin/systemctl suspend' "" &
+			'';
 
-			environment.systemPackages = [
-				dusk
-				dwmblocks
-			];
+			windowManager.dusk = {
+				enable = true;
+				package = ewpPkgs.dusk;
+			};
 		};
+
+		environment.systemPackages = [
+			dwmblocks
+		];
 	};
 }

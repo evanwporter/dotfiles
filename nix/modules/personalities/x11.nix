@@ -9,6 +9,7 @@
 			browser
 			# mango
 			niri
+			dusk
 			# dwl
 			# ewm
 			# xmonad
