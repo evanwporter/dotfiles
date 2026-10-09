@@ -22,3 +22,6 @@
 [submodule "nix/packages/ewm"]
 	path = nix/packages/ewm
 	url = https://github.com/evanwporter/ewm
+[submodule "nix/packages/dusk"]
+	path = nix/packages/dusk
+	url = https://github.com/evanwporter/dusk
