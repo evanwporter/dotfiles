@@ -12,8 +12,8 @@ stdenv.mkDerivation rec {
 		fetchFromGitHub {
 			owner = "pablopunk";
 			repo = "colortest";
-			tag = "v${version}";
-			hash = "sha256-Jmq+71vol5PTkFDKgHOHMu3XrTUJ73zQACtl5BVJ+sk=";
+			tag = version;
+			hash = "sha256-9X3tFK9qO2TpHlPj6+pEktX2Rm2HgMO5wz1hKQ0bobc=";
 		};
 
 	dontBuild = true;
