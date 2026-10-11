@@ -45,5 +45,21 @@ From [nix wiki](https://nixos.wiki/wiki/Flakes)
   };
   # Used by `nix flake init -t <flake>`
   templates.default = { path = "<store-path>"; description = ""; };
+
+  # Home Manager module, consumed by other flakes or Home Manager configurations
+  homeModules."<name>" = { config, lib, pkgs, ... }: {
+    # Home Manager options
+  };
+
+  # Default Home Manager module
+  homeModules.default = { config, lib, pkgs, ... }: {
+    # Home Manager options
+  };
+
+  # Used with `home-manager switch --flake .#<username>`
+  homeConfigurations."<username>" = home-manager.lib.homeManagerConfiguration {
+    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    modules = [ ./home.nix ];
+  };
 }
 ```
