@@ -8,6 +8,9 @@ if status is-interactive
 
     alias emacs="doom emacs"
 
+    # set vi key bindings
+    set fish_key_bindings fish_vi_key_bindings
+
     if type -q atuin
         atuin init fish | source
     end
