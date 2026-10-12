@@ -22,6 +22,7 @@ in {
 				evanp
 				browser
 				nx
+				# hydra
 			];
 
 			dotfiles.steam.desktopUIScaling = "2";
