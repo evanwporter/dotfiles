@@ -38,3 +38,6 @@ in
 
 Rule of thumb: Use `override` to change what goes into the package function, and `overrideAttrs` to change how the derivation is built.
 
+### Sources
+
+https://nixcademy.com/posts/mastering-nixpkgs-overlays-techniques-and-best-practice/
