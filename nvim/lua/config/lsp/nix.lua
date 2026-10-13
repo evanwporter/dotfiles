@@ -1,5 +1,5 @@
 vim.lsp.config("nixd", {
-    cmd = { vim.fn.expand("~/nixd/local/install/bin/nixd") },
+    -- cmd = { vim.fn.expand("~/nixd/build/nixd/tools/nixd") },
     filetypes = { "nix" },
     root_markers = { "flake.nix", ".git" },
     settings = {
