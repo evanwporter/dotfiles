@@ -2,22 +2,22 @@
 	flake.modules.nixos.dwm = {pkgs, ...}: let
 		wallpaper = ../../resources/wallpaper/wp.png;
 
-		# dwm =
-		# 	pkgs.dwm.overrideAttrs (old: {
-		# 			src = packagesDir + "/dwm";
-		# 			buildInputs =
-		# 				(old.buildInputs or [])
-		# 				++ [
-		# 					pkgs.libxcb
-		# 					pkgs.libXcursor
-		# 					pkgs.imlib2
-		# 				];
-		# 		});
-
 		dwm =
-			pkgs.writeShellScriptBin "dwm" ''
-				exec /home/evanp/dwm/dwm "$@"
-			'';
+			pkgs.dwm.overrideAttrs (old: {
+					src = packagesDir + "/dwm";
+					buildInputs =
+						(old.buildInputs or [])
+						++ [
+							pkgs.libxcb
+							pkgs.libXcursor
+							pkgs.imlib2
+						];
+				});
+
+		# dwm =
+		# 	pkgs.writeShellScriptBin "dwm" ''
+		# 		exec /home/evanp/dwm/dwm "$@"
+		# 	'';
 
 		dwmblocks =
 			pkgs.dwmblocks.overrideAttrs (_: {
