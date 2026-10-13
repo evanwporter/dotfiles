@@ -40,5 +40,9 @@
 				packagesDir = ./packages;
 				dotfilesRoot = ./..;
 			};
-		} (inputs.import-tree ./modules);
+		}
+		# This returns a NixOS module; with only the imports key
+		# and the value is a list of every .nix file
+		# nix eval --expr "(builtins.getFlake \"path:$PWD\").inputs.import-tree ./modules {}" --impure(inputs.import-tree ./modules);
+		(inputs.import-tree ./modules);
 }
