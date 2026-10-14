@@ -1,3 +1,4 @@
+# nix eval --expr 'let pkgs = import <nixpkgs> {}; in import ./nix/packages pkgs' --impure
 # This is an overlay
 final: prev:
 # Apply callPackage to every attr
