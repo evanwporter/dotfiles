@@ -13,6 +13,7 @@ in {
 				zed
 				emacs
 				colortest
+				firefox
 			];
 
 			imports = with inputs.self.modules.nixos; [
