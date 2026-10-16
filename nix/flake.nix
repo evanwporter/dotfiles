@@ -39,6 +39,7 @@
 			specialArgs = {
 				packagesDir = ./packages;
 				dotfilesRoot = ./..;
+				resourcesDir = ./resources;
 			};
 		}
 		# This returns a NixOS module; with only the imports key

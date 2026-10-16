@@ -11,21 +11,30 @@
 		pkgs,
 		system,
 		...
-	}: {
-		# Per-system attributes can be defined here. The self' and inputs'
-		# module parameters provide easy access to attributes of the same
-		# system.
-
-		# Equivalent to  inputs'.nixpkgs.legacyPackages.hello;
-		# packages.default = pkgs.hello;
-
-		# _module.args is stuff past directly to each module
-		_module.args.pkgs =
+	}: let
+		epkgs =
 			import inputs.nixpkgs {
 				inherit system;
 				overlays = [inputs.self.overlays.default];
 				config = {};
 			};
+	in {
+		# Per-system attributes can be defined here. The self' and inputs'
+		# module parameters provide easy access to attributes of the same
+		# system.
+
+		# Equivalent to  inputs'.nixpkgs.legacyPackages.hello;
+		# packages.default = epkgs.muuk;
+		# packages.default = epkgs.stack-pr;
+		packages = {
+			muuk = pkgs.muuk;
+			stack-pr = pkgs.stack-pr;
+			muukDL = pkgs.muukDL;
+		};
+		# packages.default = pkgs.reflect-cpp;
+
+		# _module.args is stuff past directly to each module
+		_module.args.pkgs = epkgs;
 	};
 
 	flake = {
