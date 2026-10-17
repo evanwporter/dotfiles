@@ -30,6 +30,8 @@
 			muuk = pkgs.muuk;
 			stack-pr = pkgs.stack-pr;
 			muukDL = pkgs.muukDL;
+			sxwm = pkgs.sxwm;
+			main-test = pkgs.main-test;
 		};
 		# packages.default = pkgs.reflect-cpp;
 

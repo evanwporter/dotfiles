@@ -1,6 +1,5 @@
 {
 	stdenv,
-	lib,
 	fetchFromGitHub,
 	pkg-config,
 	libx11,
