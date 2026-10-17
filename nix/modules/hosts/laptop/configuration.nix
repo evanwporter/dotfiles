@@ -1,11 +1,13 @@
-let
-	username = "evanp";
-in {
+{
 	flake.modules.nixos.laptop =
 		# Edit this configuration file to define what should be installed on
 		# your system.  Help is available in the configuration.nix(5) man page
 		# and in the NixOS manual (accessible by running ‘nixos-help’).
-		{pkgs, ...}: let
+		{
+			pkgs,
+			config,
+			...
+		}: let
 			capsToSuperConfig =
 				pkgs.writeText "caps-to-super.yaml" (builtins.toJSON {
 						TIMING = {
@@ -96,17 +98,17 @@ in {
 			# Enable touchpad support (enabled default in most desktopManager).
 			# services.xserver.libinput.enable = true;
 
-			# Define a user account. Don't forget to set a password with ‘passwd’.
-			users.users.${username} = {
-				isNormalUser = true;
-				description = "Evan Porter";
-				extraGroups = ["networkmanager" "wheel"];
-				# packages = with pkgs; [
-				# 	kdePackages.kate
-				# 	#  thunderbird
-				# ];
-				shell = pkgs.fish;
-			};
+			# # Define a user account. Don't forget to set a password with ‘passwd’.
+			# users.users.${config.primaryUser} = {
+			# 	isNormalUser = true;
+			# 	description = "Evan Porter";
+			# 	extraGroups = ["networkmanager" "wheel"];
+			# 	# packages = with pkgs; [
+			# 	# 	kdePackages.kate
+			# 	# 	#  thunderbird
+			# 	# ];
+			# 	shell = pkgs.fish;
+			# };
 
 			home-manager = {
 				useGlobalPkgs = true;

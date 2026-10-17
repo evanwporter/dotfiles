@@ -7,7 +7,7 @@
 in {
 	imports = [../_util];
 	flake.modules.nixos.laptop = {
-		home-manager.users.evanp.imports = with inputs.self.modules.homeManager; [
+		home-manager.users.${config.primaryUser}.imports = with inputs.self.modules.homeManager; [
 			graphical
 			btop
 			yazi
@@ -23,7 +23,7 @@ in {
 			./_hardware.nix
 			inputs.self.modules.nixos."personality-${personality}"
 			gaming
-			evanp
+			inputs.self.modules.nixos.${config.primaryUser}
 			browser
 			nx
 			# hydra

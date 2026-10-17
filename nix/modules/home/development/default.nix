@@ -10,8 +10,12 @@
 		];
 	};
 
-	perSystem = {pkgs, ...}: let
-		neovimDev = inputs.self.homeConfigurations.evanp.config.dotfiles.neovim.finalPackage.devMode;
+	perSystem = {
+		pkgs,
+		config,
+		...
+	}: let
+		neovimDev = inputs.self.homeConfigurations."${config.primaryUser}".config.dotfiles.neovim.finalPackage.devMode;
 	in {
 		packages.neovim-dev = neovimDev;
 		apps.neovim-dev = {
