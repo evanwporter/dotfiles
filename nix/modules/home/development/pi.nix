@@ -1,4 +1,4 @@
-{...}: {
+{
 	flake.modules.homeManager.pi = {pkgs, ...}: let
 		language_servers = with pkgs; [
 			clang-tools
