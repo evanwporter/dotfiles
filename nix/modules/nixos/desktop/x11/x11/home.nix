@@ -2,8 +2,6 @@
 	flake.modules.homeManager.x11 = {pkgs, ...}: {
 		imports = with inputs.self.modules.homeManager; [dunst];
 
-		xdg.configFile."libinput-gestures.conf".source = ./libinput-gestures.conf;
-
 		xdg.configFile."flameshot/flameshot.ini" = {
 			force = true;
 			text = ''
