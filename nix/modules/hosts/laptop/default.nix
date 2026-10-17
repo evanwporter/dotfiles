@@ -1,7 +1,11 @@
-{inputs, ...}: let
-	system = "x86_64-linux";
+{
+	inputs,
+	config,
+	...
+}: let
 	personality = "x11";
 in {
+	imports = [../_util];
 	flake.modules.nixos.laptop = {
 		home-manager.users.evanp.imports = with inputs.self.modules.homeManager; [
 			graphical
@@ -30,7 +34,7 @@ in {
 
 	flake.nixosConfigurations.laptop =
 		inputs.nixpkgs.lib.nixosSystem {
-			inherit system;
+			system = config.system;
 			modules = [
 				inputs.home-manager.nixosModules.home-manager
 				inputs.self.modules.nixos.laptop
