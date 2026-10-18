@@ -1,0 +1,12 @@
+input {
+    profiles {
+        touchpad {
+            libinput {
+                natural_scroll true
+            }
+        }
+    }
+    rules [
+        name, SYNA2BA6:00 06CB:CFD8 Touchpad, touchpad
+    ]
+}
