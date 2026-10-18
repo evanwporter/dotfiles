@@ -34,6 +34,8 @@ return {
                 toml = { "tombi" },
 
                 haskell = { "fourmolu" },
+
+                zig = { "zigfmt" },
             },
 
             formatters = {
