@@ -32,6 +32,8 @@
 			muukDL = pkgs.muukDL;
 			sxwm = pkgs.sxwm;
 			main-test = pkgs.main-test;
+			rill = pkgs.rill;
+			kwm = pkgs.kwm;
 		};
 		# packages.default = pkgs.reflect-cpp;
 
