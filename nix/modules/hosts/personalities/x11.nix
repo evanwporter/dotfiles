@@ -8,9 +8,10 @@
 			ly
 			browser
 			# mango
-			niri
+			# niri
+			rill
 			# dusk
-			dwl
+			# dwl
 			# ewm
 			# xmonad
 			# bspwm
