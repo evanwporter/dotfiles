@@ -38,7 +38,7 @@
 				mkdir -p $out/share/wayland-sessions
 				cat > $out/share/wayland-sessions/rill.desktop <<EOF
 				[Desktop Entry]
-				Name=Rill
+				Name=rill
 				Comment=River with the Rill scrolling window manager
 				Exec=${rillSession}/bin/rill-session
 				Type=Application
