@@ -38,19 +38,28 @@ function update()
         return
     end
     local buttons = {}
-    for index = 1, active.windows do
-        local focused = active.focused_window == index
+    local tiles = active.tiles
+    if type(tiles) ~= "table" then
+        tiles = {}
+        for index = 1, active.windows do
+            table.insert(tiles, { number = index, window = index, focused = active.focused_window == index })
+        end
+    end
+    for _, tile in ipairs(tiles) do
+        local index = tile.number
+        local window = tile.window or index
+        local focused = tile.focused
         table.insert(buttons, ui.button({
             key = "window-" .. tostring(active.number) .. "-" .. tostring(index),
             text = tostring(index),
             variant = focused and "primary" or "secondary",
             width = 30,
             height = 26,
-            tooltip = "Focus window " .. tostring(index) .. (focused and " (focused)" or ""),
-            onClick = function() command("focus-window", output, active, index) end,
+            tooltip = "Focus column " .. tostring(index) .. (focused and " (focused)" or ""),
+            onClick = function() command("focus-window", output, active, window) end,
         }))
     end
-    barWidget.setTooltip(active.floating and "Floating windows" or "Click a window to scroll it into view")
+    barWidget.setTooltip(active.floating and "Floating windows" or "Click a column to scroll it into view")
     local container = barWidget.isVertical() and ui.column or ui.row
     barWidget.render(container({ gap = 4, align = "center" }, buttons))
 end
