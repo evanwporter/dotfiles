@@ -51,7 +51,7 @@ function update()
         local focused = tile.focused
         table.insert(buttons, ui.button({
             key = "window-" .. tostring(active.number) .. "-" .. tostring(index),
-            text = tostring(index),
+            text = " ",
             variant = focused and "primary" or "secondary",
             width = 30,
             height = 26,
