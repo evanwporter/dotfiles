@@ -56,15 +56,16 @@
 
 		environment.etc."rill/config.zon".source = ./config.zon;
 
-		environment.systemPackages = with pkgs;
-			[
-				river
-				swaylock
-				wl-clipboard
-				swaybg
-				wlr-randr
-			]
-			++ [rill rillSession channel];
+		environment.systemPackages = with pkgs; [
+			river
+			swaylock
+			wl-clipboard
+			swaybg
+			wlr-randr
+			rill
+			rillSession
+			channel
+		];
 
 		xdg.portal.config.river.default = lib.mkDefault ["wlr" "gtk"];
 	};
