@@ -353,7 +353,7 @@ capsule            = false
 # capsule_opacity  = 1.0
 # capsule_border   = "outline"      # uncomment for a border on all widgets
 
-start  = ["workspaces"]
+start  = ["rill_workspaces"]
 center = ["clock"]
 end    = ["media", "tray", "network", "bluetooth", "volume", "brightness", "battery", "session"]
 
@@ -545,3 +545,9 @@ enabled = false
 # scale = 1.0                         # multiplies the bar scale for this widget only
 # font_weight = 700
 # interactive = false                 # pass clicks/scrolls through to the bar and disable hover/tooltips
+
+[plugins]
+enabled = ["rill/workspaces"]
+
+[widget.rill_workspaces]
+type = "rill/workspaces:workspaces"
