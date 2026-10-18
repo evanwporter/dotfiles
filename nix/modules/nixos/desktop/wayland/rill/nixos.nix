@@ -17,49 +17,57 @@
 				});
 
 		rillInit =
-			pkgs.writeShellScript "rill-init" ''
+			pkgs.writeShellScriptBin "rill-init" ''
+				# Inside this script we have already setup our wayland environment
+				# ie: WAYLAND_DISPLAY = 1
+
+				# Updates the activation environment with the system variables that
+				# were presumably set by river
+				# https://dbus.freedesktop.org/doc/dbus-update-activation-environment.1.html?utm_source=chatgpt.com
 				${pkgs.dbus}/bin/dbus-update-activation-environment --systemd \
-					WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP
+				    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP
 				${pkgs.systemd}/bin/systemctl --user start rill-session.target
-				${pkgs.channel}/bin/channel &
-				exec /home/evanp/rill/zig-out/bin/rill
+				${pkgs.channel}/bin/channel & exec /home/evanp/rill/zig-out/bin/rill
 			'';
 
 		rillSession =
 			pkgs.writeShellScriptBin "rill-session" ''
+				# Runs the systemctl command when the rill-session script has EXITed
 				trap '${pkgs.systemd}/bin/systemctl --user stop rill-session.target' EXIT
-				${pkgs.river}/bin/river -c ${lib.escapeShellArg "${rillInit}"}
+				${pkgs.river}/bin/river -c ${"${rillInit}/bin/rill-init"}
 			'';
 
 		rillSessionPackage =
-			pkgs.runCommand "rill-session" {
-				passthru.providedSessions = ["rill"];
-			} ''
-				mkdir -p $out/share/wayland-sessions
-				cat > $out/share/wayland-sessions/rill.desktop <<EOF
-				[Desktop Entry]
-				Name=rill
-				Comment=River with the Rill scrolling window manager
-				Exec=${rillSession}/bin/rill-session
-				Type=Application
-				DesktopNames=river
-				EOF
-			'';
+			pkgs.writeTextFile {
+				name = "rill.desktop";
+				destination = "/share/wayland-sessions/rill.desktop";
+				text = ''
+					[Desktop Entry]
+					Name=Rill
+					Comment=River with the Rill scrolling window manager
+					Exec=${lib.getExe rillSession}
+					Type=Application
+					DesktopNames=river
+				'';
+			}
+			// {
+				providedSessions = ["rill"];
+			};
 	in {
 		imports = [
 			inputs.self.modules.nixos.polkit
 			inputs.self.modules.nixos.noctalia
 		];
 
-		# The upstream NixOS River module configures river-classic, not River 0.4.
 		services.displayManager.sessionPackages = [rillSessionPackage];
 		systemd.user.targets.rill-session = {
-			description = "River and Rill graphical session";
+			description = "rill graphical session";
 			bindsTo = ["graphical-session.target"];
 			wants = ["graphical-session-pre.target"];
 			after = ["graphical-session-pre.target"];
 			before = ["graphical-session.target"];
 		};
+
 		home-manager.sharedModules = [
 			inputs.self.modules.homeManager.kanshi
 			{
