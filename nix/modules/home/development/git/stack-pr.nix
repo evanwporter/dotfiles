@@ -1,14 +1,11 @@
 {
 	flake.modules.homeManager.stack-pr = {
 		pkgs,
-		packagesDir,
 		lib,
 		config,
 		...
-	}: let
-		stack-pr = pkgs.callPackage (packagesDir + "/stack-pr/package.nix") {};
-	in {
-		options.stack-pr.enable =
+	}: {
+		options.programs.stack-pr.enable =
 			lib.mkOption {
 				type = lib.types.bool;
 				default = false;
@@ -16,9 +13,9 @@
 			};
 
 		config =
-			lib.mkIf config.stack-pr.enable {
+			lib.mkIf config.programs.stack-pr.enable {
 				home.packages = [
-					stack-pr
+					pkgs.stack-pr
 				];
 			};
 	};
