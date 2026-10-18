@@ -354,8 +354,8 @@ capsule            = false
 # capsule_border   = "outline"      # uncomment for a border on all widgets
 
 start  = ["rill_workspaces"]
-center = ["clock"]
-end    = ["media", "tray", "network", "bluetooth", "volume", "brightness", "battery", "session"]
+center = ["rill_scroll"]
+end    = ["media", "tray", "network", "bluetooth", "volume", "brightness", "battery", "session", "clock"]
 
 # Commands for the bar margin outside widget sections (dead zone):
 # [bar.main.dead_zone.actions]
@@ -551,3 +551,6 @@ enabled = ["rill/workspaces"]
 
 [widget.rill_workspaces]
 type = "rill/workspaces:workspaces"
+
+[widget.rill_scroll]
+type = "rill/workspaces:scroll"

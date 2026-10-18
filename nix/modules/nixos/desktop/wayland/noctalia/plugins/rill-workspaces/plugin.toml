@@ -1,0 +1,14 @@
+id = "rill/workspaces"
+name = "Rill Workspaces"
+description = "Workspace buttons and clickable scrolling window positions for Rill."
+version = "1.2.0"
+plugin_api = 24
+author = "rill"
+
+[[widget]]
+id = "workspaces"
+entry = "workspaces.luau"
+
+[[widget]]
+id = "scroll"
+entry = "scroll.luau"
