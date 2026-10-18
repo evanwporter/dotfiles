@@ -32,7 +32,6 @@
     .spawn_at_startup = .{
         // .{ "command", "to", "run" },
         .{ "noctalia" },
-        .{ "wlr-randr", "--output", "eDP-1", "--scale", "1.75" },
         .{ "swaybg", "-i", "/home/evanp/dotfiles/nix/resources/wallpaper/gargantua-black-3840x2160-9621.jpg" },
     },
 

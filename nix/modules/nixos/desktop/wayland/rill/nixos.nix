@@ -18,13 +18,17 @@
 
 		rillInit =
 			pkgs.writeShellScript "rill-init" ''
+				${pkgs.dbus}/bin/dbus-update-activation-environment --systemd \
+					WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP
+				${pkgs.systemd}/bin/systemctl --user start rill-session.target
 				${pkgs.channel}/bin/channel &
 				exec /home/evanp/rill/zig-out/bin/rill
 			'';
 
 		rillSession =
 			pkgs.writeShellScriptBin "rill-session" ''
-				exec ${pkgs.river}/bin/river -c ${lib.escapeShellArg "${rillInit}"}
+				trap '${pkgs.systemd}/bin/systemctl --user stop rill-session.target' EXIT
+				${pkgs.river}/bin/river -c ${lib.escapeShellArg "${rillInit}"}
 			'';
 
 		rillSessionPackage =
@@ -44,13 +48,24 @@
 	in {
 		imports = [
 			inputs.self.modules.nixos.polkit
+			inputs.self.modules.nixos.noctalia
 		];
 
 		# The upstream NixOS River module configures river-classic, not River 0.4.
 		services.displayManager.sessionPackages = [rillSessionPackage];
+		systemd.user.targets.rill-session = {
+			description = "River and Rill graphical session";
+			bindsTo = ["graphical-session.target"];
+			wants = ["graphical-session-pre.target"];
+			after = ["graphical-session-pre.target"];
+			before = ["graphical-session.target"];
+		};
 		home-manager.sharedModules = [
+			inputs.self.modules.homeManager.kanshi
 			{
+				services.kanshi.systemdTarget = "rill-session.target";
 				xdg.configFile."river/config.rh".source = ./config.rh;
+				xdg.configFile."rill/config.zon".source = ./config.zon;
 			}
 		];
 
