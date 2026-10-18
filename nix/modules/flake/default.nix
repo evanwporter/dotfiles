@@ -27,11 +27,8 @@
 		# packages.default = epkgs.muuk;
 		# packages.default = epkgs.stack-pr;
 		packages = {
-			muuk = pkgs.muuk;
 			stack-pr = pkgs.stack-pr;
-			muukDL = pkgs.muukDL;
 			sxwm = pkgs.sxwm;
-			main-test = pkgs.main-test;
 			rill = pkgs.rill;
 			kwm = pkgs.kwm;
 		};
