@@ -29,6 +29,31 @@ local function state()
     return nil
 end
 
+-- Icons keyed by app ID
+local appIcons = {
+    firefox = "",
+    ["org.mozilla.firefox"] = "",
+    chromium = "",
+    ["google-chrome"] = "",
+    kitty = "",
+    ["com.mitchellh.ghostty"] = "",
+    Alacritty = "",
+    foot = "",
+    code = "",
+    ["com.visualstudio.code"] = "",
+    ["org.gnome.Nautilus"] = "",
+    thunar = "",
+    ["org.pwmt.zathura"] = "",
+    mpv = "",
+    Spotify = "",
+    discord = "",
+}
+
+local function appIcon(appId)
+    if not appId then return "" end
+    return appIcons[appId] or appIcons[string.lower(appId)] or ""
+end
+
 function update()
     noctalia.setUpdateInterval(100)
     local output, active = state()
@@ -49,15 +74,24 @@ function update()
         local index = tile.number
         local window = tile.window or index
         local focused = tile.focused
-        table.insert(buttons, ui.button({
+        local appId = tile.app_id
+        local appName = appId and appId ~= "" and appId or "Window"
+        table.insert(buttons, ui.row({
             key = "window-" .. tostring(active.number) .. "-" .. tostring(index),
-            text = " ",
-            variant = focused and "primary" or "secondary",
+            align = "center",
+            justify = "center",
+            radius = 6,
             width = 30,
             height = 26,
-            tooltip = "Focus column " .. tostring(index) .. (focused and " (focused)" or ""),
+            tooltip = appName .. " — Focus column " .. tostring(index) .. (focused and " (focused)" or ""),
             onClick = function() command("focus-window", output, active, window) end,
-        }))
+        }, { ui.label({
+            text = appIcon(appId),
+            fontFamily = "JetBrainsMono Nerd Font",
+            fontSize = 18,
+            baseline = "inkCentered",
+            color = focused and "#ff9e3b" or "on_surface",
+        }) }))
     end
     barWidget.setTooltip(active.floating and "Floating windows" or "Click a column to scroll it into view")
     local container = barWidget.isVertical() and ui.column or ui.row
