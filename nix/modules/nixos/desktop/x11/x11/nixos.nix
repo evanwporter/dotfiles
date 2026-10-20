@@ -9,7 +9,7 @@
 		pkgs,
 		...
 	}: let
-		lockscreenBackground = resourcesDir + "/wallpaper/quentinmarsollier-unexplored.png";
+		lockscreenBackground = resourcesDir + "/wallpaper/gruvbox-rainbow-nix.png";
 
 		slock =
 			pkgs.slock.overrideAttrs (old: {
