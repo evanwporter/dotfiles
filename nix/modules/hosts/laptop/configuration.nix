@@ -126,14 +126,14 @@
 				nerd-fonts.monaspace
 			];
 
-			# Linux TTY font
-			console = {
-				font = "ter-v32n";
-				packages = with pkgs; [
-					terminus_font
-				];
-				earlySetup = true;
-			};
+			# # Linux TTY font
+			# console = {
+			# 	font = "ter-v32n";
+			# 	packages = with pkgs; [
+			# 		terminus_font
+			# 	];
+			# 	earlySetup = true;
+			# };
 
 			fonts.fontconfig.defaultFonts.monospace = ["JetBrainsMonoNL Nerd Font"];
 
