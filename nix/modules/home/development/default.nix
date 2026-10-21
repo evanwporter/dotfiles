@@ -1,4 +1,8 @@
-{inputs, ...}: {
+{
+	inputs,
+	config,
+	...
+}: {
 	flake.modules.homeManager.development = {
 		imports = [
 			inputs.self.modules.homeManager.cli
@@ -6,15 +10,11 @@
 			inputs.self.modules.homeManager.git
 			inputs.self.modules.homeManager.neovim
 			inputs.self.modules.homeManager.pi
-			inputs.self.modules.homeManager.omp
+			# inputs.self.modules.homeManager.omp
 		];
 	};
 
-	perSystem = {
-		pkgs,
-		config,
-		...
-	}: let
+	perSystem = {pkgs, ...}: let
 		neovimDev = inputs.self.homeConfigurations."${config.primaryUser}".config.dotfiles.neovim.finalPackage.devMode;
 	in {
 		packages.neovim-dev = neovimDev;

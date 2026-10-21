@@ -9,14 +9,14 @@ in {
 	flake.modules.nixos.laptop = {
 		home-manager.users.${config.primaryUser}.imports = with inputs.self.modules.homeManager; [
 			graphical
-			btop
 			yazi
-			vscode
-			helix
-			zed
-			emacs
-			colortest
 			firefox
+			# btop
+			# vscode
+			# helix
+			# zed
+			# emacs
+			# colortest
 		];
 
 		imports = with inputs.self.modules.nixos; [
