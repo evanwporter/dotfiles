@@ -24,7 +24,6 @@ in {
 			inputs.self.modules.nixos."personality-${personality}"
 			gaming
 			inputs.self.modules.nixos.${config.primaryUser}
-			browser
 			nx
 			# hydra
 		];

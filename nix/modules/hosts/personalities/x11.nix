@@ -6,10 +6,10 @@
 			x11
 			dwm
 			ly
-			browser
+			rill
+			# browser
 			# mango
 			# niri
-			rill
 			# dusk
 			# dwl
 			# ewm
