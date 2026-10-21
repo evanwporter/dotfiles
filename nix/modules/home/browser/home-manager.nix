@@ -111,30 +111,30 @@
 				};
 			};
 
-			profiles.default.bookmarks = {
-				force = true;
-
-				settings = [
-					{
-						name = "Bookmarks Toolbar";
-						toolbar = true;
-						bookmarks = [
-							{
-								name = "Search";
-								url = "https://search.nixos.org/packages";
-							}
-							{
-								name = "Clone Nixpkgs";
-								url = "https://github.com/NixOS/nixpkgs/issues/423262";
-							}
-							{
-								name = "Nixpkgs";
-								url = "https://github.com/NixOS/nixpkgs/pulls";
-							}
-						];
-					}
-				];
-			};
+			# profiles.default.bookmarks = {
+			# 	force = true;
+			#
+			# 	settings = [
+			# 		{
+			# 			name = "Bookmarks Toolbar";
+			# 			toolbar = true;
+			# 			bookmarks = [
+			# 				{
+			# 					name = "Search";
+			# 					url = "https://search.nixos.org/packages";
+			# 				}
+			# 				{
+			# 					name = "Clone Nixpkgs";
+			# 					url = "https://github.com/NixOS/nixpkgs/issues/423262";
+			# 				}
+			# 				{
+			# 					name = "Nixpkgs";
+			# 					url = "https://github.com/NixOS/nixpkgs/pulls";
+			# 				}
+			# 			];
+			# 		}
+			# 	];
+			# };
 
 			profiles.default.search = {
 				# force = true;
