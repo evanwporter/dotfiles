@@ -39,6 +39,10 @@
 			# Enable networking
 			networking.networkmanager.enable = true;
 
+			hardware.bluetooth.enable = true;
+			services.power-profiles-daemon.enable = true;
+			services.upower.enable = true;
+
 			# Set your time zone.
 			time.timeZone = "America/Los_Angeles";
 
@@ -121,6 +125,15 @@
 				nerd-fonts.jetbrains-mono
 				nerd-fonts.monaspace
 			];
+
+			# Linux TTY font
+			console = {
+				font = "ter-v32n";
+				packages = with pkgs; [
+					terminus_font
+				];
+				earlySetup = true;
+			};
 
 			fonts.fontconfig.defaultFonts.monospace = ["JetBrainsMonoNL Nerd Font"];
 
