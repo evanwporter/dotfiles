@@ -126,6 +126,8 @@ configure_ui_styles() {
     tmux_set window-status-current-format "#[fg=#282828,bg=#7daea3]$right_arrow_icon#[fg=#282828,bg=#7daea3,$window_current_style] #I:#W#F #[fg=#7daea3,bg=#282828,none]$right_arrow_icon"
 
     tmux_set window-status-style "fg=$TC,bg=$G0,none"
+    # Clear the default underline so it does not cross the Powerline arrows.
+    tmux_set window-status-current-style none
     tmux_set window-status-last-style "fg=$TC,bg=$G0,$window_last_style"
     tmux_set window-status-activity-style "fg=$TC,bg=$G0,$window_activity_style"
     tmux_set window-status-bell-style "fg=$TC,bg=$G0,$window_bell_style"
