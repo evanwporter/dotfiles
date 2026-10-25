@@ -31,6 +31,7 @@
 			sxwm = pkgs.sxwm;
 			rill = pkgs.rill;
 			kwm = pkgs.kwm;
+			channel = pkgs.channel;
 		};
 		# packages.default = pkgs.reflect-cpp;
 
