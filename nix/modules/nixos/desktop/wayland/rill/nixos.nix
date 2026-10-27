@@ -90,6 +90,15 @@
 			channel
 		];
 
-		xdg.portal.config.river.default = lib.mkDefault ["wlr" "gtk"];
+		xdg.portal = {
+			enable = true;
+			wlr.enable = true;
+			extraPortals = [pkgs.xdg-desktop-portal-gtk];
+			config.river = {
+				default = lib.mkDefault ["gtk"];
+				"org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+				"org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
+			};
+		};
 	};
 }
