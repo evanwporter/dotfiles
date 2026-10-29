@@ -38,6 +38,7 @@
 			"haskell"
 			"zig"
 			"latex"
+			"jinja"
 		];
 
 		treesitterWithParsers =
