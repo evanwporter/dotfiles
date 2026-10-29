@@ -32,6 +32,8 @@
 			rill = pkgs.rill;
 			kwm = pkgs.kwm;
 			channel = pkgs.channel;
+			photocraft = pkgs.photocraft;
+			gridcraft = pkgs.gridcraft;
 		};
 		# packages.default = pkgs.reflect-cpp;
 
