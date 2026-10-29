@@ -43,7 +43,7 @@
 				destination = "/share/wayland-sessions/rill.desktop";
 				text = ''
 					[Desktop Entry]
-					Name=Rill
+					Name=rill
 					Comment=River with the Rill scrolling window manager
 					Exec=${lib.getExe rillSession}
 					Type=Application
