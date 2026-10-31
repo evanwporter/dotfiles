@@ -38,3 +38,9 @@ vim.opt.swapfile = false
 -- vim.opt.mouse = ""
 
 vim.lsp.codelens.enable(true)
+
+vim.filetype.add({
+    extension = {
+        j2 = "jinja",
+    },
+})
