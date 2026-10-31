@@ -30,7 +30,9 @@
 			lazygit = linkWhen (hasPackage pkgs.lazygit) "lazygit";
 			# polybar = linkWhen (hasPackage pkgs.polybar) "polybar";
 			# tmux = linkWhen (hasPackage pkgs.tmux) "tmux";
-			yazi = linkWhen (hasPackage pkgs.yazi) "yazi";
+			"yazi/keymap.toml" = linkWhen (hasPackage pkgs.yazi) "yazi/keymap.toml";
+			"yazi/theme.toml" = linkWhen (hasPackage pkgs.yazi) "yazi/theme.toml";
+			"yazi/yazi.toml" = linkWhen (hasPackage pkgs.yazi) "yazi/yazi.toml";
 		};
 	};
 }
