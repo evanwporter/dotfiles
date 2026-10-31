@@ -7,12 +7,10 @@
 			dwm
 			ly
 			rill
-			# browser
 			# mango
 			# niri
 			# dusk
 			# dwl
-			# ewm
 			# xmonad
 			# bspwm
 		];
