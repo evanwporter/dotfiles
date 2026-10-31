@@ -12,10 +12,11 @@
 		system,
 		...
 	}: let
+		overlay = import packagesDir;
 		epkgs =
 			import inputs.nixpkgs {
 				inherit system;
-				overlays = [inputs.self.overlays.default];
+				overlays = [overlay];
 				config = {};
 			};
 	in {
@@ -26,15 +27,7 @@
 		# Equivalent to  inputs'.nixpkgs.legacyPackages.hello;
 		# packages.default = epkgs.muuk;
 		# packages.default = epkgs.stack-pr;
-		packages = {
-			stack-pr = pkgs.stack-pr;
-			sxwm = pkgs.sxwm;
-			rill = pkgs.rill;
-			kwm = pkgs.kwm;
-			channel = pkgs.channel;
-			photocraft = pkgs.photocraft;
-			gridcraft = pkgs.gridcraft;
-		};
+		packages = overlay epkgs epkgs;
 		# packages.default = pkgs.reflect-cpp;
 
 		# _module.args is stuff past directly to each module
