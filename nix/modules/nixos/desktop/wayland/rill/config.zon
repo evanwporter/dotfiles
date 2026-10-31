@@ -33,7 +33,10 @@
         // .{ "command", "to", "run" },
         .{"noctalia"},
         .{ "wlr-randr", "--output", "eDP-1", "--scale", "1.75" },
-        .{ "swaybg", "-i", "/home/evanp/dotfiles/nix/resources/wallpaper/gargantua-black-3840x2160-9621.jpg" },
+
+        // TODO: We need to use relative paths here
+        .{ "swaybg", "-i", "/home/evanp/dotfiles/nix/resources/wallpaper/wp.png" },
+        // .{ "swaybg", "-i", "/home/evanp/dotfiles/nix/resources/wallpaper/gargantua-black-3840x2160-9621.jpg" },
     },
 
     .keybindings = .{
