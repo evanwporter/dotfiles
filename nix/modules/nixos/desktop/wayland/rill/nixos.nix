@@ -68,6 +68,7 @@
 			before = ["graphical-session.target"];
 		};
 
+		# TODO: move to home manager module
 		home-manager.sharedModules = [
 			inputs.self.modules.homeManager.kanshi
 			{
