@@ -2,9 +2,7 @@
 	inputs,
 	config,
 	...
-}: let
-	personality = "x11";
-in {
+}: {
 	imports = [../_util];
 	flake.modules.nixos.laptop = {
 		home-manager.users.${config.primaryUser}.imports = with inputs.self.modules.homeManager; [
@@ -21,7 +19,7 @@ in {
 
 		imports = with inputs.self.modules.nixos; [
 			./_hardware.nix
-			inputs.self.modules.nixos."personality-${personality}"
+			inputs.self.modules.nixos.default-rice
 			gaming
 			inputs.self.modules.nixos.${config.primaryUser}
 			nx

@@ -1,5 +1,5 @@
 {inputs, ...}: {
-	flake.modules.nixos.personality-x11 = {
+	flake.modules.nixos.default-rice = {
 		imports = with inputs.self.modules.nixos; [
 			system-desktop
 			terminal
