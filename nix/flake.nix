@@ -37,7 +37,7 @@
 		inputs.flake-parts.lib.mkFlake {
 			inherit inputs;
 			specialArgs = {
-				packagesDir = ./packages;
+				packagesDir = ./packages/pkgs;
 				dotfilesRoot = ./..;
 				resourcesDir = ./resources;
 			};

@@ -1,21 +1,21 @@
 [submodule "nix/packages/dwmblocks"]
-	path = nix/packages/dwmblocks
+	path = nix/packages/pkgs/dwmblocks
 	url = https://github.com/evanwporter/dwmblocks
 [submodule "nix/packages/dwm"]
-	path = nix/packages/dwm
+	path = nix/packages/pkgs/dwm
 	url = https://github.com/evanwporter/dwm
 [submodule "nix/packages/slock"]
-	path = nix/packages/slock
+	path = nix/packages/pkgs/slock
 	url = https://github.com/evanwporter/slock
 [submodule "nix/packages/st"]
-	path = nix/packages/st
+	path = nix/packages/pkgs/st
 	url = https://github.com/evanwporter/st
 [submodule "nix/packages/dmenu"]
-	path = nix/packages/dmenu
+	path = nix/packages/pkgs/dmenu
 	url = https://github.com/evanwporter/dmenu
 [submodule "nix/packages/dwl"]
-	path = nix/packages/dwl
+	path = nix/packages/pkgs/dwl
 	url = https://github.com/evanwporter/dwl/
 [submodule "nix/packages/dusk"]
-	path = nix/packages/dusk
+	path = nix/packages/pkgs/dusk
 	url = https://github.com/evanwporter/dusk
