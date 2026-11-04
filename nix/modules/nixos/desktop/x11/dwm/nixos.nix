@@ -3,7 +3,11 @@
 	resourcesDir,
 	...
 }: {
-	flake.modules.nixos.dwm = {config, pkgs, ...}: let
+	flake.modules.nixos.dwm = {
+		config,
+		pkgs,
+		...
+	}: let
 		wallpaper = resourcesDir + "/wallpaper/wp.png";
 
 		dwm =
@@ -42,22 +46,6 @@
 					${xhidecursor}/bin/xhidecursor &
 				'';
 			};
-		};
-
-		services.xserver.xidlehook = {
-			enable = true;
-			notWhenFullscreen = true;
-			notWhenAudio = true;
-			timers = [
-				{
-					duration = 600;
-					command = "${config.security.wrapperDir}/slock";
-				}
-				{
-					duration = 1800;
-					command = "${pkgs.systemd}/bin/systemctl suspend";
-				}
-			];
 		};
 	};
 }

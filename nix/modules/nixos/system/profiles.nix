@@ -1,6 +1,15 @@
-{inputs, ...}: {
+{
+	inputs,
+	modulesDir,
+	...
+}: {
+	flake.modules.nixos.custom = import modulesDir;
+
 	flake.modules.nixos.system-default = {
-		imports = [inputs.self.modules.nixos.nix-settings];
+		imports = with inputs.self.modules.nixos; [
+			nix-settings
+			custom
+		];
 	};
 
 	# Terminal Only Interface

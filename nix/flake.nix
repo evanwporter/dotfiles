@@ -38,6 +38,7 @@
 			inherit inputs;
 			specialArgs = {
 				packagesDir = ./packages/pkgs;
+				modulesDir = ./packages/nixos;
 				dotfilesRoot = ./..;
 				resourcesDir = ./resources;
 			};

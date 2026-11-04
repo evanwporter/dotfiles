@@ -24,7 +24,11 @@
 
 		xhidecursor = pkgs.callPackage (packagesDir + "/xhidecursor/package.nix") {};
 	in {
-		imports = with inputs.self.modules.nixos; [powermenu picom];
+		imports = with inputs.self.modules.nixos; [
+			powermenu
+			picom
+			xidlehook
+		];
 
 		services.displayManager.ly.x11Support = lib.mkForce true;
 

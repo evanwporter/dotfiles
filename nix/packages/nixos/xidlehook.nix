@@ -104,7 +104,7 @@ in {
 				}
 			];
 
-			environment.systemPackages = [cfg.package];
+			environment.systemPackages = [pkgs.xidlehook];
 
 			systemd.user.services.xidlehook = {
 				description = "xidlehook idle timer service";
@@ -113,7 +113,7 @@ in {
 				serviceConfig = {
 					ExecStart =
 						lib.escapeShellArgs (
-							["${pkgs.xautolock}/bin/xautolock"]
+							["${pkgs.xidlehook}/bin/xidlehook"]
 							++ lib.optional cfg.notWhenAudio "--not-when-audio"
 							++ lib.optional cfg.notWhenFullscreen "--not-when-fullscreen"
 							++ lib.optional cfg.detectSleep "--detect-sleep"
