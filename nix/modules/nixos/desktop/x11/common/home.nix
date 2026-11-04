@@ -1,6 +1,9 @@
 {inputs, ...}: {
 	flake.modules.homeManager.x11 = {pkgs, ...}: {
-		imports = with inputs.self.modules.homeManager; [dunst];
+		imports = with inputs.self.modules.homeManager; [
+			dunst
+			feh
+		];
 
 		xdg.configFile."flameshot/flameshot.ini" = {
 			force = true;
