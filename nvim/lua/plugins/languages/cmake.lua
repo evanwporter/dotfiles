@@ -91,6 +91,8 @@ return {
                 runInTerminal = true,
                 console = "integratedTerminal",
             },
+
+            cmake_virtual_text_support = false,
         },
         config = function(_, opts)
             require("cmake-tools").setup(opts)
