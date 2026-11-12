@@ -8,7 +8,7 @@
 	in {
 		programs.pi-coding-agent = {
 			enable = true;
-			extraPackages = with pkgs; [nodejs bun rtk] ++ language_servers;
+			extraPackages = with pkgs; [nodejs bun] ++ language_servers;
 		};
 
 		# home.file.".pi".source = osConfig._module.args.impurity.link piConfig;

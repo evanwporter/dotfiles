@@ -7,7 +7,7 @@
 		];
 
 		extraPackages = with pkgs;
-			[nodejs bun rtk] ++ language_servers;
+			[nodejs bun] ++ language_servers;
 
 		wrappedOMP =
 			pkgs.writeShellScriptBin "omp" ''

@@ -9,7 +9,7 @@
 			inputs.self.modules.homeManager.direnv
 			inputs.self.modules.homeManager.git
 			inputs.self.modules.homeManager.neovim
-			inputs.self.modules.homeManager.pi
+			# inputs.self.modules.homeManager.pi
 			# inputs.self.modules.homeManager.omp
 		];
 	};

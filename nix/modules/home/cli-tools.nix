@@ -23,7 +23,7 @@
 			codex
 			# opencode
 			# pi-coding-agent
-			rtk
+			# rtk
 
 			# useful libs/tools
 			cmake
